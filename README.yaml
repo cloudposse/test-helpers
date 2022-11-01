@@ -1,0 +1,61 @@
+name: terratest-helpers
+license: APACHE2
+github_repo: cloudposse/terratest-helpers
+badges:
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudposse/terratest-helpers.svg
+    url: https://github.com/cloudposse/terratest-helpers/releases/latest
+  - name: Slack Community
+    image: https://slack.cloudposse.com/badge.svg
+    url: https://slack.cloudposse.com
+
+categories:
+  - cli
+  - automation
+  - cloud
+  - devops
+  - workflow
+  - terraform
+  - terratest
+
+description: |-
+  `terratest-helpers` - A library for helping to run tests in [terratest](https://terratest.gruntwork.io).
+
+introduction: |-
+
+  `terratest-helpers` is a library for helping to run tests in [terratest](https://terratest.gruntwork.io).
+
+  `terratest-helpers` includes functionality for:
+
+     - Destroying all resources in an AWS account after a test run
+
+  ## Install
+
+  ### Go
+
+  Install the latest version
+
+  ```console
+  go install github.com/cloudposse/terratest-helpers
+  ```
+
+  Get a specific version
+
+  ```console
+  go install github.com/cloudposse/terratest-helpers@v0.0.1
+  ```
+
+  ## Usage
+
+  You can use `terratest-helpers` as a library in your own terratest code.
+
+  ## Examples
+
+  The [example](examples/complete) folder contains a complete solution that shows how to:
+
+    - [example](examples/awsnuke-example) folder contains a terraform module that can be used to test the `awsnuke` functionality.
+    The test for this module is in [pkg/awsnuke/awsnuke_test.go](pkg/awsnuke/awsnuke_test.go).
+
+contributors:
+  - name: Matt Calhoun
+    github: mcalhoun
