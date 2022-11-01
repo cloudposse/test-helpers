@@ -87,7 +87,7 @@ You can use `terratest-helpers` as a library in your own terratest code.
 
 ## Examples
 
-The [example](examples/complete) folder contains a complete solution that shows how to:
+The [example](examples/) folder contains examples that demonstrate the use of `terratest-helpers`:
 
   - [example](examples/awsnuke-example) folder contains a terraform module that can be used to test the `awsnuke` functionality.
   The test for this module is in [pkg/awsnuke/awsnuke_test.go](pkg/awsnuke/awsnuke_test.go).
