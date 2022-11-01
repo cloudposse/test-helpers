@@ -27,7 +27,7 @@ jobs:
         id: go
 
       - name: Get dependencies
-        run: go mod tidy
+        run: go mod download
 
       - name: Run tests
         run: |
