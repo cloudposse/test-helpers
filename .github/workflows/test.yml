@@ -1,0 +1,34 @@
+name: Run Tests
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - "README.md"
+
+  release:
+    types: [created]
+    paths-ignore:
+      - "README.md"
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: "./go.mod"
+        id: go
+
+      - name: Get dependencies
+        run: go mod tidy
+
+      - name: Run tests
+        run: |
+          go test ./...
