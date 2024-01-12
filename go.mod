@@ -3,6 +3,8 @@ module github.com/cloudposse/terratest-helpers
 go 1.19
 
 require (
+	github.com/hashicorp/terraform-json v0.14.0
+	github.com/jinzhu/copier v0.3.5
 	github.com/rebuy-de/aws-nuke/v2 v2.20.0
 	github.com/stretchr/testify v1.8.0
 )
@@ -46,9 +48,7 @@ require (
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.14.1 // indirect
-	github.com/hashicorp/terraform-json v0.14.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jstemmer/go-junit-report v1.0.0 // indirect

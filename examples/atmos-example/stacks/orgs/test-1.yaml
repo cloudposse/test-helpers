@@ -1,0 +1,9 @@
+components:
+  terraform:
+    test:
+      vars:
+        namespace: test
+        tenant: test
+        stage: test
+        environment: test
+        seed: base
