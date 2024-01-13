@@ -41,7 +41,7 @@ var TerraformCommandsWithPlanFileSupport = []string{
 func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 	var terraformArgs []string
 	commandType := args[0]
-	fmt.Printf("***************%s\n", commandType)
+
 	lockSupported := collections.ListContains(TerraformCommandsWithLockSupport, commandType)
 	planFileSupported := collections.ListContains(TerraformCommandsWithPlanFileSupport, commandType)
 

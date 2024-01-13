@@ -1,0 +1,14 @@
+vars:
+  namespace: atmos
+  tenant: test
+  stage: test
+  environment: test
+
+components:
+  terraform:
+    terraform-basic-configuration:
+      vars: {}
+    terraform-no-error:
+      vars: {}
+    terraform-with-plan-error:
+      vars: {}
