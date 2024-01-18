@@ -100,7 +100,7 @@ func GetExitCodeForAtmosCommand(t testing.TestingT, additionalOptions *Options, 
 func GetExitCodeForAtmosCommandE(t testing.TestingT, additionalOptions *Options, additionalArgs ...string) (int, error) {
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
-	additionalOptions.Logger.Logf(t, "Running %s with args %v", options.AtmosBinary, args)
+	additionalOptions.Logger.Logf(t, "Running %s in %s with args %v", options.AtmosBinary, options.AtmosBasePath, args)
 	cmd := generateCommand(options, args...)
 	_, err := shell.RunCommandAndGetOutputE(t, cmd)
 	if err == nil {

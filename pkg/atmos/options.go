@@ -48,30 +48,31 @@ type Options struct {
 	// map[string]interface{}{
 	//     "foo": map[string]interface{}{"bar": nil},
 	// }
-	Vars                 map[string]interface{}
-	VarFiles             []string               // The var file paths to pass to Atmos commands using -var-file option.
-	Stack                string                 // The stack to pass to the atmos command with -stack
-	Component            string                 // The component to pass to the atmos terraform command
-	Targets              []string               // The target resources to pass to the atmos command with -target
-	Lock                 bool                   // The lock option to pass to the atmos command with -lock
-	LockTimeout          string                 // The lock timeout option to pass to the atmos command with -lock-timeout
-	EnvVars              map[string]string      // Environment variables to set when running Atmos
-	BackendConfig        map[string]interface{} // The vars to pass to the atmos init command for extra configuration for the backend
-	RetryableAtmosErrors map[string]string      // If Atmos apply fails with one of these (transient) errors, retry. The keys are a regexp to match against the error and the message is what to display to a user if that error is matched.
-	MaxRetries           int                    // Maximum number of times to retry errors matching RetryableAtmosErrors
-	TimeBetweenRetries   time.Duration          // The amount of time to wait between retries
-	Upgrade              bool                   // Whether the -upgrade flag of the atmos init command should be set to true or not
-	Reconfigure          bool                   // Set the -reconfigure flag to the atmos init command
-	MigrateState         bool                   // Set the -migrate-state and -force-copy (suppress 'yes' answer prompt) flag to the atmos init command
-	NoColor              bool                   // Whether the -no-color flag will be set for any Atmos command or not
-	SshAgent             *ssh.SshAgent          // Overrides local SSH agent with the given in-process agent
-	NoStderr             bool                   // Disable stderr redirection
-	OutputMaxLineSize    int                    // The max size of one line in stdout and stderr (in bytes)
-	Logger               *logger.Logger         // Set a non-default logger that should be used. See the logger package for more info.
-	Parallelism          int                    // Set the parallelism setting for Atmos
-	PlanFilePath         string                 // The path to output a plan file to (for the plan command) or read one from (for the apply command)
-	PluginDir            string                 // The path of downloaded plugins to pass to the atmos init command (-plugin-dir)
-	SetVarsAfterVarFiles bool                   // Pass -var options after -var-file options to Atmos commands
+	Vars                      map[string]interface{}
+	VarFiles                  []string               // The var file paths to pass to Atmos commands using -var-file option.
+	Stack                     string                 // The stack to pass to the atmos command with -stack
+	Component                 string                 // The component to pass to the atmos terraform command
+	Targets                   []string               // The target resources to pass to the atmos command with -target
+	Lock                      bool                   // The lock option to pass to the atmos command with -lock
+	LockTimeout               string                 // The lock timeout option to pass to the atmos command with -lock-timeout
+	EnvVars                   map[string]string      // Environment variables to set when running Atmos
+	BackendConfig             map[string]interface{} // The vars to pass to the atmos init command for extra configuration for the backend
+	RetryableAtmosErrors      map[string]string      // If Atmos apply fails with one of these (transient) errors, retry. The keys are a regexp to match against the error and the message is what to display to a user if that error is matched.
+	MaxRetries                int                    // Maximum number of times to retry errors matching RetryableAtmosErrors
+	TimeBetweenRetries        time.Duration          // The amount of time to wait between retries
+	Upgrade                   bool                   // Whether the -upgrade flag of the atmos init command should be set to true or not
+	Reconfigure               bool                   // Set the -reconfigure flag to the atmos init command
+	MigrateState              bool                   // Set the -migrate-state and -force-copy (suppress 'yes' answer prompt) flag to the atmos init command
+	NoColor                   bool                   // Whether the -no-color flag will be set for any Atmos command or not
+	RedirectStrErrDestination string                 // The destination to redirect stderr to. If nil, stderr will not be redirected.
+	SshAgent                  *ssh.SshAgent          // Overrides local SSH agent with the given in-process agent
+	NoStderr                  bool                   // Disable stderr redirection
+	OutputMaxLineSize         int                    // The max size of one line in stdout and stderr (in bytes)
+	Logger                    *logger.Logger         // Set a non-default logger that should be used. See the logger package for more info.
+	Parallelism               int                    // Set the parallelism setting for Atmos
+	PlanFilePath              string                 // The path to output a plan file to (for the plan command) or read one from (for the apply command)
+	PluginDir                 string                 // The path of downloaded plugins to pass to the atmos init command (-plugin-dir)
+	SetVarsAfterVarFiles      bool                   // Pass -var options after -var-file options to Atmos commands
 }
 
 // Clone makes a deep copy of most fields on the Options object and returns it.

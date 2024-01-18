@@ -7,10 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
-
 func TestPlanWithExitCodeWithNoChanges(t *testing.T) {
 	t.Parallel()
+
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
 
@@ -18,9 +17,11 @@ func TestPlanWithExitCodeWithNoChanges(t *testing.T) {
 		AtmosBasePath: testFolder,
 		Component:     "terraform-no-error",
 		Stack:         testStack,
+		RedirectStrErrDestination: "/dev/null",
 	}
 
 	Apply(t, options)
+
 	exitCode := PlanExitCode(t, options)
 	require.Equal(t, DefaultSuccessExitCode, exitCode)
 }
@@ -29,6 +30,7 @@ func TestPlanWithExitCodeWithChanges(t *testing.T) {
 	t.Parallel()
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
+	require.NoError(t, err)
 
 	require.NoError(t, err)
 

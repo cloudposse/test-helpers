@@ -37,7 +37,7 @@ func PlanExitCode(t testing.TestingT, options *Options) int {
 
 // PlanExitCodeE runs terraform plan with the given options and returns the detailed exitcode.
 func PlanExitCodeE(t testing.TestingT, options *Options) (int, error) {
-	return GetExitCodeForAtmosCommandE(t, options, FormatArgs(options, "terraform", "plan", "-input=false")...) //add back once Andriy fixes "-detailed-exitcode"
+	return GetExitCodeForAtmosCommandE(t, options, FormatArgs(options, "terraform", "plan", "-input=false", "-detailed-exitcode")...)
 }
 
 // Custom errors

@@ -13,6 +13,8 @@ func TestApplyNoError(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+
+	require.NoError(t, err)
 	fmt.Printf("running in %s\n", testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
@@ -28,9 +30,12 @@ func TestApplyNoError(t *testing.T) {
 }
 
 func TestApplyNoColor(t *testing.T) {
+	t.Skip("atmos doesn't support running with --no-color yet")
 	t.Parallel()
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
+	require.NoError(t, err)
+
 	require.NoError(t, err)
 	fmt.Printf("running in %s\n", testFolder)
 
@@ -47,21 +52,23 @@ func TestApplyNoColor(t *testing.T) {
 	require.NotRegexp(t, `\[\d*m`, out, "Output should not contain color escape codes")
 }
 
-// func TestApplyWithErrorNoRetry(t *testing.T) {
-// 	t.Parallel()
+func TestApplyWithErrorNoRetry(t *testing.T) {
+	t.Parallel()
 
-// 	testFolder, err := files.CopyTerraformFolderToTemp("../../test/fixtures/terraform-with-error", t.Name())
-// 	require.NoError(t, err)
+	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
+	require.NoError(t, err)
 
-// 	options := WithDefaultRetryableErrors(t, &Options{
-// 		TerraformDir: testFolder,
-// 	})
+	options := WithDefaultRetryableErrors(t, &Options{
+		AtmosBasePath: testFolder,
+		Component:     "terraform-with-plan-error",
+		Stack:         testStack,
+	})
 
-// 	out, err := InitAndApplyE(t, options)
+	out, err := ApplyE(t, options)
 
-// 	require.Error(t, err)
-// 	require.Contains(t, out, "This is the first run, exiting with an error")
-// }
+	require.Error(t, err)
+	require.Contains(t, out, "This is the first run, exiting with an error")
+}
 
 // func TestApplyWithErrorWithRetry(t *testing.T) {
 // 	t.Parallel()
