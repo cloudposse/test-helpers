@@ -80,24 +80,25 @@ introduction: |-
   ### aws-nuke
 
   ```go
-  func TestApplyNoError(t *testing.T) {
+  func TestAwsNuke(t *testing.T) {
     t.Parallel()
+    randID := strings.ToLower(random.UniqueId())
 
-    testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
-    require.NoError(t, err)
+    rootFolder := "../../"
+    terraformFolderRelativeToRoot := "examples/awsnuke-example"
+    tempTestFolder := testStructure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
+    defer os.RemoveAll(tempTestFolder)
 
-    fmt.Printf("running in %s\n", testFolder)
-
-    options := WithDefaultRetryableErrors(t, &Options{
-      AtmosBasePath: testFolder,
-      Component:     "terraform-no-error",
-      Stack:         testStack,
-      NoColor:       true,
-    })
-
-    out := Apply(t, options)
-
-    require.Contains(t, out, "Hello, World")
+    terraformOptions := &terraform.Options{
+        TerraformDir: tempTestFolder,
+        Upgrade:      true,
+        VarFiles:     []string{fmt.Sprintf("fixtures.%s.tfvars", testRegion)},
+        Vars: map[string]interface{}{
+          "attributes": []string{randID},
+          "default_tags": map[string]string{
+          terratestTagName: randID,
+        },
+     },
   }
   ```
 
