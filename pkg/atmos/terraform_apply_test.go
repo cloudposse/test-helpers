@@ -16,7 +16,6 @@ func TestApplyNoError(t *testing.T) {
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
 
-	require.NoError(t, err)
 	fmt.Printf("running in %s\n", testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
