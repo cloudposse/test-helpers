@@ -106,7 +106,8 @@ func TestIdempotentNoChanges(t *testing.T) {
 		NoColor:       true,
 	})
 
-	ApplyAndIdempotentE(t, options)
+	_, err = ApplyAndIdempotentE(t, options)
+	require.Equal(t, nil, err)
 }
 
 func TestIdempotentWithChanges(t *testing.T) {
