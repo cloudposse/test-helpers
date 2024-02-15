@@ -22,9 +22,9 @@ func generateCommand(options *Options, args ...string) shell.Command {
 }
 
 var commandsWithParallelism = []string{
-	"terraform plan",
-	"terraform apply",
-	"terraform destroy",
+	"plan",
+	"apply",
+	"destroy",
 }
 
 const (
@@ -40,7 +40,7 @@ func GetCommonOptions(options *Options, args ...string) (*Options, []string) {
 		options.AtmosBinary = DefaultExecutable
 	}
 
-	if options.Parallelism > 0 && len(args) > 0 && collections.ListContains(commandsWithParallelism, args[0]) {
+	if options.Parallelism > 0 && len(args) > 0 && args[0] == "terraform" && collections.ListContains(commandsWithParallelism, args[1]) {
 		args = append(args, fmt.Sprintf("--parallelism=%d", options.Parallelism))
 	}
 

@@ -18,6 +18,20 @@ var TerraformCommandsWithPlanFileSupport = []string{
 	"graph",
 }
 
+func FormatTerraformPlanFileAsArg(commandType string, outPath string) []string {
+	if outPath == "" {
+		return nil
+	}
+	if commandType == "plan" {
+		return []string{fmt.Sprintf("%s=%s", "-out", outPath)}
+	}
+
+	if commandType == "apply" {
+		return []string{fmt.Sprintf("%s %s", "--planfile", outPath)}
+	}
+	return []string{outPath}
+}
+
 // FormatTerraformArgs converts the inputs to a format palatable to terraform. This includes converting the given vars
 // to the format the Terraform CLI expects (-var key=value).
 func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
@@ -26,11 +40,12 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 
 	lockSupported := collections.ListContains(tt.TerraformCommandsWithLockSupport, commandType)
 	planFileSupported := collections.ListContains(TerraformCommandsWithPlanFileSupport, commandType)
+	planFileSpecified := len(options.PlanFilePath) > 0
 
 	terraformArgs = append(terraformArgs, "terraform", commandType, options.Component, "-s", options.Stack)
 
 	// Include -var and -var-file flags unless we're running 'apply' with a plan file
-	includeVars := !(commandType == "apply" && len(options.PlanFilePath) > 0)
+	includeVars := !(commandType == "apply" && planFileSpecified)
 
 	terraformArgs = append(terraformArgs, args[1:]...)
 
@@ -61,7 +76,7 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 
 	if planFileSupported {
 		// The plan file arg should be last in the terraformArgs slice. Some commands use it as an input (e.g. show, apply)
-		terraformArgs = append(terraformArgs, tt.FormatTerraformPlanFileAsArg(commandType, options.PlanFilePath)...)
+		terraformArgs = append(terraformArgs, FormatTerraformPlanFileAsArg(commandType, options.PlanFilePath)...)
 	}
 
 	return terraformArgs

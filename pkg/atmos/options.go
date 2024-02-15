@@ -115,13 +115,16 @@ func WithDefaultRetryableErrors(t testing.TestingT, originalOptions *Options) *O
 
 	if newOptions.RetryableAtmosErrors == nil {
 		newOptions.RetryableAtmosErrors = map[string]string{}
-	}
-	for k, v := range DefaultRetryableAtmosErrors {
-		newOptions.RetryableAtmosErrors[k] = v
+
+		for k, v := range DefaultRetryableAtmosErrors {
+			newOptions.RetryableAtmosErrors[k] = v
+		}
 	}
 
-	newOptions.MaxRetries = 3
-	newOptions.TimeBetweenRetries = 5 * time.Second
+	if originalOptions.MaxRetries < 1 {
+		newOptions.MaxRetries = 3
+		newOptions.TimeBetweenRetries = 5 * time.Second
+	}
 
 	return newOptions
 }

@@ -12,3 +12,9 @@ components:
       vars: {}
     terraform-with-plan-error:
       vars: {}
+    terraform-with-error:
+      vars: {}
+    terraform-not-idempotent:
+      vars: {}
+    terraform-parallelism:
+      vars: {}

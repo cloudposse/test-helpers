@@ -14,9 +14,9 @@ func TestPlanWithExitCodeWithNoChanges(t *testing.T) {
 	require.NoError(t, err)
 
 	options := &Options{
-		AtmosBasePath: testFolder,
-		Component:     "terraform-no-error",
-		Stack:         testStack,
+		AtmosBasePath:             testFolder,
+		Component:                 "terraform-no-error",
+		Stack:                     testStack,
 		RedirectStrErrDestination: "/dev/null",
 	}
 
@@ -30,8 +30,6 @@ func TestPlanWithExitCodeWithChanges(t *testing.T) {
 	t.Parallel()
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
-	require.NoError(t, err)
-
 	require.NoError(t, err)
 
 	options := &Options{
