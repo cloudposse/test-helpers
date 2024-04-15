@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/gruntwork-io/terratest v0.46.9
 	github.com/hashicorp/terraform-json v0.21.0
-	github.com/jinzhu/copier v0.3.5
+	github.com/jinzhu/copier v0.4.0
 	github.com/rebuy-de/aws-nuke/v2 v2.25.0
 	github.com/stretchr/testify v1.8.4
 )
