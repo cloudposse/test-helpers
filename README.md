@@ -70,15 +70,16 @@ properly and that the coput contains "Hello, World". Below hows how you could ru
 func TestApplyNoError(t *testing.T) {
   t.Parallel()
 
-  testFolder, err := files.CopyTerraformFolderToTemp("test/my-test", t.Name())
+  testFolder, err := files.CopyTerraformFolderToTemp("../../test/fixtures/atmos", t.Name())
   require.NoError(t, err)
+  defer os.RemoveAll(testFolder)
 
   fmt.Printf("running in %s\n", testFolder)
 
   options := WithDefaultRetryableErrors(t, &Options{
     AtmosBasePath: testFolder,
     Component:     "terraform-no-error",
-    Stack:         testStack,
+    Stack:         "test-test-test",
     NoColor:       true,
   })
 
