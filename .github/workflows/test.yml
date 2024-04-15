@@ -4,16 +4,12 @@ on:
     types: [opened, synchronize, reopened]
     paths-ignore:
       - "README.md"
-
   release:
     types: [created]
-    paths-ignore:
-      - "README.md"
-
   workflow_dispatch:
 
 permissions:
-  id-token: write # This is required for requesting the JWT
+  id-token: write # This is required for requesting the JWT for OIDC
   contents: read # This is required for actions/checkout
 
 jobs:
@@ -30,8 +26,15 @@ jobs:
           go-version-file: "./go.mod"
         id: go
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
       - name: Setup atmos
-        uses: cloudposse/github-action-setup-atmos@v1
+        uses: cloudposse/github-action-setup-atmos@v2
+        with:
+          install-wrapper: false
 
       - name: Get dependencies
         run: go mod download
