@@ -28,7 +28,7 @@ deps:
 	go mod download
 
 # Run acceptance tests
-testacc: get
-	go test $(TEST) -v $(TESTARGS) -timeout 2m
+test: deps
+	go run gotest.tools/gotestsum@latest --junitfile unit-tests.xml --format pkgname-and-test-fails -- -timeout 30m -parallel=1 -count=1 -v $(TEST)
 
 .PHONY: lint get build deps version testacc

@@ -19,21 +19,21 @@ categories:
   - terratest
 
 description: |-
-  `terratest-helpers` - A library for helping to run tests in [terratest](https://terratest.gruntwork.io).
+  `terratest-helpers` is a library that adds some missing functionality to [terratest](https://terratest.gruntwork.io).
 
 introduction: |-
 
-  `terratest-helpers` is a library for helping to run tests in [terratest](https://terratest.gruntwork.io).
+  `terratest-helpers` is a library that adds some missing functionality to [terratest](https://terratest.gruntwork.io).
 
   `terratest-helpers` includes functionality for:
 
-     - Destroying all resources in an AWS account after a test run
+     - Destroying all resources in an AWS account after a test run using [aws-nuke](https://github.com/rebuy-de/aws-nuke)
+     - Running tests with [atmos](https://github.com/cloudposse/atmos) stack configs
+
 
   ## Install
 
-  ### Go
-
-  Install the latest version
+  Install the latest version in your go tests
 
   ```console
   go install github.com/cloudposse/terratest-helpers
@@ -49,9 +49,63 @@ introduction: |-
 
   You can use `terratest-helpers` as a library in your own terratest code.
 
+  ### atmos
+
+  This library is designed to be used with [atmos](https://github.com/cloudposse/atmos) to allow you to run tests with
+  different stack configurations. For example, imagine you have a component that you want to test to make sure it applies
+  properly and that the coput contains "Hello, World". Below hows how you could run a test from an atmos stack.
+
+  ```go
+  func TestApplyNoError(t *testing.T) {
+    t.Parallel()
+
+    testFolder, err := files.CopyTerraformFolderToTemp("test/my-test", t.Name())
+    require.NoError(t, err)
+
+    fmt.Printf("running in %s\n", testFolder)
+
+    options := WithDefaultRetryableErrors(t, &Options{
+      AtmosBasePath: testFolder,
+      Component:     "terraform-no-error",
+      Stack:         testStack,
+      NoColor:       true,
+    })
+
+    out := Apply(t, options)
+
+    require.Contains(t, out, "Hello, World")
+  }
+  ```
+
+  ### aws-nuke
+
+  ```go
+  func TestAwsNuke(t *testing.T) {
+    t.Parallel()
+    randID := strings.ToLower(random.UniqueId())
+
+    rootFolder := "../../"
+    terraformFolderRelativeToRoot := "examples/awsnuke-example"
+    tempTestFolder := testStructure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
+    defer os.RemoveAll(tempTestFolder)
+
+    terraformOptions := &terraform.Options{
+        TerraformDir: tempTestFolder,
+        Upgrade:      true,
+        VarFiles:     []string{fmt.Sprintf("fixtures.%s.tfvars", testRegion)},
+        Vars: map[string]interface{}{
+          "attributes": []string{randID},
+          "default_tags": map[string]string{
+          terratestTagName: randID,
+        },
+     },
+  }
+  ```
+
+
   ## Examples
 
-  The [example](examples/) folder contains examples that demonstrate the use of `terratest-helpers`:
+  The [example](examples/) folder contains a full set examples that demonstrate the use of `terratest-helpers`:
 
     - [example](examples/awsnuke-example) folder contains a terraform module that can be used to test the `awsnuke` functionality.
     The test for this module is in [pkg/awsnuke/awsnuke_test.go](pkg/awsnuke/awsnuke_test.go).
