@@ -5,8 +5,8 @@ go 1.21
 require (
 	github.com/gruntwork-io/terratest v0.46.13
 	github.com/hashicorp/terraform-json v0.21.0
-	github.com/jinzhu/copier v0.3.5
-	github.com/rebuy-de/aws-nuke/v2 v2.20.0
+	github.com/jinzhu/copier v0.4.0
+	github.com/rebuy-de/aws-nuke/v2 v2.25.0
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -109,7 +109,7 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.44.122
+	github.com/aws/aws-sdk-go v1.51.21
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
