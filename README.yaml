@@ -59,7 +59,7 @@ introduction: |-
   func TestApplyNoError(t *testing.T) {
     t.Parallel()
 
-    testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
+    testFolder, err := files.CopyTerraformFolderToTemp("../../test/fixtures/atmos", t.Name())
     require.NoError(t, err)
     defer os.RemoveAll(testFolder)
 
