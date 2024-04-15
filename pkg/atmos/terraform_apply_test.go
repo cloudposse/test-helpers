@@ -32,6 +32,7 @@ func TestApplyNoError(t *testing.T) {
 	require.Contains(t, out, "Hello, World")
 }
 
+// TODO: This test is skipped because atmos doesn't support running with --no-color yet
 func TestApplyNoColor(t *testing.T) {
 	t.Skip("atmos doesn't support running with --no-color yet")
 	t.Parallel()
@@ -39,7 +40,6 @@ func TestApplyNoColor(t *testing.T) {
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
 
-	require.NoError(t, err)
 	fmt.Printf("running in %s\n", testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
@@ -168,6 +168,7 @@ func TestParallelism(t *testing.T) {
 	require.GreaterOrEqual(t, int64(duration.Seconds()), int64(25))
 }
 
+// TODO: This test is skipped because atmos doesn't support running with apply options with plan file yet
 func TestApplyWithPlanFile(t *testing.T) {
 	t.Skip(("atmos doesn't support running with apply options with plan file yet"))
 	t.Parallel()
