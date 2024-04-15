@@ -1,6 +1,7 @@
 package atmos
 
 import (
+	"os"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/files"
@@ -12,15 +13,17 @@ func TestPlanWithExitCodeWithNoChanges(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := &Options{
-		AtmosBasePath:             testFolder,
-		Component:                 "terraform-no-error",
-		Stack:                     testStack,
-		RedirectStrErrDestination: "/dev/null",
+		AtmosBasePath: testFolder,
+		Component:     "terraform-no-error",
+		Stack:         testStack,
 	}
 
 	Apply(t, options)
+	_, err = GetExitCodeForAtmosCommandE(t, options, "version")
+	require.NoError(t, err)
 
 	exitCode := PlanExitCode(t, options)
 	require.Equal(t, DefaultSuccessExitCode, exitCode)
@@ -31,6 +34,7 @@ func TestPlanWithExitCodeWithChanges(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := &Options{
 		AtmosBasePath: testFolder,
@@ -49,6 +53,7 @@ func TestPlanWithExitCodeWithFailure(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := &Options{
 		AtmosBasePath: testFolder,

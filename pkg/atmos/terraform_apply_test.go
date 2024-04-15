@@ -2,6 +2,7 @@ package atmos
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -15,6 +16,7 @@ func TestApplyNoError(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	fmt.Printf("running in %s\n", testFolder)
 
@@ -58,6 +60,7 @@ func TestApplyWithErrorNoRetry(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
 		AtmosBasePath: testFolder,
@@ -76,6 +79,7 @@ func TestApplyWithErrorWithRetry(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
 		AtmosBasePath: testFolder,
@@ -83,7 +87,7 @@ func TestApplyWithErrorWithRetry(t *testing.T) {
 		Stack:         testStack,
 		MaxRetries:    1,
 		RetryableAtmosErrors: map[string]string{
-			"This is the first run, exiting with an error": "Intentional failure in test fixture",
+			"but this error was expected and warrants a retry": "Intentional failure in test fixture",
 		},
 	})
 
@@ -98,6 +102,7 @@ func TestIdempotentNoChanges(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
 		AtmosBasePath: testFolder,
@@ -115,6 +120,7 @@ func TestIdempotentWithChanges(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
 		AtmosBasePath: testFolder,
@@ -136,6 +142,7 @@ func TestParallelism(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
 
 	options := WithDefaultRetryableErrors(t, &Options{
 		AtmosBasePath: testFolder,
@@ -167,6 +174,8 @@ func TestApplyWithPlanFile(t *testing.T) {
 
 	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
 	require.NoError(t, err)
+	defer os.RemoveAll(testFolder)
+
 	planFilePath := filepath.Join(testFolder, "plan.out")
 
 	options := &Options{
@@ -193,5 +202,5 @@ func TestApplyWithPlanFile(t *testing.T) {
 	out, err := ApplyE(t, applyOptions)
 	require.NoError(t, err)
 	require.Contains(t, out, "1 added, 0 changed, 0 destroyed.")
-	//require.NotRegexp(t, `\[\d*m`, out, "Output should not contain color escape codes")
+	require.NotRegexp(t, `\[\d*m`, out, "Output should not contain color escape codes")
 }
