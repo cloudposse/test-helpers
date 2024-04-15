@@ -14,3 +14,4 @@
 **/.terraform.lock.hcl
 
 bin/
+unit-tests.xml
