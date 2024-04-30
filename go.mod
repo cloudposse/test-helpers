@@ -3,7 +3,7 @@ module github.com/cloudposse/terratest-helpers
 go 1.21
 
 require (
-	github.com/gruntwork-io/terratest v0.46.13
+	github.com/gruntwork-io/terratest v0.46.14
 	github.com/hashicorp/terraform-json v0.21.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/rebuy-de/aws-nuke/v2 v2.25.0
@@ -49,7 +49,7 @@ require (
 	github.com/gruntwork-io/go-commons v0.13.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-getter v1.7.3 // indirect
+	github.com/hashicorp/go-getter v1.7.4 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
