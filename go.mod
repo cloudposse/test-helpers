@@ -109,7 +109,7 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.51.31
+	github.com/aws/aws-sdk-go v1.54.19
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
