@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/gruntwork-io/terratest v0.47.0
-	github.com/hashicorp/terraform-json v0.21.0
+	github.com/hashicorp/terraform-json v0.22.1
 	github.com/jinzhu/copier v0.4.0
 	github.com/rebuy-de/aws-nuke/v2 v2.25.0
 	github.com/stretchr/testify v1.9.0
@@ -76,7 +76,7 @@ require (
 	github.com/urfave/cli v1.22.10 // indirect
 	github.com/urfave/cli/v2 v2.20.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
-	github.com/zclconf/go-cty v1.14.1 // indirect
+	github.com/zclconf/go-cty v1.14.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
