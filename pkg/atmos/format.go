@@ -60,7 +60,10 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 	}
 
 	terraformArgs = append(terraformArgs, tt.FormatTerraformArgs("-target", options.Targets)...)
-	terraformArgs = append(terraformArgs, tt.FormatTerraformBackendConfigAsArgs(options.BackendConfig)...)
+
+	if commandType == "init" {
+		terraformArgs = append(terraformArgs, tt.FormatTerraformBackendConfigAsArgs(options.BackendConfig)...)
+	}
 
 	if options.NoColor {
 		terraformArgs = append(terraformArgs, "-no-color")
