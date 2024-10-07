@@ -73,6 +73,7 @@ type Options struct {
 	PlanFilePath              string                 // The path to output a plan file to (for the plan command) or read one from (for the apply command)
 	PluginDir                 string                 // The path of downloaded plugins to pass to the atmos init command (-plugin-dir)
 	SetVarsAfterVarFiles      bool                   // Pass -var options after -var-file options to Atmos commands
+	WarningsAsErrors          map[string]string      // Terraform warning messages that should be treated as errors. The keys are a regexp to match against the warning and the value is what to display to a user if that warning is matched.
 }
 
 // Clone makes a deep copy of most fields on the Options object and returns it.

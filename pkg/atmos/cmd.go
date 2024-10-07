@@ -3,6 +3,8 @@ package atmos
 import (
 	"fmt"
 	"os/exec"
+	"regexp"
+	"strings"
 
 	"github.com/gruntwork-io/terratest/modules/collections"
 	"github.com/gruntwork-io/terratest/modules/retry"
@@ -70,11 +72,20 @@ func RunAtmosCommandE(t testing.TestingT, additionalOptions *Options, additional
 
 	cmd := generateCommand(options, args...)
 	description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
-	return retry.DoWithRetryableErrorsE(t, description, options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
-		return shell.RunCommandAndGetOutputE(t, cmd)
-	})
-}
 
+	return retry.DoWithRetryableErrorsE(t, description, options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
+		s, err := shell.RunCommandAndGetOutputE(t, cmd)
+		if err != nil {
+			return s, err
+		}
+
+		if err := hasWarning(additionalOptions, s); err != nil {
+			return s, err
+		}
+		return s, err
+	})
+
+}
 
 // RunAtmosCommandAndGetStdoutE runs atmos with the given arguments and options and returns solely its stdout (but not
 // stderr).
@@ -84,7 +95,16 @@ func RunAtmosCommandAndGetStdoutE(t testing.TestingT, additionalOptions *Options
 	cmd := generateCommand(options, args...)
 	description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 	return retry.DoWithRetryableErrorsE(t, description, options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
-		return shell.RunCommandAndGetStdOutE(t, cmd)
+		s, err := shell.RunCommandAndGetOutputE(t, cmd)
+		if err != nil {
+			return s, err
+		}
+
+		if err := hasWarning(additionalOptions, s); err != nil {
+			return s, err
+		}
+
+		return s, err
 	})
 }
 
@@ -101,8 +121,10 @@ func GetExitCodeForAtmosCommand(t testing.TestingT, additionalOptions *Options, 
 func GetExitCodeForAtmosCommandE(t testing.TestingT, additionalOptions *Options, additionalArgs ...string) (int, error) {
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
-	additionalOptions.Logger.Logf(t, "Running %s in %s with args %v", options.AtmosBinary, options.AtmosBasePath, args)
+	additionalOptions.Logger.Logf(t, "Running %s with args %v", options.AtmosBinary, options.AtmosBinary, args)
 	cmd := generateCommand(options, args...)
+	cmd.WorkingDir = options.AtmosBasePath
+	
 	_, err := shell.RunCommandAndGetOutputE(t, cmd)
 	if err == nil {
 		return DefaultSuccessExitCode, nil
@@ -125,4 +147,20 @@ func defaultAtmosExecutable() string {
 	}
 
 	return AtmosDefaultPath
+}
+
+func hasWarning(opts *Options, out string) error {
+	for k, v := range opts.WarningsAsErrors {
+		str := fmt.Sprintf("\nWarning: %s[^\n]*\n", k)
+		re, err := regexp.Compile(str)
+		if err != nil {
+			return fmt.Errorf("cannot compile regex for warning detection: %w", err)
+		}
+		m := re.FindAllString(out, -1)
+		if len(m) == 0 {
+			continue
+		}
+		return fmt.Errorf("warning(s) were found: %s:\n%s", v, strings.Join(m, ""))
+	}
+	return nil
 }
