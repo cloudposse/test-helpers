@@ -14,5 +14,13 @@ func Destroy(t testing.TestingT, options *Options) string {
 
 // DestroyE runs atmos terraform destroy with the given options and return stdout/stderr.
 func DestroyE(t testing.TestingT, options *Options) (string, error) {
-	return RunAtmosCommandE(t, options, FormatArgs(options, "destroy", "-auto-approve", "-input=false")...)
+	if options.Component == "" {
+		return "", ErrorComponentRequired
+	}
+
+	if options.Stack == "" {
+		return "", ErrorStackRequired
+	}
+
+	return RunAtmosCommandE(t, options, FormatArgs(options, "terraform", "destroy", "-input=false", "-auto-approve")...)
 }
