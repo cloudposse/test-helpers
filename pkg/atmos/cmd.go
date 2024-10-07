@@ -75,6 +75,7 @@ func RunAtmosCommandE(t testing.TestingT, additionalOptions *Options, additional
 	})
 }
 
+
 // RunAtmosCommandAndGetStdoutE runs atmos with the given arguments and options and returns solely its stdout (but not
 // stderr).
 func RunAtmosCommandAndGetStdoutE(t testing.TestingT, additionalOptions *Options, additionalArgs ...string) (string, error) {

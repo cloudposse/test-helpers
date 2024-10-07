@@ -121,7 +121,7 @@ func WithDefaultRetryableErrors(t testing.TestingT, originalOptions *Options) *O
 		}
 	}
 
-	if originalOptions.MaxRetries < 1 {
+	if originalOptions.MaxRetries < 0 {
 		newOptions.MaxRetries = 3
 		newOptions.TimeBetweenRetries = 5 * time.Second
 	}
