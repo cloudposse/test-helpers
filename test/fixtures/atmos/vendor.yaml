@@ -1,0 +1,32 @@
+apiVersion: atmos/v1
+kind: AtmosVendorConfig
+metadata:
+  name: test-vendor-config
+  description: Atmos vendoring manifest for testing
+spec:
+  # `imports` or `sources` (or both) must be defined in a vendoring manifest
+  imports: []
+
+  sources:
+    - component: "vpc"
+      source: "github.com/cloudposse/terraform-aws-components.git//modules/vpc?ref={{.Version}}"
+      version: "1.398.0"
+      targets:
+        - "components/terraform/vpc"
+      included_paths:
+        - "**/*.tf"
+      excluded_paths:
+        - "**/providers.tf"
+      tags:
+        - networking
+    - component: "vpc-flow-logs-bucket"
+      source: "github.com/cloudposse/terraform-aws-components.git//modules/vpc-flow-logs-bucket?ref={{.Version}}"
+      version: "1.398.0"
+      targets:
+        - "components/terraform/vpc-flow-logs-bucket"
+      included_paths:
+        - "**/*.tf"
+      excluded_paths:
+        - "**/providers.tf"
+      tags:
+        - storage
