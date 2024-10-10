@@ -9,6 +9,7 @@ import (
 	"github.com/cloudposse/terratest-helpers/pkg/awsnuke"
 	"github.com/gruntwork-io/terratest/modules/files"
 	"github.com/gruntwork-io/terratest/modules/random"
+	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/require"
 )
 
@@ -65,49 +66,68 @@ func NewAwsComponentTestOptions(awsRegion, componentName, stackName string, opts
 }
 
 func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback func(t *testing.T, opts *Options, output string)) {
-	t.Helper() // Marks this function as a test helper
+	t.Helper()
 
-	t.Log("Copying fixtures and component (src/) to temp folder...")
-	testFolder, err := files.CopyTerraformFolderToTemp(opts.FixturesPath, t.Name())
-	require.NoError(t, err)
-	fmt.Printf("running in %s\n", testFolder)
-	defer os.RemoveAll(testFolder)
+	var options *Options
+	var out string
+	var randID string
+	var testFolder string
 
-	// Copy the component to the test folder
-	commponentFolderPath := MakeComponentFolder(t, testFolder, []string{opts.ComponentName})
-	err = files.CopyFolderContents("../src", commponentFolderPath)
-	require.NoError(t, err)
+	test_structure.RunTestStage(t, "copy_fixtures_to_temp_folder", func() {
+		t.Log("Copying fixtures and component (src/) to temp folder...")
+		testFolder, err := files.CopyTerraformFolderToTemp(opts.FixturesPath, t.Name())
+		require.NoError(t, err)
+		fmt.Printf("running in %s\n", testFolder)
 
-	// Perform setup tasks here
-	t.Log("Performing test setup...")
-	randID := strings.ToLower(random.UniqueId())
-	atmosOptions := WithDefaultRetryableErrors(t, &Options{
-		AtmosBasePath: testFolder,
-		Component:     opts.ComponentName,
-		Stack:         opts.StackName,
-		NoColor:       true,
-		BackendConfig: map[string]interface{}{
-			"workspace_key_prefix": strings.Join([]string{randID, opts.StackName}, "-"),
-		},
-		Vars: map[string]interface{}{
-			"attributes": []string{randID},
-			"default_tags": map[string]string{
-				"CreatedByTerratestRun": randID,
-			},
-			"region": opts.AwsRegion,
-		},
+		// Copy the component to the test folder
+		commponentFolderPath := MakeComponentFolder(t, testFolder, []string{opts.ComponentName})
+		err = files.CopyFolderContents("../src", commponentFolderPath)
+		require.NoError(t, err)
 	})
-	options := WithDefaultRetryableErrors(t, atmosOptions)
 
-	// Clean up after the test with deferred functions
-	if !opts.SkipAwsNuke {
-		defer awsnuke.NukeTestAccountByTag(t, "CreatedByTerratestRun", randID, []string{opts.AwsRegion}, false)
-	}
-	defer Destroy(t, options)
+	defer test_structure.RunTestStage(t, "cleanup_temp_folder", func() {
+		t.Log("Cleaning up temp folder...")
+		os.RemoveAll(testFolder)
+	})
 
-	// Apply the deployment
-	out := Apply(t, options)
+	test_structure.RunTestStage(t, "terraform_setup", func() {
+		// Perform setup tasks here
+		t.Log("Performing test setup...")
+		randID = strings.ToLower(random.UniqueId())
+		atmosOptions := WithDefaultRetryableErrors(t, &Options{
+			AtmosBasePath: testFolder,
+			Component:     opts.ComponentName,
+			Stack:         opts.StackName,
+			NoColor:       true,
+			BackendConfig: map[string]interface{}{
+				"workspace_key_prefix": strings.Join([]string{randID, opts.StackName}, "-"),
+			},
+			Vars: map[string]interface{}{
+				"attributes": []string{randID},
+				"default_tags": map[string]string{
+					"CreatedByTerratestRun": randID,
+				},
+				"region": opts.AwsRegion,
+			},
+		})
+		options = WithDefaultRetryableErrors(t, atmosOptions)
+	})
 
-	// Call the callback function for assertions
-	callback(t, options, out)
+	defer test_structure.RunTestStage(t, "aws_nuke", func() {
+		if !opts.SkipAwsNuke {
+			awsnuke.NukeTestAccountByTag(t, "CreatedByTerratestRun", randID, []string{opts.AwsRegion}, false)
+		}
+	})
+
+	defer test_structure.RunTestStage(t, "terraform_destroy", func() {
+		Destroy(t, options)
+	})
+
+	test_structure.RunTestStage(t, "terraform_apply", func() {
+		out = Apply(t, options)
+	})
+
+	test_structure.RunTestStage(t, "callback", func() {
+		callback(t, options, out)
+	})
 }
