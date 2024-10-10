@@ -10,12 +10,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func setupVendorTest(t *testing.T) (string, func()) {
+	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
+	require.NoError(t, err, "Failed to copy Terraform folder to temp directory")
+
+	cleanup := func() {
+		os.RemoveAll(testFolder)
+	}
+
+	return testFolder, cleanup
+}
+
 func TestVendorPullBasic(t *testing.T) {
 	t.Parallel()
 
-	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
-	require.NoError(t, err)
-	defer os.RemoveAll(testFolder)
+	testFolder, cleanup := setupVendorTest(t)
+	defer cleanup()
 
 	fmt.Printf("running in %s\n", testFolder)
 
@@ -23,7 +33,7 @@ func TestVendorPullBasic(t *testing.T) {
 		AtmosBasePath: testFolder,
 	})
 
-	_, err = VendorPullE(t, options)
+	_, err := VendorPullE(t, options)
 	require.NoError(t, err)
 
 	_, err = os.Stat(filepath.Join(testFolder, "components", "terraform", "vpc"))
@@ -36,9 +46,8 @@ func TestVendorPullBasic(t *testing.T) {
 func TestVendorPullSingleComponent(t *testing.T) {
 	t.Parallel()
 
-	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
-	require.NoError(t, err)
-	defer os.RemoveAll(testFolder)
+	testFolder, cleanup := setupVendorTest(t)
+	defer cleanup()
 
 	fmt.Printf("running in %s\n", testFolder)
 
@@ -47,7 +56,7 @@ func TestVendorPullSingleComponent(t *testing.T) {
 		VendorComponent: "vpc",
 	})
 
-	_, err = VendorPullE(t, options)
+	_, err := VendorPullE(t, options)
 	require.NoError(t, err)
 
 	_, err = os.Stat(filepath.Join(testFolder, "components", "terraform", "vpc"))
@@ -60,9 +69,8 @@ func TestVendorPullSingleComponent(t *testing.T) {
 func TestVendorPullByTag(t *testing.T) {
 	t.Parallel()
 
-	testFolder, err := files.CopyTerraformFolderToTemp(atmosExamplePath, t.Name())
-	require.NoError(t, err)
-	defer os.RemoveAll(testFolder)
+	testFolder, cleanup := setupVendorTest(t)
+	defer cleanup()
 
 	fmt.Printf("running in %s\n", testFolder)
 
@@ -71,7 +79,7 @@ func TestVendorPullByTag(t *testing.T) {
 		VendorTags:    []string{"storage"},
 	})
 
-	_, err = VendorPullE(t, options)
+	_, err := VendorPullE(t, options)
 	require.NoError(t, err)
 
 	_, err = os.Stat(filepath.Join(testFolder, "components", "terraform", "vpc"))
