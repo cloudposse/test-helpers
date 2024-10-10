@@ -12,7 +12,7 @@ func VendorPull(t testing.TestingT, options *Options) string {
 	return out
 }
 
-// ApplyE runs atmos vendor with the given options and return stdout/stderr.
+// VendorPullE runs atmos vendor with the given options and return stdout/stderr.
 func VendorPullE(t testing.TestingT, options *Options) (string, error) {
 	return RunAtmosCommandE(t, options, FormatArgs(options, "vendor", "pull")...)
 }

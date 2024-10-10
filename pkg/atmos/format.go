@@ -85,22 +85,6 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 		terraformArgs = append(terraformArgs, FormatTerraformPlanFileAsArg(commandType, options.PlanFilePath)...)
 	}
 
-	if commandType == "vendor" && options.VendorComponent != "" {
-		terraformArgs = append(terraformArgs, "--component", options.VendorComponent)
-	}
-
-	if commandType == "vendor" && options.VendorStack != "" {
-		terraformArgs = append(terraformArgs, "--stack", options.VendorStack)
-	}
-
-	if commandType == "vendor" && len(options.VendorTags) > 0 {
-		terraformArgs = append(terraformArgs, "--tags", strings.Join(options.VendorTags, ","))
-	}
-
-	if commandType == "vendor" && options.VendorType != "" {
-		terraformArgs = append(terraformArgs, "--type", options.VendorType)
-	}
-
 	return terraformArgs
 }
 
