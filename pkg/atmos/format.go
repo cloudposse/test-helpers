@@ -2,12 +2,14 @@ package atmos
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gruntwork-io/terratest/modules/collections"
 	tt "github.com/gruntwork-io/terratest/modules/terraform"
 )
 
 const terraformCmd = "terraform"
+const vendorCmd = "vendor"
 
 // TerraformCommandsWithPlanFileSupport is a list of all the Terraform commands that support interacting with plan
 // files.
@@ -83,7 +85,55 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 		terraformArgs = append(terraformArgs, FormatTerraformPlanFileAsArg(commandType, options.PlanFilePath)...)
 	}
 
+	if commandType == "vendor" && options.VendorComponent != "" {
+		terraformArgs = append(terraformArgs, "--component", options.VendorComponent)
+	}
+
+	if commandType == "vendor" && options.VendorStack != "" {
+		terraformArgs = append(terraformArgs, "--stack", options.VendorStack)
+	}
+
+	if commandType == "vendor" && len(options.VendorTags) > 0 {
+		terraformArgs = append(terraformArgs, "--tags", strings.Join(options.VendorTags, ","))
+	}
+
+	if commandType == "vendor" && options.VendorType != "" {
+		terraformArgs = append(terraformArgs, "--type", options.VendorType)
+	}
+
 	return terraformArgs
+}
+
+// FormatAtmosVendorArgs converts the inputs to a format palatable to atmos vendor.
+func FormatAtmosVendorArgs(options *Options, args ...string) []string {
+	var vendorArgs []string
+	commandType := args[0]
+
+	vendorArgs = append(vendorArgs, "vendor", commandType)
+
+	vendorArgs = append(vendorArgs, args[1:]...)
+
+	if options.RedirectStrErrDestination != "" {
+		vendorArgs = append(vendorArgs, fmt.Sprintf("--redirect-stderr=%s", options.RedirectStrErrDestination))
+	}
+
+	if options.VendorComponent != "" {
+		vendorArgs = append(vendorArgs, "--component", options.VendorComponent)
+	}
+
+	if options.VendorStack != "" {
+		vendorArgs = append(vendorArgs, "--stack", options.VendorStack)
+	}
+
+	if len(options.VendorTags) > 0 {
+		vendorArgs = append(vendorArgs, "--tags", strings.Join(options.VendorTags, ","))
+	}
+
+	if options.VendorType != "" {
+		vendorArgs = append(vendorArgs, "--type", options.VendorType)
+	}
+
+	return vendorArgs
 }
 
 func FormatArgs(options *Options, args ...string) []string {
@@ -92,6 +142,10 @@ func FormatArgs(options *Options, args ...string) []string {
 
 	if commandType == terraformCmd {
 		atmosArgs = append(atmosArgs, FormatAtmosTerraformArgs(options, args[1:]...)...)
+	}
+
+	if commandType == vendorCmd {
+		atmosArgs = append(atmosArgs, FormatAtmosVendorArgs(options, args[1:]...)...)
 	}
 
 	return atmosArgs

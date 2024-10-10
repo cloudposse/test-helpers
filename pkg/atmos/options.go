@@ -74,6 +74,10 @@ type Options struct {
 	PluginDir                 string                 // The path of downloaded plugins to pass to the atmos init command (-plugin-dir)
 	SetVarsAfterVarFiles      bool                   // Pass -var options after -var-file options to Atmos commands
 	WarningsAsErrors          map[string]string      // Terraform warning messages that should be treated as errors. The keys are a regexp to match against the warning and the value is what to display to a user if that warning is matched.
+	VendorComponent           string                 // The component to pass to the atmos vendor command, if not passed all components will be vendored
+	VendorStack               string                 // The stack to pass to the atmos vendor command, if not passed all stacks will be vendored
+	VendorTags                []string               // The tags to pass to the atmos vendor command, if not passed all tags will be vendored
+	VendorType                string                 // The type of vendor to pass to the atmos vendor command, if not passed `terraform` will be used
 }
 
 // Clone makes a deep copy of most fields on the Options object and returns it.
