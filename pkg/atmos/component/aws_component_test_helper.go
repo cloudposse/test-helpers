@@ -1,4 +1,4 @@
-package atmos
+package component
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cloudposse/terratest-helpers/pkg/atmos"
 	"github.com/cloudposse/terratest-helpers/pkg/awsnuke"
 	"github.com/gruntwork-io/terratest/modules/files"
 	"github.com/gruntwork-io/terratest/modules/random"
@@ -22,53 +23,10 @@ func MakeComponentFolder(t *testing.T, testFolder string, componentPath []string
 	return subFolderPath
 }
 
-type AwsComponentTestOptions struct {
-	AwsRegion     string
-	ComponentName string
-	FixturesPath  string
-	SkipAwsNuke   bool
-	StackName     string
-}
-
-// Option type represents a configuration option
-type AwsComponentTestOption func(*AwsComponentTestOptions)
-
-// WithFixturesPath is an option for setting the FixturesPath
-func WithFixturesPath(fixturesPath string) AwsComponentTestOption {
-	return func(a *AwsComponentTestOptions) {
-		a.FixturesPath = fixturesPath
-	}
-}
-
-// WithSkipAwsNuke is an option for setting SkipAwsNuke
-func WithSkipAwsNuke(skip bool) AwsComponentTestOption {
-	return func(a *AwsComponentTestOptions) {
-		a.SkipAwsNuke = skip
-	}
-}
-
-// NewAwsComponentTestOptions creates a new AwsComponentTestOptions with required fields and optional configuration
-func NewAwsComponentTestOptions(awsRegion, componentName, stackName string, opts ...AwsComponentTestOption) AwsComponentTestOptions {
-	options := &AwsComponentTestOptions{
-		AwsRegion:     awsRegion,
-		ComponentName: componentName,
-		StackName:     stackName,
-		FixturesPath:  "./fixtures",
-		SkipAwsNuke:   false,
-	}
-
-	// Apply optional configurations
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	return *options
-}
-
-func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback func(t *testing.T, opts *Options, output string)) {
+func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback func(t *testing.T, opts *atmos.Options, output string)) {
 	t.Helper()
 
-	var options *Options
+	var options *atmos.Options
 	var out string
 	var randID string
 	var testFolder string
@@ -90,11 +48,34 @@ func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback
 		os.RemoveAll(testFolder)
 	})
 
+	test_structure.RunTestStage(t, "terraform_apply_dependencies", func() {
+		for _, dependency := range opts.StackDependencies {
+			t.Logf("Applying dependency: %s in stack %s in region %s", dependency.Component, dependency.StackName, dependency.Region)
+			_, err := atmos.ApplyE(t, atmos.WithDefaultRetryableErrors(t, &atmos.Options{
+				AtmosBasePath: testFolder,
+				Component:     dependency.Component,
+				Stack:         dependency.StackName,
+				NoColor:       true,
+				BackendConfig: map[string]interface{}{
+					"workspace_key_prefix": strings.Join([]string{randID, opts.StackName}, "-"),
+				},
+				Vars: map[string]interface{}{
+					"attributes": []string{randID},
+					"default_tags": map[string]string{
+						"CreatedByTerratestRun": randID,
+					},
+					"region": dependency.Region,
+				},
+			}))
+			require.NoError(t, err)
+		}
+	})
+
 	test_structure.RunTestStage(t, "terraform_setup", func() {
 		// Perform setup tasks here
 		t.Log("Performing test setup...")
 		randID = strings.ToLower(random.UniqueId())
-		atmosOptions := WithDefaultRetryableErrors(t, &Options{
+		atmosOptions := atmos.WithDefaultRetryableErrors(t, &atmos.Options{
 			AtmosBasePath: testFolder,
 			Component:     opts.ComponentName,
 			Stack:         opts.StackName,
@@ -110,7 +91,7 @@ func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback
 				"region": opts.AwsRegion,
 			},
 		})
-		options = WithDefaultRetryableErrors(t, atmosOptions)
+		options = atmos.WithDefaultRetryableErrors(t, atmosOptions)
 	})
 
 	defer test_structure.RunTestStage(t, "aws_nuke", func() {
@@ -119,12 +100,35 @@ func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback
 		}
 	})
 
+	test_structure.RunTestStage(t, "terraform_destroy_dependencies", func() {
+		for _, dependency := range opts.StackDependencies {
+			t.Logf("Destroying dependency: %s in stack %s in region %s", dependency.Component, dependency.StackName, dependency.Region)
+			_, err := atmos.ApplyE(t, atmos.WithDefaultRetryableErrors(t, &atmos.Options{
+				AtmosBasePath: testFolder,
+				Component:     dependency.Component,
+				Stack:         dependency.StackName,
+				NoColor:       true,
+				BackendConfig: map[string]interface{}{
+					"workspace_key_prefix": strings.Join([]string{randID, opts.StackName}, "-"),
+				},
+				Vars: map[string]interface{}{
+					"attributes": []string{randID},
+					"default_tags": map[string]string{
+						"CreatedByTerratestRun": randID,
+					},
+					"region": dependency.Region,
+				},
+			}))
+			require.NoError(t, err)
+		}
+	})
+
 	defer test_structure.RunTestStage(t, "terraform_destroy", func() {
-		Destroy(t, options)
+		atmos.Destroy(t, options)
 	})
 
 	test_structure.RunTestStage(t, "terraform_apply", func() {
-		out = Apply(t, options)
+		out = atmos.Apply(t, options)
 	})
 
 	test_structure.RunTestStage(t, "callback", func() {
