@@ -443,6 +443,8 @@ github.com/cloudflare/circl v1.3.3 h1:fE/Qz0QdIGqeWfnwq0RE0R7MI51s0M2E4Ga9kq5AEM
 github.com/cloudflare/circl v1.3.3/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=
 github.com/cloudposse/atmos v1.54.0 h1:cg5uAOIKf8gImEJ9q+viKCrJTdTAYotOcYSDct60YKw=
 github.com/cloudposse/atmos v1.54.0/go.mod h1:U4JpQjh8MUZii0jTLDHqNzXxAslNs9mRSh81LyIxkDY=
+github.com/cloudposse/test-helpers v0.10.0 h1:xCOJmUtm0U7/zCLsvTaQ+p3qH00+rrMB28ol+weUYkI=
+github.com/cloudposse/test-helpers v0.10.0/go.mod h1:+Z7HX9IXLvwzFGHh7CXFwWWoHda58FAdAAqjm7llWBw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/cncf/udpa/go v0.0.0-20200629203442-efcf912fb354/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
 github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=

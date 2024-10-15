@@ -1,6 +1,6 @@
-module github.com/cloudposse/terratest-helpers
+module github.com/cloudposse/test-helpers
 
-go 1.21
+go 1.23
 
 require (
 	github.com/gruntwork-io/terratest v0.47.0
