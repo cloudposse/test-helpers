@@ -43,7 +43,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::799847381734:role/cptest-test-gbl-sandbox-tester
-          role-session-name: githubaction-test-repo-terratest-helpers
+          role-session-name: githubaction-test-repo-test-helpers
           aws-region: us-east-2
 
       - name: Run tests

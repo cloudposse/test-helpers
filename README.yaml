@@ -1,10 +1,10 @@
-name: terratest-helpers
+name: test-helpers
 license: APACHE2
-github_repo: cloudposse/terratest-helpers
+github_repo: cloudposse/test-helpers
 badges:
   - name: Latest Release
-    image: https://img.shields.io/github/release/cloudposse/terratest-helpers.svg
-    url: https://github.com/cloudposse/terratest-helpers/releases/latest
+    image: https://img.shields.io/github/release/cloudposse/test-helpers.svg
+    url: https://github.com/cloudposse/test-helpers/releases/latest
   - name: Slack Community
     image: https://slack.cloudposse.com/badge.svg
     url: https://slack.cloudposse.com
@@ -19,13 +19,13 @@ categories:
   - terratest
 
 description: |-
-  `terratest-helpers` is a library that adds some missing functionality to [terratest](https://terratest.gruntwork.io).
+  `test-helpers` is a library that adds some missing functionality to [terratest](https://terratest.gruntwork.io).
 
 introduction: |-
 
-  `terratest-helpers` is a library that adds some missing functionality to [terratest](https://terratest.gruntwork.io).
+  `test-helpers` is a library that adds some missing functionality to [terratest](https://terratest.gruntwork.io).
 
-  `terratest-helpers` includes functionality for:
+  `test-helpers` includes functionality for:
 
      - Destroying all resources in an AWS account after a test run using [aws-nuke](https://github.com/rebuy-de/aws-nuke)
      - Running tests with [atmos](https://github.com/cloudposse/atmos) stack configs
@@ -36,18 +36,18 @@ introduction: |-
   Install the latest version in your go tests
 
   ```console
-  go install github.com/cloudposse/terratest-helpers
+  go install github.com/cloudposse/test-helpers
   ```
 
   Get a specific version
 
   ```console
-  go install github.com/cloudposse/terratest-helpers@v0.0.1
+  go install github.com/cloudposse/test-helpers@v0.0.1
   ```
 
   ## Usage
 
-  You can use `terratest-helpers` as a library in your own terratest code.
+  You can use `test-helpers` as a library in your own terratest code.
 
   ### atmos
 
@@ -106,7 +106,7 @@ introduction: |-
 
   ## Examples
 
-  The [example](examples/) folder contains a full set examples that demonstrate the use of `terratest-helpers`:
+  The [example](examples/) folder contains a full set examples that demonstrate the use of `test-helpers`:
 
     - [example](examples/awsnuke-example) folder contains a terraform module that can be used to test the `awsnuke` functionality.
     The test for this module is in [pkg/awsnuke/awsnuke_test.go](pkg/awsnuke/awsnuke_test.go).

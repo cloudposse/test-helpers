@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cloudposse/terratest-helpers/pkg/awsnuke"
+	"github.com/cloudposse/test-helpers/pkg/awsnuke"
 	"github.com/gruntwork-io/terratest/modules/files"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/require"
