@@ -38,7 +38,7 @@ func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback
 		fmt.Printf("running in %s\n", testFolder)
 
 		// Copy the component to the test folder
-		commponentFolderPath := MakeComponentFolder(t, testFolder, []string{opts.ComponentName})
+		componentFolderPath := MakeComponentFolder(t, testFolder, []string{opts.ComponentName})
 		err = files.CopyFolderContents("../src", commponentFolderPath)
 		require.NoError(t, err)
 	})
