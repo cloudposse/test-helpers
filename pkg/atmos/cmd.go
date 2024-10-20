@@ -74,6 +74,7 @@ func RunAtmosCommandE(t testing.TestingT, additionalOptions *Options, additional
 	description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 
 	return retry.DoWithRetryableErrorsE(t, description, options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
+		fmt.Printf("\nRunning Atmos command:\n   %v\n\n", cmd)
 		s, err := shell.RunCommandAndGetOutputE(t, cmd)
 		if err != nil {
 			return s, err
@@ -124,7 +125,7 @@ func GetExitCodeForAtmosCommandE(t testing.TestingT, additionalOptions *Options,
 	additionalOptions.Logger.Logf(t, "Running %s with args %v", options.AtmosBinary, options.AtmosBinary, args)
 	cmd := generateCommand(options, args...)
 	cmd.WorkingDir = options.AtmosBasePath
-	
+
 	_, err := shell.RunCommandAndGetOutputE(t, cmd)
 	if err == nil {
 		return DefaultSuccessExitCode, nil

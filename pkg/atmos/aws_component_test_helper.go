@@ -2,11 +2,11 @@ package atmos
 
 import (
 	"fmt"
+	// "github.com/cloudposse/test-helpers/test/awsnuke"
 	"os"
 	"strings"
 	"testing"
 
-	"github.com/cloudposse/test-helpers/pkg/awsnuke"
 	"github.com/gruntwork-io/terratest/modules/files"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/require"
@@ -100,10 +100,10 @@ func AwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback
 	options := WithDefaultRetryableErrors(t, atmosOptions)
 
 	// Clean up after the test with deferred functions
-	if !opts.SkipAwsNuke {
-		defer awsnuke.NukeTestAccountByTag(t, "CreatedByTerratestRun", randID, []string{opts.AwsRegion}, false)
-	}
-	defer Destroy(t, options)
+	/*	if !opts.SkipAwsNuke {
+			defer awsnuke.NukeTestAccountByTag(t, "CreatedByTerratestRun", randID, []string{opts.AwsRegion}, false)
+		}
+	*/defer Destroy(t, options)
 
 	// Apply the deployment
 	out := Apply(t, options)

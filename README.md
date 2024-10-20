@@ -115,7 +115,7 @@ func TestAwsNuke(t *testing.T) {
 The [example](examples/) folder contains a full set examples that demonstrate the use of `test-helpers`:
 
 - [example](examples/awsnuke-example) folder contains a terraform module that can be used to test the `awsnuke` functionality.
-  The test for this module is in [pkg/awsnuke/awsnuke_test.go](pkg/awsnuke/awsnuke_test.go).
+  The test for this module is in [pkg/awsnuke/awsnuke_test.go](test/awsnuke/awsnuke_test.go).
 
 ## ✨ Contributing
 
