@@ -6,6 +6,7 @@ import (
 )
 
 type TestingT interface {
+	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
 	FailNow()
 	Fatal(args ...interface{})
