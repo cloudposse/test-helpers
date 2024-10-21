@@ -1,8 +1,9 @@
-module github.com/cloudposse/terratest-helpers
+module github.com/cloudposse/test-helpers
 
 go 1.21
 
 require (
+	github.com/cloudposse/terratest-helpers v0.10.0
 	github.com/gruntwork-io/terratest v0.47.0
 	github.com/hashicorp/terraform-json v0.22.1
 	github.com/jinzhu/copier v0.4.0
