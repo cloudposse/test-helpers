@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/cloudposse/terratest-helpers/pkg/atmos"
 	"golang.org/x/exp/rand"
 )
 
@@ -142,19 +141,19 @@ func AtmosAwsComponentMainHelper(m *testing.M, opts AwsComponentTestOptions) {
 	m.Run()
 }
 
-func AtmosAwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback func(t *testing.T, opts *atmos.Options, output string)) {
-	t.Helper()
+// func AtmosAwsComponentTestHelper(t *testing.T, opts AwsComponentTestOptions, callback func(t *testing.T, opts *atmos.Options, output string)) {
+// 	t.Helper()
 
-	// Setup temp dir
-	// Copy src to temp dir/component/component_name
-	// Run atmos vendor pull
-	// Terraform apply dependencies
-	// Terraform apply component
-	// Run callback
-	// Terraform destroy component
-	// Terraform destroy dependencies
-	// Delete temp dir
+// 	// Setup temp dir
+// 	// Copy src to temp dir/component/component_name
+// 	// Run atmos vendor pull
+// 	// Terraform apply dependencies
+// 	// Terraform apply component
+// 	// Run callback
+// 	// Terraform destroy component
+// 	// Terraform destroy dependencies
+// 	// Delete temp dir
 
-	output := ""
-	callback(t, opts, output)
-}
+// 	output := ""
+// 	callback(t, opts, output)
+// }
