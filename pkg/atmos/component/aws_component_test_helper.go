@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cloudposse/terratest-helpers/pkg/atmos"
-	"github.com/cloudposse/terratest-helpers/pkg/awsnuke"
+	"github.com/cloudposse/test-helpers/pkg/atmos"
+	"github.com/cloudposse/test-helpers/pkg/awsnuke"
 	"github.com/gruntwork-io/terratest/modules/random"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/require"
