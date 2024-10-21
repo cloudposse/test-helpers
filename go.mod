@@ -6,6 +6,7 @@ require (
 	github.com/ekristen/aws-nuke v2.10.0+incompatible
 	github.com/gruntwork-io/terratest v0.47.0
 	github.com/jinzhu/copier v0.4.0
+	github.com/rebuy-de/aws-nuke/v2 v2.25.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 )

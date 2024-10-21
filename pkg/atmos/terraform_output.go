@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gruntwork-io/terratest/modules/testing"
+	"github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/stretchr/testify/require"
 )
 

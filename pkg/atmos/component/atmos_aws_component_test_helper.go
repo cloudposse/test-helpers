@@ -8,8 +8,13 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 
+	"github.com/cloudposse/test-helpers/pkg/atmos"
+	"github.com/cloudposse/test-helpers/pkg/awsnuke"
+	tt "github.com/cloudposse/test-helpers/pkg/testing"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/rand"
 )
 
@@ -86,27 +91,77 @@ func tearDownTestSuite() error {
 	return nil
 }
 
-func setupDependencyStacks(m *testing.M, suite *TestSuite, stacks []Stack) error {
+func setupDependencyStacks(t tt.TestingT, suite *TestSuite, opts AwsComponentTestOptions) {
 	fmt.Printf("Setting up dependency stacks in %s\n", suite.TempDir)
-	for _, stack := range stacks {
-		fmt.Printf("    Component: %s, Stack: %s\n", stack.Component, stack.StackName)
+	for _, dependency := range opts.StackDependencies {
+		fmt.Printf("Applying dependency: %s in stack %s\n", dependency.Component, dependency.StackName)
+		_, err := atmos.ApplyE(t, atmos.WithDefaultRetryableErrors(t, &atmos.Options{
+			AtmosBasePath: suite.TempDir,
+			Component:     dependency.Component,
+			Stack:         dependency.StackName,
+			NoColor:       true,
+			BackendConfig: map[string]interface{}{
+				"workspace_key_prefix": strings.Join([]string{suite.RandomSeed, opts.StackName}, "-"),
+			},
+			Vars: map[string]interface{}{
+				"attributes": []string{suite.RandomSeed},
+				"default_tags": map[string]string{
+					"CreatedByTerratestRun": suite.RandomSeed,
+				},
+				"region": dependency.Region,
+			},
+		}))
+		require.NoError(t, err)
 	}
-
-	return nil
 }
 
-func tearDownDependencyStacks(m *testing.M, suite *TestSuite, stacks []Stack) error {
-	// iterate through all the stacks and print the component name and stack name
-	for _, stack := range stacks {
-		fmt.Printf("Tearing down dependency Component: %s, Stack: %s\n", stack.Component, stack.StackName)
+func tearDownDependencyStacks(t tt.TestingT, suite *TestSuite, opts AwsComponentTestOptions) {
+	for _, dependency := range opts.StackDependencies {
+		t.Logf("Destroying dependency: %s in stack %s\n", dependency.Component, dependency.StackName)
+		_, err := atmos.DestroyE(t, atmos.WithDefaultRetryableErrors(t, &atmos.Options{
+			AtmosBasePath: suite.TempDir,
+			Component:     dependency.Component,
+			Stack:         dependency.StackName,
+			NoColor:       true,
+			BackendConfig: map[string]interface{}{
+				"workspace_key_prefix": strings.Join([]string{suite.RandomSeed, opts.StackName}, "-"),
+			},
+			Vars: map[string]interface{}{
+				"attributes": []string{suite.RandomSeed},
+				"default_tags": map[string]string{
+					"CreatedByTerratestRun": suite.RandomSeed,
+				},
+				"region": dependency.Region,
+			},
+		}))
+		require.NoError(t, err)
 	}
-
-	return nil
 }
 
-func setupTest(m *testing.M) error {
-	fmt.Println("Setting up test")
-	return nil
+func setupTest(t tt.TestingT, suite *TestSuite, opts AwsComponentTestOptions) string {
+
+	t.Log("Performing test setup...")
+
+	atmosOptions := atmos.WithDefaultRetryableErrors(t, &atmos.Options{
+		AtmosBasePath: suite.TempDir,
+		Component:     opts.ComponentName,
+		Stack:         opts.StackName,
+		NoColor:       true,
+		BackendConfig: map[string]interface{}{
+			"workspace_key_prefix": strings.Join([]string{suite.RandomSeed, opts.StackName}, "-"),
+		},
+		Vars: map[string]interface{}{
+			"attributes": []string{suite.RandomSeed},
+			"default_tags": map[string]string{
+				"CreatedByTerratestRun": suite.RandomSeed,
+			},
+			"region": opts.AwsRegion,
+		},
+	})
+	options := atmos.WithDefaultRetryableErrors(t, atmosOptions)
+	out := atmos.Apply(t, options)
+
+	return out
 }
 
 func tearDownTest(m *testing.M) error {
@@ -115,6 +170,9 @@ func tearDownTest(m *testing.M) error {
 }
 
 func AtmosAwsComponentMainHelper(m *testing.M, opts AwsComponentTestOptions) {
+	// Create a mocked testing.T instance so we can call methods that expect a testing.T instance from TestMain
+	t := &tt.CustomT{}
+
 	cliArgs := parseCLIArgs()
 
 	testSuite, err := setupTestSuite()
@@ -123,11 +181,11 @@ func AtmosAwsComponentMainHelper(m *testing.M, opts AwsComponentTestOptions) {
 	}
 
 	if !cliArgs.SkipDependencyTeardown {
-		defer tearDownDependencyStacks(m, &testSuite, opts.StackDependencies)
+		defer tearDownDependencyStacks(t, &testSuite, opts)
 	}
 
 	if !cliArgs.SkipDependencySetup {
-		setupDependencyStacks(m, &testSuite, opts.StackDependencies)
+		setupDependencyStacks(t, &testSuite, opts)
 	}
 
 	if !cliArgs.SkipTestTeardown {
@@ -135,7 +193,11 @@ func AtmosAwsComponentMainHelper(m *testing.M, opts AwsComponentTestOptions) {
 	}
 
 	if !cliArgs.SkipTestSetup {
-		setupTest(m)
+		setupTest(t, &testSuite, opts)
+	}
+
+	if !opts.SkipAwsNuke {
+		awsnuke.NukeTestAccountByTag(t, "CreatedByTerratestRun", testSuite.RandomSeed, []string{opts.AwsRegion}, false)
 	}
 
 	m.Run()

@@ -6,10 +6,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/gruntwork-io/terratest/modules/collections"
 	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/shell"
-	"github.com/gruntwork-io/terratest/modules/testing"
 )
 
 func generateCommand(options *Options, args ...string) shell.Command {
@@ -124,7 +124,7 @@ func GetExitCodeForAtmosCommandE(t testing.TestingT, additionalOptions *Options,
 	additionalOptions.Logger.Logf(t, "Running %s with args %v", options.AtmosBinary, options.AtmosBinary, args)
 	cmd := generateCommand(options, args...)
 	cmd.WorkingDir = options.AtmosBasePath
-	
+
 	_, err := shell.RunCommandAndGetOutputE(t, cmd)
 	if err == nil {
 		return DefaultSuccessExitCode, nil

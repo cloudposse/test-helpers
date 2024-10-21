@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"testing"
 
 	"github.com/aws/aws-sdk-go/aws/endpoints"
+	tt "github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/testing"
 	"github.com/rebuy-de/aws-nuke/v2/cmd"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/awsutil"
 	nukeconfig "github.com/rebuy-de/aws-nuke/v2/pkg/config"
@@ -121,8 +122,8 @@ func RunAwsNukeE(params RunAwsNukeParams) error {
 	return n.Run()
 }
 
-func NukeTestAccountByTag(t *testing.T, tagName string, tagValue string, regions []string, dryRun bool) {
-	accountID, err := aws.GetAccountIdE(t)
+func NukeTestAccountByTag(t tt.TestingT, tagName string, tagValue string, regions []string, dryRun bool) {
+	accountID, err := aws.GetAccountIdE(t.(testing.TestingT))
 	assert.NoError(t, err)
 
 	// run sts.getcalleridentity
