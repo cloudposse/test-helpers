@@ -18,7 +18,7 @@ get:
 	go get
 
 build: get
-	env GOOS=${GOOS} GOARCH=${GOARCH} go build -o build/atmos -v -ldflags "-X 'github.com/cloudposse/atmos/cmd.Version=${VERSION}'"
+	env GOOS=${GOOS} GOARCH=${GOARCH} go build -o build/atmos -v -ldflags "-X 'github.com/cloudposse/atmos/pkg/version.Version=${VERSION}'"
 
 version: build
 	chmod +x ./build/atmos
