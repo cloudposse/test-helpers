@@ -12,12 +12,22 @@ import (
 func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) *atmos.Options {
 	mergedVars := map[string]interface{}{
 		"attributes": []string{suite.RandomSeed},
-		"default_tags": map[string]string{
-			"CreatedByTerratestRun": suite.RandomSeed,
-		},
-		"region": suite.AwsRegion,
+		"region":     suite.AwsRegion,
 	}
 
+	// If we are not skipping the nuking of the test account, add the default tags
+	if !suite.SkipNukeTestAccount {
+		nukeVars := map[string]interface{}{
+			"default_tags": map[string]string{
+				"CreatedByTerratestRun": suite.RandomSeed,
+			},
+		}
+
+		err := mergo.Merge(&mergedVars, nukeVars)
+		require.NoError(t, err)
+	}
+
+	// Merge in any additional vars passed in
 	err := mergo.Merge(&mergedVars, vars)
 	require.NoError(t, err)
 
