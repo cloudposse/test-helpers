@@ -1,0 +1,50 @@
+vars:
+  namespace: cptest
+  tenant: test
+  environment: use2
+  stage: sandbox
+
+# This should be moved to the catalog
+terraform:
+  backend_type: local
+  backend:
+    local:
+      path: ../../../state/{{ .component }}/terraform.tfstate
+      workspace_dir: ../../../state/{{ .component }}/
+  settings: {}
+  vars:
+    label_order:
+      - namespace
+      - tenant
+      - environment
+      - stage
+      - name
+      - attributes
+    descriptor_formats:
+      account_name:
+        format: "%v-%v"
+        labels:
+          - tenant
+          - stage
+      stack:
+        format: "%v-%v-%v"
+        labels:
+          - tenant
+          - environment
+          - stage
+
+components:
+  terraform:
+    dep1:
+      metadata:
+        component: basic
+      vars:
+        revision: 21
+    dep2:
+      metadata:
+        component: basic
+      vars:
+        revision: 22
+    basic:
+      vars:
+        revision: 1

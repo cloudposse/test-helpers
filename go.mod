@@ -3,6 +3,7 @@ module github.com/cloudposse/test-helpers
 go 1.21
 
 require (
+	dario.cat/mergo v1.0.1
 	github.com/ekristen/aws-nuke v2.10.0+incompatible
 	github.com/gruntwork-io/terratest v0.47.0
 	github.com/jinzhu/copier v0.4.0
