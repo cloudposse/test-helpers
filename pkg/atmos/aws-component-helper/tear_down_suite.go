@@ -18,5 +18,7 @@ func tearDown(ts *TestSuite) error {
 		return err
 	}
 
+	os.Unsetenv("ATMOS_BASE_PATH")
+
 	return nil
 }

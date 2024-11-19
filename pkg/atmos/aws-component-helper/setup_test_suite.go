@@ -90,5 +90,7 @@ func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuit
 		}
 	}
 
+	os.Setenv("ATMOS_BASE_PATH", testSuite.TempDir)
+
 	return testSuite, nil
 }
