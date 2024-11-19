@@ -36,9 +36,9 @@ func (ts *TestSuite) AddDependencies(dependencies []string) {
 	}
 }
 
-func (ts *TestSuite) AddDependenciesWithStacks(dependencies []string) {
+func (ts *TestSuite) AddCrossStackDependencies(dependencies []Dependency) {
 	for _, dependency := range dependencies {
-		ts.AddDependencyWithStack(dependency, ts.StackName)
+		ts.AddCrossStackDependency(dependency.ComponentName, dependency.StackName)
 	}
 }
 
@@ -46,7 +46,7 @@ func (ts *TestSuite) AddDependency(componentName string) {
 	ts.Dependencies = append(ts.Dependencies, NewDependency(componentName, ts.StackName))
 }
 
-func (ts *TestSuite) AddDependencyWithStack(componentName string, stackName string) {
+func (ts *TestSuite) AddCrossStackDependency(componentName string, stackName string) {
 	ts.Dependencies = append(ts.Dependencies, NewDependency(componentName, stackName))
 }
 
