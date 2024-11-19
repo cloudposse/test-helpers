@@ -16,7 +16,6 @@ func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stack
 			"CreatedByTerratestRun": suite.RandomSeed,
 		},
 		"region": suite.AwsRegion,
-		"environment": suite.RandomSeed,
 	}
 
 	err := mergo.Merge(&mergedVars, vars)
