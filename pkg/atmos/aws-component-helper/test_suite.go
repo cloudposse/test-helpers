@@ -186,9 +186,10 @@ func (ts *TestSuite) TearDown(t *testing.T) error {
 	return nil
 }
 
-func NewTestSuite(componentName string, stackName string, opts ...TestSuiteOption) (*TestSuite, error) {
+func NewTestSuite(awsRegion string, componentName string, stackName string, opts ...TestSuiteOption) (*TestSuite, error) {
 	suite := &TestSuite{
 		AtmosOptions:     &atmos.Options{},
+		AwsRegion:        awsRegion,
 		ComponentName:    componentName,
 		ComponentSrcPath: "../src",
 		FixturesPath:     "fixtures",
