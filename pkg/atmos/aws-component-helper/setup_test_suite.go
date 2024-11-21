@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -88,7 +89,7 @@ func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuit
 		return testSuite, nil
 	} else {
 		randID := random.UniqueId()
-		testSuite.RandomSeed = randID
+		testSuite.RandomSeed = strings.ToLower(randID)
 
 		testSuite.TempDir, err = os.MkdirTemp("", testName)
 		if err != nil {
