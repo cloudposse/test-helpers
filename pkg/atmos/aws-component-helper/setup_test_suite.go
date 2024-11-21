@@ -1,12 +1,15 @@
 package aws_component_helper
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/gruntwork-io/terratest/modules/random"
 )
 
@@ -60,6 +63,21 @@ func getTestName() (string, error) {
 	return testName, nil
 }
 
+func getAwsAccountId() (string, error) {
+	ctx := context.Background()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return "", err
+	}
+	stsClient := sts.NewFromConfig(cfg)
+	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		return "", err
+	}
+
+	return *identity.Account, nil
+}
+
 func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuite, error) {
 	if data, err := os.ReadFile(testSuiteFile); err == nil {
 		if err := json.Unmarshal(data, &testSuite); err != nil {
@@ -91,6 +109,7 @@ func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuit
 	}
 
 	os.Setenv("ATMOS_BASE_PATH", testSuite.TempDir)
+	os.Setenv("TEST_ACCOUNT_ID", testSuite.AwsAccountId)
 
 	return testSuite, nil
 }

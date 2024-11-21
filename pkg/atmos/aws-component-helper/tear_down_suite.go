@@ -18,7 +18,8 @@ func tearDown(ts *TestSuite) error {
 		return err
 	}
 
-	os.Unsetenv("ATMOS_BASE_PATH")
+	defer os.Unsetenv("ATMOS_BASE_PATH")
+	defer os.Unsetenv("TEST_ACCOUNT_ID")
 
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 
 type TestSuite struct {
 	AtmosOptions                  *atmos.Options
+	AwsAccountId                  string
 	AwsRegion                     string
 	ComponentName                 string
 	ComponentSrcPath              string
@@ -187,8 +188,14 @@ func (ts *TestSuite) TearDown(t *testing.T) error {
 }
 
 func NewTestSuite(awsRegion string, componentName string, stackName string, opts ...TestSuiteOption) (*TestSuite, error) {
+	awsAccountId, err := getAwsAccountId()
+	if err != nil {
+		return &TestSuite{}, err
+	}
+
 	suite := &TestSuite{
 		AtmosOptions:     &atmos.Options{},
+		AwsAccountId:     awsAccountId,
 		AwsRegion:        awsRegion,
 		ComponentName:    componentName,
 		ComponentSrcPath: "../src",
