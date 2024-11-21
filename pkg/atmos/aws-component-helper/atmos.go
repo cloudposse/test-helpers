@@ -74,8 +74,12 @@ func deployComponent(t *testing.T, suite *TestSuite, componentName string, stack
 	return options, out, err
 }
 
-func verifyEnabledFlag(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) (*atmos.Options, error) {
+func verifyEnabledFlag(t *testing.T, suite *TestSuite, componentName string, stackName string) (*atmos.Options, error) {
+	vars := map[string]interface{}{
+		"enabled": false,
+	}
 	options := GetAtmosOptions(t, suite, componentName, stackName, vars)
+
 	exitCode, err := atmos.PlanExitCodeE(t, options)
 
 	if err != nil {
@@ -83,7 +87,7 @@ func verifyEnabledFlag(t *testing.T, suite *TestSuite, componentName string, sta
 	}
 
 	if exitCode != 0 {
-		return options, fmt.Errorf("running atmos terraform plan with disabled flag resulted in resource changes")
+		return options, fmt.Errorf("running atmos terraform plan with enabled flag set to false resulted in resource changes")
 	}
 
 	return options, nil

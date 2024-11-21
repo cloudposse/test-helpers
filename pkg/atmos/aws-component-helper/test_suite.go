@@ -91,10 +91,10 @@ func (ts *TestSuite) DeployDependencies(t *testing.T) error {
 	return nil
 }
 
-func (ts *TestSuite) VerifyEnabledFlag(t *testing.T, vars map[string]interface{}) error {
+func (ts *TestSuite) VerifyEnabledFlag(t *testing.T) error {
 	if !ts.SkipVerifyEnabledFlag {
 		fmt.Println("VerifyEnabledFlag")
-		_, err := verifyEnabledFlag(t, ts, ts.ComponentName, ts.StackName, vars)
+		_, err := verifyEnabledFlag(t, ts, ts.ComponentName, ts.StackName)
 		return err
 	} else {
 		fmt.Println("Skipping VerifyEnabledFlag")
@@ -179,7 +179,7 @@ func (ts *TestSuite) Setup(t *testing.T) error {
 		return err
 	}
 
-	if err := ts.VerifyEnabledFlag(t, nil); err != nil {
+	if err := ts.VerifyEnabledFlag(t); err != nil {
 		return err
 	}
 

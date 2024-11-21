@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	var err error
 
 	// Configure the test suite
-	suite, err = helper.NewTestSuite("basic", "test-use2-sandbox")
+	suite, err = helper.NewTestSuite("us-east-2", "basic", "test-use2-sandbox")
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,10 @@ func TestMain(m *testing.M) {
 	t := &testing.T{}
 
 	defer suite.TearDown(t)
-	suite.Setup(t)
+	err = suite.Setup(t)
+	if err != nil {
+		panic(err)
+	}
 
 	m.Run()
 }

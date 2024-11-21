@@ -15,9 +15,10 @@ locals {
 }
 
 resource "terraform_data" "replacement" {
+  count = module.this.enabled ? 1 : 0
   input = local.revision
 }
 
 output "revision" {
-  value = local.revision
+  value = module.this.enabled ? local.revision : null
 }
