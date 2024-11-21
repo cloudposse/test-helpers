@@ -109,6 +109,7 @@ func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuit
 	}
 
 	os.Setenv("ATMOS_BASE_PATH", testSuite.TempDir)
+	os.Setenv("ATMOS_CLI_CONFIG_PATH", testSuite.TempDir)
 	os.Setenv("TEST_ACCOUNT_ID", testSuite.AwsAccountId)
 
 	return testSuite, nil
