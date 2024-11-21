@@ -30,6 +30,7 @@ func TestParseCLIArgs(t *testing.T) {
 				SkipDeployComponentUnderTest:  false,
 				SkipDestroyComponentUnderTest: false,
 				SkipTeardownTestSuite:         false,
+				SkipVerifyEnabledFlag:         false,
 			},
 			expected: &TestSuite{
 				SkipNukeTestAccount:           false,
@@ -39,6 +40,7 @@ func TestParseCLIArgs(t *testing.T) {
 				SkipDeployComponentUnderTest:  false,
 				SkipDestroyComponentUnderTest: false,
 				SkipTeardownTestSuite:         false,
+				SkipVerifyEnabledFlag:         false,
 			},
 		},
 		{
@@ -51,6 +53,7 @@ func TestParseCLIArgs(t *testing.T) {
 				"-skip-deploy-cut",
 				"-skip-destroy-cut",
 				"-skip-teardown",
+				"-skip-verify-enabled-flag",
 			},
 			initial: &TestSuite{},
 			expected: &TestSuite{
@@ -61,6 +64,7 @@ func TestParseCLIArgs(t *testing.T) {
 				SkipDeployComponentUnderTest:  true,
 				SkipDestroyComponentUnderTest: true,
 				SkipTeardownTestSuite:         true,
+				SkipVerifyEnabledFlag:         true,
 			},
 		},
 	}

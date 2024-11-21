@@ -23,6 +23,7 @@ type TestSuite struct {
 	SkipDestroyDependencies       bool
 	SkipTeardownTestSuite         bool
 	SkipVendorDependencies        bool
+	SkipVerifyEnabledFlag         bool
 	SkipNukeTestAccount           bool
 	StackName                     string
 	TempDir                       string
@@ -86,6 +87,17 @@ func (ts *TestSuite) DeployDependencies(t *testing.T) error {
 		return err
 	} else {
 		fmt.Println("Skipping DeployDependencies")
+	}
+	return nil
+}
+
+func (ts *TestSuite) VerifyEnabledFlag(t *testing.T, vars map[string]interface{}) error {
+	if !ts.SkipVerifyEnabledFlag {
+		fmt.Println("VerifyEnabledFlag")
+		_, err := verifyEnabledFlag(t, ts, ts.ComponentName, ts.StackName, vars)
+		return err
+	} else {
+		fmt.Println("Skipping VerifyEnabledFlag")
 	}
 	return nil
 }
@@ -164,6 +176,10 @@ func (ts *TestSuite) Setup(t *testing.T) error {
 	}
 
 	if err := ts.DeployDependencies(t); err != nil {
+		return err
+	}
+
+	if err := ts.VerifyEnabledFlag(t, nil); err != nil {
 		return err
 	}
 

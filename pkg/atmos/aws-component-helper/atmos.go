@@ -1,6 +1,7 @@
 package aws_component_helper
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -71,6 +72,21 @@ func deployComponent(t *testing.T, suite *TestSuite, componentName string, stack
 	out, err := atmos.ApplyE(t, options)
 
 	return options, out, err
+}
+
+func verifyEnabledFlag(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) (*atmos.Options, error) {
+	options := GetAtmosOptions(t, suite, componentName, stackName, vars)
+	exitCode, err := atmos.PlanExitCodeE(t, options)
+
+	if err != nil {
+		return options, err
+	}
+
+	if exitCode != 0 {
+		return options, fmt.Errorf("running atmos terraform plan with disabled flag resulted in resource changes")
+	}
+
+	return options, nil
 }
 
 func destroyComponent(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) (*atmos.Options, string, error) {
