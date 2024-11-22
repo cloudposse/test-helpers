@@ -67,7 +67,7 @@ You can use `test-helpers` as a library in your own Go test code along with the 
 
 This library is designed to be used with [atmos](https://github.com/cloudposse/atmos) to allow you to run tests with
 different stack configurations. For example, imagine you have a component that you want to test to make sure it applies
-properly and that the coput contains "Hello, World". Below hows how you could run a test from an atmos stack.
+properly and that the coput contains "Hello, World". Below shows how you could run a test from an atmos stack.
 
 ```go
 func TestApplyNoError(t *testing.T) {
