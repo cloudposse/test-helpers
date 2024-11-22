@@ -10,7 +10,8 @@ func parseCLIArgs(ts *TestSuite) *TestSuite {
 	skipDeployComponentUnderTest := flag.Bool("skip-deploy-cut", ts.SkipDeployComponentUnderTest, "skip deploy component under test")
 	skipDestroyComponentUnderTest := flag.Bool("skip-destroy-cut", ts.SkipDestroyComponentUnderTest, "skip destroy component under test")
 	skipTeardownTestSuite := flag.Bool("skip-teardown", ts.SkipTeardownTestSuite, "skip test suite teardown")
-	SkipVerifyEnabledFlag := flag.Bool("skip-verify-enabled-flag", ts.SkipVerifyEnabledFlag, "skip verify enabled flag")
+	skipVendorDependencies := flag.Bool("skip-vendor", ts.SkipVendorDependencies, "skip vendor dependencies")
+	skipVerifyEnabledFlag := flag.Bool("skip-verify-enabled-flag", ts.SkipVerifyEnabledFlag, "skip verify enabled flag")
 
 	flag.Parse()
 
@@ -21,7 +22,8 @@ func parseCLIArgs(ts *TestSuite) *TestSuite {
 	ts.SkipDeployComponentUnderTest = *skipDeployComponentUnderTest
 	ts.SkipDestroyComponentUnderTest = *skipDestroyComponentUnderTest
 	ts.SkipTeardownTestSuite = *skipTeardownTestSuite
-	ts.SkipVerifyEnabledFlag = *SkipVerifyEnabledFlag
+	ts.SkipVendorDependencies = *skipVendorDependencies
+	ts.SkipVerifyEnabledFlag = *skipVerifyEnabledFlag
 	return ts
 }
 
