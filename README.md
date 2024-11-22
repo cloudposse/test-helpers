@@ -94,6 +94,9 @@ func TestApplyNoError(t *testing.T) {
 
 ### pkg/aws-nuke
 
+This package is designed to be used to destroy all resources created by a test in an AWS account after a test run
+using [aws-nuke](https://github.com/ekristen/aws-nuke).
+
 ```go
 func TestAwsNuke(t *testing.T) {
   t.Parallel()
