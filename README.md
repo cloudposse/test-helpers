@@ -119,6 +119,10 @@ func TestAwsNuke(t *testing.T) {
 
 ### pkg/atmos/aws-component-helper
 
+This package is designed to be used to test components that follow the Cloud Posse convention for AWS Components
+(terraform root modules). The code below demonstrates how to standup a test suite, deploy dependencies, deploy the
+component under test, run assertions, and then destroy the component under test and its dependencies.
+
 ```go
 package test
 
