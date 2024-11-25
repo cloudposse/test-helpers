@@ -89,7 +89,7 @@ func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuit
 		return testSuite, nil
 	} else {
 		randID := random.UniqueId()
-		testSuite.RandomSeed = strings.ToLower(randID)
+		testSuite.RandomIdentifier = strings.ToLower(randID)
 
 		testSuite.TempDir, err = os.MkdirTemp("", testName)
 		if err != nil {
