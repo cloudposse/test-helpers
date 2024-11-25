@@ -80,33 +80,52 @@ func getAwsAccountId() (string, error) {
 }
 
 func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuite, error) {
+	// Initialize TestSuites structure
+	var testSuites TestSuites
+
 	if data, err := os.ReadFile(testSuiteFile); err == nil {
-		if err := json.Unmarshal(data, &testSuite); err != nil {
+		// File exists, try to unmarshal existing test suites
+		if err := json.Unmarshal(data, &testSuites); err != nil {
 			return &TestSuite{}, fmt.Errorf("failed to parse test_suites.json: %s", err.Error())
 		}
 
-		fmt.Printf("running tests in %s\n", testSuite.TempDir)
-		return testSuite, nil
-	} else {
-		randID := random.UniqueId()
-		testSuite.RandomIdentifier = strings.ToLower(randID)
-
-		testSuite.TempDir, err = os.MkdirTemp("", testName)
-		if err != nil {
-			return &TestSuite{}, err
-		}
-		fmt.Printf("running tests in %s\n", testSuite.TempDir)
-
-		// Write new values to file
-		data, err := json.MarshalIndent(testSuite, "", "  ")
-
-		if err != nil {
-			return &TestSuite{}, err
+		if len(testSuites.Suites) > 1 && testSuite.Index < 0 {
+			return &TestSuite{}, fmt.Errorf("test suite index is required when multiple test suites are present")
 		}
 
-		if err := os.WriteFile(testSuiteFile, data, 0644); err != nil {
-			return &TestSuite{}, err
+		if testSuite.Index == -1 && len(testSuites.Suites) == 1 {
+			testSuite.Index = 0
 		}
+
+		if !testSuite.ForceNewSuite && len(testSuites.Suites) > 0 {
+			return testSuites.Suites[testSuite.Index], nil
+		}
+	}
+
+	// If we get here, either the file doesn't exist or we didn't find a matching suite
+	fmt.Println("no matching test suite found for index", testSuite.Index, "creating new test suite")
+	randID := random.UniqueId()
+	testSuite.RandomIdentifier = strings.ToLower(randID)
+	testSuite.Index = len(testSuites.Suites) // Set index to current length
+
+	var err error
+	testSuite.TempDir, err = os.MkdirTemp("", testName)
+	if err != nil {
+		return &TestSuite{}, err
+	}
+	fmt.Printf("running tests in %s\n", testSuite.TempDir)
+
+	// Add new test suite to the collection
+	testSuites.Suites = append(testSuites.Suites, testSuite)
+
+	// Write updated test suites to file
+	data, err := json.MarshalIndent(testSuites, "", "  ")
+	if err != nil {
+		return &TestSuite{}, err
+	}
+
+	if err := os.WriteFile(testSuiteFile, data, 0644); err != nil {
+		return &TestSuite{}, err
 	}
 
 	os.Setenv("ATMOS_BASE_PATH", testSuite.TempDir)

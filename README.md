@@ -192,6 +192,9 @@ individually skipped as needed. By default, all phases are run. The following ph
 
 | Phase | Description |Flag|
 | ----- | ----------- |----|
+| Force New Test Suite | Creates a new test suite in a new temp dir when another test suite is present | force-new-suite |
+| Select Test Suite    | Selects a test suite from `test-suite.json`. Required when multiple test suites are present | suite-index |
+| Setup Test Suite | Bootstraps a temp directory and creates a new test suite or reads in a test suite from `test-suite.json` | N/A |
 | Setup Test Suite | Bootstraps a temp directory and creates a new test suite or reads in a test suite from `test-suite.json` | N/A |
 | Setup Component Under Test | Copies the component from `src/` to the temp dir `components/terraform` | `-skip-setup-cut` |
 | Vendor Dependencies | Runs the `atmos vendor pull` command to pull in dependency components | `-skip-vendor` |
