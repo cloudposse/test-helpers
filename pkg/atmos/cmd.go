@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	tt "github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/gruntwork-io/terratest/modules/collections"
 	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/shell"
@@ -58,7 +59,7 @@ func GetCommonOptions(options *Options, args ...string) (*Options, []string) {
 }
 
 // RunAtmosCommand runs atmos with the given arguments and options and return stdout/stderr.
-func RunAtmosCommand(t testing.TestingT, additionalOptions *Options, args ...string) string {
+func RunAtmosCommand(t tt.TestingT, additionalOptions *Options, args ...string) string {
 	out, err := RunAtmosCommandE(t, additionalOptions, args...)
 	if err != nil {
 		t.Fatal(err)
@@ -67,14 +68,14 @@ func RunAtmosCommand(t testing.TestingT, additionalOptions *Options, args ...str
 }
 
 // RunAtmosCommandE runs atmos with the given arguments and options and return stdout/stderr.
-func RunAtmosCommandE(t testing.TestingT, additionalOptions *Options, additionalArgs ...string) (string, error) {
+func RunAtmosCommandE(t tt.TestingT, additionalOptions *Options, additionalArgs ...string) (string, error) {
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
 	cmd := generateCommand(options, args...)
 	description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 
-	return retry.DoWithRetryableErrorsE(t, description, options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
-		s, err := shell.RunCommandAndGetOutputE(t, cmd)
+	return retry.DoWithRetryableErrorsE(t.(testing.TestingT), description, options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
+		s, err := shell.RunCommandAndGetOutputE(t.(testing.TestingT), cmd)
 		if err != nil {
 			return s, err
 		}
@@ -89,7 +90,7 @@ func RunAtmosCommandE(t testing.TestingT, additionalOptions *Options, additional
 
 // RunAtmosCommandAndGetStdoutE runs atmos with the given arguments and options and returns solely its stdout (but not
 // stderr).
-func RunAtmosCommandAndGetStdoutE(t testing.TestingT, additionalOptions *Options, additionalArgs ...string) (string, error) {
+func RunAtmosCommandAndGetStdoutE(t tt.TestingT, additionalOptions *Options, additionalArgs ...string) (string, error) {
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
 	cmd := generateCommand(options, args...)
@@ -109,7 +110,7 @@ func RunAtmosCommandAndGetStdoutE(t testing.TestingT, additionalOptions *Options
 }
 
 // GetExitCodeForAtmosCommand runs atmos with the given arguments and options and returns exit code
-func GetExitCodeForAtmosCommand(t testing.TestingT, additionalOptions *Options, args ...string) int {
+func GetExitCodeForAtmosCommand(t tt.TestingT, additionalOptions *Options, args ...string) int {
 	exitCode, err := GetExitCodeForAtmosCommandE(t, additionalOptions, args...)
 	if err != nil {
 		t.Fatal(err)
@@ -118,13 +119,13 @@ func GetExitCodeForAtmosCommand(t testing.TestingT, additionalOptions *Options, 
 }
 
 // GetExitCodeForAtmosCommandE runs atmos with the given arguments and options and returns exit code
-func GetExitCodeForAtmosCommandE(t testing.TestingT, additionalOptions *Options, additionalArgs ...string) (int, error) {
+func GetExitCodeForAtmosCommandE(t tt.TestingT, additionalOptions *Options, additionalArgs ...string) (int, error) {
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
 	additionalOptions.Logger.Logf(t, "Running %s with args %v", options.AtmosBinary, options.AtmosBinary, args)
 	cmd := generateCommand(options, args...)
 	cmd.WorkingDir = options.AtmosBasePath
-	
+
 	_, err := shell.RunCommandAndGetOutputE(t, cmd)
 	if err == nil {
 		return DefaultSuccessExitCode, nil

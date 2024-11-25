@@ -3,7 +3,7 @@ package atmos
 import (
 	"errors"
 
-	"github.com/gruntwork-io/terratest/modules/testing"
+	"github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/stretchr/testify/require"
 )
 

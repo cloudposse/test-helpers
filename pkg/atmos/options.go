@@ -3,9 +3,9 @@ package atmos
 import (
 	"time"
 
+	"github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/ssh"
-	"github.com/gruntwork-io/terratest/modules/testing"
 	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/require"
 )
