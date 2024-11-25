@@ -40,7 +40,9 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	m.Run()
+	if !suite.SkipTests {
+		m.Run()
+	}
 }
 
 func TestBasic(t *testing.T) {

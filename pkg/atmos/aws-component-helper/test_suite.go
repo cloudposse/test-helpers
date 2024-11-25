@@ -24,6 +24,7 @@ type TestSuite struct {
 	SkipDestroyComponentUnderTest bool
 	SkipDestroyDependencies       bool
 	SkipTeardownTestSuite         bool
+	SkipTests                     bool
 	SkipVendorDependencies        bool
 	SkipVerifyEnabledFlag         bool
 	SkipNukeTestAccount           bool

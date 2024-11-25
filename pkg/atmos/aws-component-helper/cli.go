@@ -14,6 +14,7 @@ func parseCLIArgs(ts *TestSuite) *TestSuite {
 	skipTeardownTestSuite := flag.Bool("skip-teardown", ts.SkipTeardownTestSuite, "skip test suite teardown")
 	skipVendorDependencies := flag.Bool("skip-vendor", ts.SkipVendorDependencies, "skip vendor dependencies")
 	skipVerifyEnabledFlag := flag.Bool("skip-verify-enabled-flag", ts.SkipVerifyEnabledFlag, "skip verify enabled flag")
+	skipTests := flag.Bool("skip-tests", ts.SkipTests, "skip tests")
 
 	flag.Parse()
 
@@ -28,6 +29,7 @@ func parseCLIArgs(ts *TestSuite) *TestSuite {
 	ts.SkipTeardownTestSuite = *skipTeardownTestSuite
 	ts.SkipVendorDependencies = *skipVendorDependencies
 	ts.SkipVerifyEnabledFlag = *skipVerifyEnabledFlag
+	ts.SkipTests = *skipTests
 	return ts
 }
 
