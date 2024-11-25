@@ -15,6 +15,8 @@ type TestSuite struct {
 	ComponentSrcPath              string
 	Dependencies                  []*Dependency
 	FixturesPath                  string
+	ForceNewSuite                 bool
+	Index                         int
 	RandomIdentifier              string
 	SkipSetupComponentUnderTest   bool
 	SkipDeployDependencies        bool
@@ -27,6 +29,10 @@ type TestSuite struct {
 	SkipNukeTestAccount           bool
 	StackName                     string
 	TempDir                       string
+}
+
+type TestSuites struct {
+	Suites []*TestSuite
 }
 
 // Option type represents a configuration option
@@ -229,14 +235,14 @@ func NewTestSuite(awsRegion string, componentName string, stackName string, opts
 		opt(suite)
 	}
 
+	// Parse the CLI args
+	suite = parseCLIArgs(suite)
+
 	// Read or create the test suite file
 	suite, err = readOrCreateTestSuiteFile(suite, testName)
 	if err != nil {
 		panic("Failed to create test suite: " + err.Error())
 	}
-
-	// Parse the CLI args
-	suite = parseCLIArgs(suite)
 
 	return suite, nil
 }

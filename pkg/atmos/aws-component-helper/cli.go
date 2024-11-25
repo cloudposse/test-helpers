@@ -3,6 +3,8 @@ package aws_component_helper
 import "flag"
 
 func parseCLIArgs(ts *TestSuite) *TestSuite {
+	forceNewSuite := flag.Bool("force-new-suite", false, "force new suite")
+	suiteIndex := flag.Int("suite-index", -1, "suite index")
 	skipAwsNuke := flag.Bool("skip-aws-nuke", ts.SkipNukeTestAccount, "skip aws nuke")
 	skipDeployDependencies := flag.Bool("skip-deploy-deps", ts.SkipDeployDependencies, "skip deploy dependencies")
 	skipDestroyDependencies := flag.Bool("skip-destroy-deps", ts.SkipDestroyDependencies, "skip destroy dependencies")
@@ -15,6 +17,8 @@ func parseCLIArgs(ts *TestSuite) *TestSuite {
 
 	flag.Parse()
 
+	ts.ForceNewSuite = *forceNewSuite
+	ts.Index = *suiteIndex
 	ts.SkipNukeTestAccount = *skipAwsNuke
 	ts.SkipDeployDependencies = *skipDeployDependencies
 	ts.SkipDestroyDependencies = *skipDestroyDependencies
