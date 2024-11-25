@@ -12,7 +12,7 @@ import (
 
 func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) *atmos.Options {
 	mergedVars := map[string]interface{}{
-		"attributes": []string{suite.RandomSeed},
+		"attributes": []string{suite.RandomIdentifier},
 		"region":     suite.AwsRegion,
 	}
 
@@ -20,7 +20,7 @@ func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stack
 	if !suite.SkipNukeTestAccount {
 		nukeVars := map[string]interface{}{
 			"default_tags": map[string]string{
-				"CreatedByTerratestRun": suite.RandomSeed,
+				"CreatedByTerratestRun": suite.RandomIdentifier,
 			},
 		}
 
@@ -38,7 +38,7 @@ func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stack
 		Stack:         stackName,
 		NoColor:       true,
 		BackendConfig: map[string]interface{}{
-			"workspace_key_prefix": strings.Join([]string{suite.RandomSeed, stackName}, "-"),
+			"workspace_key_prefix": strings.Join([]string{suite.RandomIdentifier, stackName}, "-"),
 		},
 		Vars: mergedVars,
 	})

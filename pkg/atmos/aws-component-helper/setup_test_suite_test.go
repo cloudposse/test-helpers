@@ -69,7 +69,7 @@ func TestReadOrCreateTestSuiteFile(t *testing.T) {
 
 		result, err := readOrCreateTestSuiteFile(ts, testName)
 		assert.NoError(t, err)
-		assert.NotEmpty(t, result.RandomSeed)
+		assert.NotEmpty(t, result.RandomIdentifier)
 		assert.NotEmpty(t, result.TempDir)
 
 		// Verify file was created
@@ -83,8 +83,8 @@ func TestReadOrCreateTestSuiteFile(t *testing.T) {
 	t.Run("read existing test suite file", func(t *testing.T) {
 		// Create a test suite file
 		existingTS := &TestSuite{
-			RandomSeed: "test-seed",
-			TempDir:    "test-dir",
+			RandomIdentifier: "test-seed",
+			TempDir:          "test-dir",
 		}
 		data, err := json.MarshalIndent(existingTS, "", "  ")
 		assert.NoError(t, err)
@@ -95,10 +95,10 @@ func TestReadOrCreateTestSuiteFile(t *testing.T) {
 		ts := &TestSuite{}
 		result, err := readOrCreateTestSuiteFile(ts, "test_")
 		assert.NoError(t, err)
-		assert.Equal(t, existingTS.RandomSeed, result.RandomSeed)
+		assert.Equal(t, existingTS.RandomIdentifier, result.RandomIdentifier)
 		assert.Equal(t, existingTS.TempDir, result.TempDir)
 
 		// Clean up
 		os.Remove(testSuiteFile)
 	})
-} 
+}

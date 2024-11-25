@@ -15,7 +15,7 @@ type TestSuite struct {
 	ComponentSrcPath              string
 	Dependencies                  []*Dependency
 	FixturesPath                  string
-	RandomSeed                    string
+	RandomIdentifier              string
 	SkipSetupComponentUnderTest   bool
 	SkipDeployDependencies        bool
 	SkipDeployComponentUnderTest  bool

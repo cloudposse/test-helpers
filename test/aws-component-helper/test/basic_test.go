@@ -53,6 +53,6 @@ func TestBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	revision := atmos.Output(t, suite.AtmosOptions, "revision")
-	expected := fmt.Sprintf("%s-%s", strings.ToLower(suite.RandomSeed), additionalVars["revision"])
+	expected := fmt.Sprintf("%s-%s", strings.ToLower(suite.RandomIdentifier), additionalVars["revision"])
 	require.Equal(t, expected, revision)
 }
