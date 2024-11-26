@@ -165,7 +165,9 @@ func TestMain(m *testing.M) {
   defer suite.TearDown(t)
   suite.Setup(t)
 
-  m.Run()
+  if !suite.SkipTests {
+    m.Run()
+  }
 }
 
 func TestBastion(t *testing.T) {
