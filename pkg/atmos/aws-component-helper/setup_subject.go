@@ -19,7 +19,7 @@ func awsComponentTestCleanup(t *testing.T, opts *atmos.Options, destroy bool, tm
 		if err == nil {
 			// if the destroy was successful, remove the temp directory
 			if tmpDir == protectDir {
-				t.Logf("Not removing protected directory directory %s", protectDir)
+				t.Logf("Not removing protected directory %s", protectDir)
 			} else {
 				t.Log("Cleaning out temp folder...")
 				err = os.RemoveAll(tmpDir)
@@ -92,8 +92,8 @@ func AwsComponentTestHelper(t *testing.T, opts *atmos.Options, callback func(t *
 	out := ""
 	if doApply {
 		out, err = atmos.ApplyE(t, options)
+		require.NoError(t, err, "Failed to deploy component, skipping other tests.")
 	}
-	require.NoError(t, err, "Failed to deploy component, skipping other tests.")
 	// Call the callback function for assertions
 	callback(t, options, ComponentTestResults{
 		Output: out,
