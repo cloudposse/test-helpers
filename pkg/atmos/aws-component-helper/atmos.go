@@ -10,6 +10,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func GetAtmosTestOptions(t *testing.T, componentName string, stackName string, vars map[string]interface{}) *atmos.Options {
+	atmosOptions := atmos.WithDefaultRetryableErrors(t, &atmos.Options{
+		Component: componentName,
+		Stack:     stackName,
+		NoColor:   false,
+		Vars:      vars,
+	})
+	return atmosOptions
+}
+
 func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) *atmos.Options {
 	mergedVars := map[string]interface{}{
 		"attributes": []string{suite.RandomIdentifier},
