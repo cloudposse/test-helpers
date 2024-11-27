@@ -14,6 +14,16 @@ import (
 )
 
 func generateCommand(options *Options, args ...string) shell.Command {
+	// TODO: replace with command line argument
+	if options.AtmosBasePath != "" {
+		var err error
+		options, err = options.Clone()
+		if err != nil {
+			fmt.Printf("Error cloning options: %v", err)
+			return shell.Command{}
+		}
+		options.EnvVars["ATMOS_BASE_PATH"] = options.AtmosBasePath
+	}
 	cmd := shell.Command{
 		Command:    options.AtmosBinary,
 		Args:       args,
@@ -42,6 +52,13 @@ func GetCommonOptions(options *Options, args ...string) (*Options, []string) {
 	if options.AtmosBinary == "" {
 		options.AtmosBinary = DefaultExecutable
 	}
+
+	// TODO:
+	// if options.AtmosBasePath != "", then add args "--base-path", options.AtmosBasePath to the args
+	// Unfortunately, as of Atmos 1.109.0, the flag "--base-path" does not work
+	// if options.AtmosBasePath != "" {
+	// 	args = append([]string{"--base-path", options.AtmosBasePath}, args...)
+	// }
 
 	if options.Parallelism > 0 && len(args) > 0 && args[0] == "terraform" && collections.ListContains(commandsWithParallelism, args[1]) {
 		args = append(args, fmt.Sprintf("--parallelism=%d", options.Parallelism))
