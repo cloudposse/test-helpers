@@ -6,7 +6,7 @@ require (
 	dario.cat/mergo v1.0.1
 	github.com/aws/aws-sdk-go-v2/config v1.15.13
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.9
-	github.com/ekristen/aws-nuke v2.10.0+incompatible
+	github.com/ekristen/aws-nuke v2.26.6+incompatible
 	github.com/gruntwork-io/terratest v0.47.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/rebuy-de/aws-nuke/v2 v2.25.0
