@@ -12,6 +12,10 @@ import (
 	"testing"
 )
 
+var (
+	getAwsAaccountIdCallback = getAwsAccountId
+)
+
 type XTestSuites struct {
 	RandomIdentifier string
 	AtmosOptions     *atmos.Options
@@ -23,8 +27,8 @@ type XTestSuites struct {
 	suites           map[string]*XTestSuite
 }
 
-func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, f func() (string, error), fixturesDir string) (*XTestSuites, error) {
-	awsAccountId, err := f()
+func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir string) (*XTestSuites, error) {
+	awsAccountId, err := getAwsAaccountIdCallback()
 	if err != nil {
 		return &XTestSuites{}, err
 	}

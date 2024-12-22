@@ -67,7 +67,7 @@ func TestComponentTestSuitesMinimum(t *testing.T) {
 }
 
 func TestComponentTestSuitesCreate(t *testing.T) {
-	getAwsAccountIdMock := func() (string, error) {
+	getAwsAaccountIdCallback = func() (string, error) {
 		return "123456789012", nil
 	}
 
@@ -77,7 +77,7 @@ func TestComponentTestSuitesCreate(t *testing.T) {
 
 	fmt.Printf("running in %s\n", testFolder)
 
-	componentTestSuites, err := NewTestSuites(t, testFolder, "us-west-2", getAwsAccountIdMock, atmosExamplePath)
+	componentTestSuites, err := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
 
 	assert.NoError(t, err)
 
@@ -110,7 +110,7 @@ func TestComponentTestSuitesCreate(t *testing.T) {
 }
 
 func TestComponentTestSuitesRun(t *testing.T) {
-	getAwsAccountIdMock := func() (string, error) {
+	getAwsAaccountIdCallback = func() (string, error) {
 		return "123456789012", nil
 	}
 
@@ -122,7 +122,7 @@ func TestComponentTestSuitesRun(t *testing.T) {
 
 	fmt.Printf("running in %s\n", testFolder)
 
-	componentTestSuites, err := NewTestSuites(t, testFolder, "us-west-2", getAwsAccountIdMock, atmosExamplePath)
+	componentTestSuites, err := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
 
 	assert.NoError(t, err)
 
