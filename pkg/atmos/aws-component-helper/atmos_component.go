@@ -8,28 +8,29 @@ import (
 )
 
 type AtmosComponent struct {
-	Component    string
-	Stack        string
-	atmosOptions *atmos.Options
+	Component string
+	Stack     string
 }
 
-func NewAtmosComponent(component string, stack string, options *atmos.Options) *AtmosComponent {
+func NewAtmosComponent(component string, stack string) *AtmosComponent {
 	return &AtmosComponent{
-		Component:    component,
-		Stack:        stack,
-		atmosOptions: options,
+		Component: component,
+		Stack:     stack,
 	}
 }
 
-func (ac *AtmosComponent) getAtmosOptions(t *testing.T, vars map[string]interface{}) *atmos.Options {
-	result, _ := ac.atmosOptions.Clone()
+func (ac *AtmosComponent) getAtmosOptions(t *testing.T, options *atmos.Options, vars map[string]interface{}) *atmos.Options {
+	result := &atmos.Options{}
+	if options != nil {
+		result, _ = options.Clone()
+	}
 
 	// Merge in any additional vars passed in
 	err := mergo.Merge(&result.Vars, vars)
 	require.NoError(t, err)
 
 	result.Component = ac.Component
-	result.Stack = ac.Component
+	result.Stack = ac.Stack
 
 	atmosOptions := atmos.WithDefaultRetryableErrors(t, result)
 	return atmosOptions

@@ -1,13 +1,15 @@
 package aws_component_helper
 
 import (
+	"dario.cat/mergo"
+	"flag"
 	"fmt"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"testing"
 )
@@ -16,134 +18,169 @@ var (
 	getAwsAaccountIdCallback = getAwsAccountId
 )
 
+var (
+	skipTmpDir                    = flag.Bool("cth.skip-tmp-dir", false, "Run in the current directory")
+	skipVendorDependencies        = flag.Bool("cth.skip-vendor", false, "skip vendor dependencies")
+	forceNewSuite                 = flag.Bool("cth.force-new-suite", false, "force new suite")
+	suiteIndex                    = flag.Int("cth.suite-index", -1, "suite index")
+	skipAwsNuke                   = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
+	skipDeployDependencies        = flag.Bool("cth.skip-deploy-deps", false, "skip deploy dependencies")
+	skipDestroyDependencies       = flag.Bool("cth.skip-destroy-deps", false, "skip destroy dependencies")
+	skipSetupComponentUnderTest   = flag.Bool("cth.skip-setup-cut", false, "skip setup component under test")
+	skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
+	skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
+	skipTeardownTestSuite         = flag.Bool("cth.skip-teardown", false, "skip test suite teardown")
+
+	skipVerifyEnabledFlag = flag.Bool("cth.skip-verify-enabled-flag", true, "skip verify enabled flag")
+	skipTests             = flag.Bool("cth.skip-tests", false, "skip tests")
+)
+
 type XTestSuites struct {
 	RandomIdentifier string
-	AtmosOptions     *atmos.Options
 	AwsAccountId     string
 	AwsRegion        string
 	SourceDir        string
+	TempDir          string
 	FixturesPath     string
-	WorkDir          string
 	suites           map[string]*XTestSuite
 }
 
-func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir string) (*XTestSuites, error) {
+func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir string) *XTestSuites {
 	awsAccountId, err := getAwsAaccountIdCallback()
-	if err != nil {
-		return &XTestSuites{}, err
-	}
+	require.NoError(t, err)
 
 	randID := random.UniqueId()
 	randomId := strings.ToLower(randID)
-	workdir := filepath.Join(os.TempDir(), "test-suites-"+randomId)
-	suitesOptions := &atmos.Options{
-		AtmosBasePath: filepath.Join(workdir, fixturesDir),
-		NoColor:       true,
-		Vars: map[string]interface{}{
-			"region": awsRegion,
-		},
-	}
-
+	tmpdir := filepath.Join(os.TempDir(), "test-suites-"+randomId)
 	suites := &XTestSuites{
 		RandomIdentifier: randomId,
 		SourceDir:        sourceDir,
+		TempDir:          tmpdir,
 		FixturesPath:     fixturesDir,
-		WorkDir:          workdir,
 		AwsAccountId:     awsAccountId,
 		AwsRegion:        awsRegion,
-		AtmosOptions:     suitesOptions,
 		suites:           map[string]*XTestSuite{},
 	}
 
-	describeStacksConfigs, err := atmos.DescribeStacksE(t, &atmos.Options{
-		AtmosBasePath: filepath.Join(suites.SourceDir, fixturesDir),
-		Vars:          map[string]interface{}{},
-	})
+	describeStacksOptions := suites.getAtmosOptions(t, &atmos.Options{}, map[string]interface{}{})
+	describeStacksOptions.AtmosBasePath = filepath.Join(suites.SourceDir, suites.FixturesPath)
+	describeStacksOptions.EnvVars["ATMOS_BASE_PATH"] = describeStacksOptions.AtmosBasePath
 
-	if err != nil {
-		return suites, err
-	}
+	describeStacksConfigs, err := atmos.DescribeStacksE(t, describeStacksOptions)
+	require.NoError(t, err)
 
 	for stackName, stack := range describeStacksConfigs.Stacks {
 		for componentName, component := range stack.Components.Terraform {
-			if component.Settings.Test != nil {
-				if component.Settings.Test.Suite == "" {
-					return &XTestSuites{}, fmt.Errorf("settings.test.suite is required for component %s in stack %s", componentName, stackName)
-				}
+			if component.Settings.Test == nil {
+				// Skip components that are not part of tests
+				continue
+			}
 
-				suiteName := component.Settings.Test.Suite
+			suiteName := component.Settings.Test.Suite
+			require.NotEmptyf(t, suiteName, "settings.test.suite is required for component %s in stack %s", componentName, stackName)
 
-				validStages := []string{"testSuiteSetUp", "testSetUp", "subjectUnderTest", "assert"}
+			validStages := []string{"testSuiteSetUp", "testSetUp", "subjectUnderTest", "assert"}
+			stage := component.Settings.Test.Stage
 
-				if component.Settings.Test.Stage == "" {
-					return &XTestSuites{}, fmt.Errorf("settings.test.stage is required for component %s in stack %s", componentName, stackName)
-				} else if !slices.Contains(validStages, component.Settings.Test.Stage) {
-					message := "settings.test.stage should be one of \"testSuiteSetUp\", \"testSetUp\", \"subjectUnderTest\", \"assert\" for component %s in stack %s"
-					return &XTestSuites{}, fmt.Errorf(message, componentName, stackName)
-				}
+			require.NotEmptyf(t, stage, "settings.test.stage is required for component %s in stack %s", componentName, stackName)
+			require.Containsf(t, validStages, stage, "settings.test.stage should be one of %v for component %s in stack %s", validStages, componentName, stackName)
 
-				stage := component.Settings.Test.Stage
+			testName := component.Settings.Test.Test
+			require.False(t, stage != "testSuiteSetUp" && testName == "", "settings.test.test is required for component %s in stack %s", componentName, stackName)
 
-				if stage != "testSuiteSetUp" && component.Settings.Test.Test == "" {
-					return &XTestSuites{}, fmt.Errorf("settings.test.test is required for component %s in stack %s", componentName, stackName)
-				}
+			suite := suites.GetOrCreateSuite(suiteName)
 
-				testName := component.Settings.Test.Test
-
-				suite := suites.GetOrCreateSuite(suiteName)
-
-				switch stage {
-				case "testSuiteSetUp":
-					suite.AddSetup(componentName, stackName)
-				case "testSetUp":
-					suite.GetOrCreateTest(testName).AddSetup(componentName, stackName)
-				case "subjectUnderTest":
-					suite.GetOrCreateTest(testName).SetSubject(componentName, stackName)
-				case "assert":
-					suite.GetOrCreateTest(testName).AddSAssert(componentName, stackName)
-				}
+			switch stage {
+			case "testSuiteSetUp":
+				suite.AddSetup(componentName, stackName)
+			case "testSetUp":
+				suite.GetOrCreateTest(testName).AddSetup(componentName, stackName)
+			case "subjectUnderTest":
+				suite.GetOrCreateTest(testName).SetSubject(componentName, stackName)
+			case "assert":
+				suite.GetOrCreateTest(testName).AddSAssert(componentName, stackName)
 			}
 		}
 	}
 
-	//for _, opt := range opts {
-	//	opt(suite)
-	//}
-
-	return suites, nil
+	return suites
 }
 
-func (ts *XTestSuites) Run(t *testing.T) {
-	fmt.Printf("create TMP dir: %s \n", ts.WorkDir)
+func (ts *XTestSuites) WorkDir() string {
+	if !*skipTmpDir {
+		return filepath.Join(ts.TempDir, ts.FixturesPath)
+	} else {
+		return filepath.Join(ts.SourceDir, ts.FixturesPath)
+	}
+}
 
-	err := os.Mkdir(ts.WorkDir, 0777)
-	assert.NoError(t, err)
-	defer os.RemoveAll(ts.WorkDir)
+func (ts *XTestSuites) Run(t *testing.T, options *atmos.Options) {
+	suitesOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
+	if !*skipTmpDir {
+		fmt.Printf("create TMP dir: %s \n", ts.TempDir)
 
-	err = copyDirectoryRecursively(ts.SourceDir, ts.WorkDir)
-	assert.NoError(t, err)
+		err := os.Mkdir(ts.TempDir, 0777)
+		assert.NoError(t, err)
+		defer os.RemoveAll(ts.TempDir)
 
-	atmos.VendorPull(t, ts.AtmosOptions)
+		err = copyDirectoryRecursively(ts.SourceDir, ts.TempDir)
+		assert.NoError(t, err)
+	} else {
+		fmt.Printf("Skip TMP dir: %t \n", *skipTmpDir)
+	}
 
-	err = createStateDir(ts.WorkDir)
+	if !*skipVendorDependencies {
+		atmos.VendorPull(t, suitesOptions)
+	} else {
+		fmt.Println("Skip Vendor Pull")
+	}
+
+	err := createStateDir(ts.TempDir)
 	assert.NoError(t, err)
 
 	// t.Parallel()
 	for name, suite := range ts.suites {
 		t.Run(name, func(t *testing.T) {
-			suite.Run(t)
+			suite.Run(t, suitesOptions)
 		})
 	}
 }
 
+func (ts *XTestSuites) getAtmosOptions(t *testing.T, options *atmos.Options, vars map[string]interface{}) *atmos.Options {
+	result := &atmos.Options{}
+	if options != nil {
+		result, _ = options.Clone()
+	}
+
+	result.AtmosBasePath = ts.WorkDir()
+	result.NoColor = true
+
+	envvars := map[string]string{
+		"TEST_ACCOUNT_ID":       ts.AwsAccountId,
+		"ATMOS_BASE_PATH":       result.AtmosBasePath,
+		"ATMOS_CLI_CONFIG_PATH": result.AtmosBasePath,
+	}
+
+	err := mergo.Merge(&result.EnvVars, envvars)
+	require.NoError(t, err)
+
+	suiteVars := map[string]interface{}{
+		"region": ts.AwsRegion,
+	}
+
+	err = mergo.Merge(&result.Vars, suiteVars)
+	require.NoError(t, err)
+
+	err = mergo.Merge(&result.Vars, vars)
+	require.NoError(t, err)
+
+	return result
+}
+
 func (ts *XTestSuites) GetOrCreateSuite(name string) *XTestSuite {
 	if _, ok := ts.suites[name]; !ok {
-		ts.suites[name] = NewXTestSuite(ts.AtmosOptions)
+		ts.suites[name] = NewXTestSuite()
 	}
 	return ts.suites[name]
 
-}
-
-func (ts *XTestSuites) SetSuite(name string, item *XTestSuite) {
-	ts.suites[name] = item
 }

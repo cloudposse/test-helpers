@@ -40,10 +40,9 @@ func mockAtmos() {
 func TestComponentTestSuitesMinimum(t *testing.T) {
 	componentTestSuites := &XTestSuites{
 		FixturesPath: "testdata/fixtures",
-		WorkDir:      "testdata/tmp",
+		TempDir:      "testdata/tmp",
 		AwsAccountId: "123456789012",
 		AwsRegion:    "us-west-2",
-		AtmosOptions: &atmos.Options{},
 		suites: map[string]*XTestSuite{
 			"default": {
 				tests: map[string]*ComponentTest{
@@ -58,7 +57,7 @@ func TestComponentTestSuitesMinimum(t *testing.T) {
 		},
 	}
 	assert.Equal(t, componentTestSuites.FixturesPath, "testdata/fixtures")
-	assert.Equal(t, componentTestSuites.WorkDir, "testdata/tmp")
+	assert.Equal(t, componentTestSuites.TempDir, "testdata/tmp")
 	assert.Equal(t, componentTestSuites.AwsAccountId, "123456789012")
 	assert.Equal(t, componentTestSuites.AwsRegion, "us-west-2")
 	// assert.Equal(t, componentTestSuites.AtmosOptions, "us-west-2")
@@ -77,9 +76,7 @@ func TestComponentTestSuitesCreate(t *testing.T) {
 
 	fmt.Printf("running in %s\n", testFolder)
 
-	componentTestSuites, err := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
-
-	assert.NoError(t, err)
+	componentTestSuites := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
 
 	assert.Equal(t, componentTestSuites.SourceDir, testFolder)
 
@@ -122,9 +119,7 @@ func TestComponentTestSuitesRun(t *testing.T) {
 
 	fmt.Printf("running in %s\n", testFolder)
 
-	componentTestSuites, err := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
+	componentTestSuites := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
 
-	assert.NoError(t, err)
-
-	componentTestSuites.Run(t)
+	componentTestSuites.Run(t, &atmos.Options{})
 }
