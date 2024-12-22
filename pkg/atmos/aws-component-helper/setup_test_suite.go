@@ -2,36 +2,32 @@ package aws_component_helper
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
-
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/gruntwork-io/terratest/modules/random"
 )
 
-func setupTestSuite(ts *TestSuite) error {
-	err := createStateDir(ts.TempDir)
-	if err != nil {
-		return err
-	}
-
-	err = createTerraformComponentsDir(ts.TempDir)
-	if err != nil {
-		return err
-	}
-
-	err = copyDirectoryRecursively(ts.FixturesPath, ts.TempDir)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
+//func setupTestSuite(ts *TestSuite) error {
+//	err := createStateDir(ts.TempDir)
+//	if err != nil {
+//		return err
+//	}
+//
+//	err = createTerraformComponentsDir(ts.TempDir)
+//	if err != nil {
+//		return err
+//	}
+//
+//	err = copyDirectoryRecursively(ts.FixturesPath, ts.TempDir)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return nil
+//}
 
 func createStateDir(tempDir string) error {
 	stateDir := filepath.Join(tempDir, "state")
@@ -79,58 +75,56 @@ func getAwsAccountId() (string, error) {
 	return *identity.Account, nil
 }
 
-func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuite, error) {
-	// Initialize TestSuites structure
-	var testSuites TestSuites
-
-	if data, err := os.ReadFile(testSuiteFile); err == nil {
-		// File exists, try to unmarshal existing test suites
-		if err := json.Unmarshal(data, &testSuites); err != nil {
-			return &TestSuite{}, fmt.Errorf("failed to parse test_suites.json: %s", err.Error())
-		}
-
-		if len(testSuites.Suites) > 1 && testSuite.Index < 0 {
-			return &TestSuite{}, fmt.Errorf("test suite index is required when multiple test suites are present")
-		}
-
-		if testSuite.Index == -1 && len(testSuites.Suites) == 1 {
-			testSuite.Index = 0
-		}
-
-		if !testSuite.ForceNewSuite && len(testSuites.Suites) > 0 {
-			return testSuites.Suites[testSuite.Index], nil
-		}
-	}
-
-	// If we get here, either the file doesn't exist or we didn't find a matching suite
-	fmt.Println("no matching test suite found for index", testSuite.Index, "creating new test suite")
-	randID := random.UniqueId()
-	testSuite.RandomIdentifier = strings.ToLower(randID)
-	testSuite.Index = len(testSuites.Suites) // Set index to current length
-
-	var err error
-	testSuite.TempDir, err = os.MkdirTemp("", testName)
-	if err != nil {
-		return &TestSuite{}, err
-	}
-	fmt.Printf("running tests in %s\n", testSuite.TempDir)
-
-	// Add new test suite to the collection
-	testSuites.Suites = append(testSuites.Suites, testSuite)
-
-	// Write updated test suites to file
-	data, err := json.MarshalIndent(testSuites, "", "  ")
-	if err != nil {
-		return &TestSuite{}, err
-	}
-
-	if err := os.WriteFile(testSuiteFile, data, 0644); err != nil {
-		return &TestSuite{}, err
-	}
-
-	os.Setenv("ATMOS_BASE_PATH", testSuite.TempDir)
-	os.Setenv("ATMOS_CLI_CONFIG_PATH", testSuite.TempDir)
-	os.Setenv("TEST_ACCOUNT_ID", testSuite.AwsAccountId)
-
-	return testSuite, nil
-}
+//func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuite, error) {
+//	// Initialize TestSuites structure
+//	var testSuites TestSuites
+//
+//	if data, err := os.ReadFile(testSuiteFile); err == nil {
+//		// File exists, try to unmarshal existing test suites
+//		if err := json.Unmarshal(data, &testSuites); err != nil {
+//			return &TestSuite{}, fmt.Errorf("failed to parse test_suites.json: %s", err.Error())
+//		}
+//
+//		if len(testSuites.Suites) > 1 && testSuite.Index < 0 {
+//			return &TestSuite{}, fmt.Errorf("test suite index is required when multiple test suites are present")
+//		}
+//		if testSuite.Index == -1 && len(testSuites.Suites) == 1 {
+//			testSuite.Index = 0
+//		}
+//		if !testSuite.ForceNewSuite && len(testSuites.Suites) > 0 {
+//			return testSuites.Suites[testSuite.Index], nil
+//		}
+//	}
+//
+//	// If we get here, either the file doesn't exist or we didn't find a matching suite
+//	fmt.Println("no matching test suite found for index", testSuite.Index, "creating new test suite")
+//	randID := random.UniqueId()
+//	testSuite.RandomIdentifier = strings.ToLower(randID)
+//	testSuite.Index = len(testSuites.Suites) // Set index to current length
+//
+//	var err error
+//	testSuite.TempDir, err = os.MkdirTemp("", testName)
+//	if err != nil {
+//		return &TestSuite{}, err
+//	}
+//	fmt.Printf("running tests in %s\n", testSuite.TempDir)
+//
+//	// Add new test suite to the collection
+//	testSuites.Suites = append(testSuites.Suites, testSuite)
+//
+//	// Write updated test suites to file
+//	data, err := json.MarshalIndent(testSuites, "", "  ")
+//	if err != nil {
+//		return &TestSuite{}, err
+//	}
+//
+//	if err := os.WriteFile(testSuiteFile, data, 0644); err != nil {
+//		return &TestSuite{}, err
+//	}
+//
+//	// os.Setenv("ATMOS_BASE_PATH", testSuite.WorkDir)
+//	os.Setenv("ATMOS_CLI_CONFIG_PATH", testSuite.TempDir)
+//	os.Setenv("TEST_ACCOUNT_ID", testSuite.AwsAccountId)
+//
+//	return testSuite, nil
+//}

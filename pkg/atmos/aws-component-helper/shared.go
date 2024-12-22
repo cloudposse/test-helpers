@@ -1,11 +1,13 @@
 package aws_component_helper
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
 
 func copyDirectoryRecursively(srcDir string, destDir string) error {
+	fmt.Println("copying contents of", srcDir, "to", destDir)
 	// Walk through all files and directories in srcDir and copy them to destDir
 	return filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {

@@ -1,0 +1,16 @@
+package aws_component_helper
+
+import (
+	"github.com/cloudposse/test-helpers/pkg/atmos"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestComponentTestMinimum(t *testing.T) {
+	componentTest := NewComponentTest(&atmos.Options{})
+	componentTest.SetSubject("vpc", "default-test")
+
+	assert.Equal(t, componentTest.Subject.Component, "vpc")
+	assert.Equal(t, componentTest.Subject.Stack, "default-test")
+}
