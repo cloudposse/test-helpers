@@ -35,6 +35,13 @@ func mockAtmos() {
 		fmt.Println(description)
 		return 0, nil
 	}
+
+	atmosVendorPull = func(t tt.TestingT, options *atmos.Options) string {
+		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "vendor", "pull")...)
+		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
+		fmt.Println(description)
+		return ""
+	}
 }
 
 func TestComponentTestSuitesMinimum(t *testing.T) {

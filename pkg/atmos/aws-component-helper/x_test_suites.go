@@ -19,20 +19,16 @@ var (
 )
 
 var (
-	skipTmpDir                    = flag.Bool("cth.skip-tmp-dir", false, "Run in the current directory")
-	skipVendorDependencies        = flag.Bool("cth.skip-vendor", false, "skip vendor dependencies")
-	forceNewSuite                 = flag.Bool("cth.force-new-suite", false, "force new suite")
-	suiteIndex                    = flag.Int("cth.suite-index", -1, "suite index")
-	skipAwsNuke                   = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
-	skipDeployDependencies        = flag.Bool("cth.skip-deploy-deps", false, "skip deploy dependencies")
-	skipDestroyDependencies       = flag.Bool("cth.skip-destroy-deps", false, "skip destroy dependencies")
-	skipSetupComponentUnderTest   = flag.Bool("cth.skip-setup-cut", false, "skip setup component under test")
-	skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
-	skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
-	skipTeardownTestSuite         = flag.Bool("cth.skip-teardown", false, "skip test suite teardown")
+	skipTmpDir              = flag.Bool("cth.skip-tmp-dir", false, "Run in the current directory")
+	skipVendorDependencies  = flag.Bool("cth.skip-vendor", false, "skip vendor dependencies")
+	forceNewSuite           = flag.Bool("cth.force-new-suite", false, "force new suite")
+	suiteIndex              = flag.Int("cth.suite-index", -1, "suite index")
+	skipAwsNuke             = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
+	skipDeployDependencies  = flag.Bool("cth.skip-deploy-deps", false, "skip deploy dependencies")
+	skipDestroyDependencies = flag.Bool("cth.skip-destroy-deps", false, "skip destroy dependencies")
+	skipTeardownTestSuite   = flag.Bool("cth.skip-teardown", false, "skip test suite teardown")
 
-	skipVerifyEnabledFlag = flag.Bool("cth.skip-verify-enabled-flag", true, "skip verify enabled flag")
-	skipTests             = flag.Bool("cth.skip-tests", false, "skip tests")
+	skipTests = flag.Bool("cth.skip-tests", false, "skip tests")
 )
 
 type XTestSuites struct {
@@ -52,9 +48,11 @@ func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir
 	randID := random.UniqueId()
 	randomId := strings.ToLower(randID)
 	tmpdir := filepath.Join(os.TempDir(), "test-suites-"+randomId)
+	realSourcePath, err := filepath.Abs(sourceDir)
+	require.NoError(t, err)
 	suites := &XTestSuites{
 		RandomIdentifier: randomId,
-		SourceDir:        sourceDir,
+		SourceDir:        realSourcePath,
 		TempDir:          tmpdir,
 		FixturesPath:     fixturesDir,
 		AwsAccountId:     awsAccountId,
@@ -65,6 +63,7 @@ func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir
 	describeStacksOptions := suites.getAtmosOptions(t, &atmos.Options{}, map[string]interface{}{})
 	describeStacksOptions.AtmosBasePath = filepath.Join(suites.SourceDir, suites.FixturesPath)
 	describeStacksOptions.EnvVars["ATMOS_BASE_PATH"] = describeStacksOptions.AtmosBasePath
+	describeStacksOptions.EnvVars["ATMOS_CLI_CONFIG_PATH"] = describeStacksOptions.AtmosBasePath
 
 	describeStacksConfigs, err := atmos.DescribeStacksE(t, describeStacksOptions)
 	require.NoError(t, err)
@@ -117,7 +116,7 @@ func (ts *XTestSuites) WorkDir() string {
 func (ts *XTestSuites) Run(t *testing.T, options *atmos.Options) {
 	suitesOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
 	if !*skipTmpDir {
-		fmt.Printf("create TMP dir: %s \n", ts.TempDir)
+		fmt.Printf("Create TMP dir: %s \n", ts.TempDir)
 
 		err := os.Mkdir(ts.TempDir, 0777)
 		assert.NoError(t, err)
@@ -126,11 +125,11 @@ func (ts *XTestSuites) Run(t *testing.T, options *atmos.Options) {
 		err = copyDirectoryRecursively(ts.SourceDir, ts.TempDir)
 		assert.NoError(t, err)
 	} else {
-		fmt.Printf("Skip TMP dir: %t \n", *skipTmpDir)
+		fmt.Printf("Use source dir: %s \n", ts.SourceDir)
 	}
 
 	if !*skipVendorDependencies {
-		atmos.VendorPull(t, suitesOptions)
+		atmosVendorPull(t, suitesOptions)
 	} else {
 		fmt.Println("Skip Vendor Pull")
 	}

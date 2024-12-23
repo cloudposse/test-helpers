@@ -5,10 +5,10 @@ import (
 )
 
 var (
-	atmosApply   = atmos.Apply
-	atmosDestroy = atmos.Destroy
-
+	atmosApply         = atmos.Apply
+	atmosDestroy       = atmos.Destroy
 	atmosPlanExitCodeE = atmos.PlanExitCodeE
+	atmosVendorPull    = atmos.VendorPull
 )
 
 //func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) *atmos.Options {

@@ -2,11 +2,17 @@ package aws_component_helper
 
 import (
 	"dario.cat/mergo"
+	"flag"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+)
+
+var (
+	skipDeploySuiteDependencies  = flag.Bool("cth.skip-suite-deps", false, "skip deploy suite deps")
+	skipDestroySuiteDependencies = flag.Bool("cth.skip-suite-deps-teardown", false, "skip destroy suite deps")
 )
 
 type XTestSuite struct {
@@ -68,8 +74,12 @@ func (ts *XTestSuite) Run(t *testing.T, options *atmos.Options) {
 	suiteOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
 	for _, component := range ts.setup {
 		componentOptions := component.getAtmosOptions(t, suiteOptions, map[string]interface{}{})
-		atmosApply(t, componentOptions)
-		defer atmosDestroy(t, componentOptions)
+		if !*skipDeploySuiteDependencies {
+			atmosApply(t, componentOptions)
+		}
+		if !*skipDeploySuiteDependencies && !*skipDestroySuiteDependencies {
+			defer atmosDestroy(t, componentOptions)
+		}
 	}
 
 	//t.Parallel()

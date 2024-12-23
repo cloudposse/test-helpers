@@ -2,12 +2,26 @@ package aws_component_helper
 
 import (
 	"dario.cat/mergo"
+	"flag"
 	"fmt"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+)
+
+var (
+	skipVerifyEnabledFlag = flag.Bool("cth.skip-verify-enabled-flag", true, "skip verify enabled flag")
+
+	skipDeployTestDependencies  = flag.Bool("cth.skip-deploy-test-deps", false, "skip deploy test deps")
+	skipDestroyTestDependencies = flag.Bool("cth.skip-destroy-test-deps-teardown", false, "skip destroy test deps")
+
+	skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
+	skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
+
+	skipDeployAsserts  = flag.Bool("cth.skip-deploy-asserts", false, "skip deploy component under test")
+	skipDestroyAsserts = flag.Bool("cth.skip-destroy-asserts", false, "skip destroy component under test")
 )
 
 type ComponentTest struct {
@@ -32,9 +46,12 @@ func (ct *ComponentTest) Run(t *testing.T, options *atmos.Options) {
 	testOptions := ct.getAtmosOptions(t, options, map[string]interface{}{})
 	for _, component := range ct.setup {
 		componentOptions := component.getAtmosOptions(t, testOptions, map[string]interface{}{})
-
-		atmosApply(t, componentOptions)
-		defer atmosDestroy(t, componentOptions)
+		if !*skipDeployTestDependencies {
+			atmosApply(t, componentOptions)
+		}
+		if !*skipDeployTestDependencies && !*skipDestroyTestDependencies {
+			defer atmosDestroy(t, componentOptions)
+		}
 	}
 
 	if !*skipVerifyEnabledFlag {
@@ -45,14 +62,22 @@ func (ct *ComponentTest) Run(t *testing.T, options *atmos.Options) {
 	}
 
 	subjectOptions := ct.Subject.getAtmosOptions(t, testOptions, map[string]interface{}{})
-	atmosApply(t, subjectOptions)
-	defer atmosDestroy(t, subjectOptions)
+	if !*skipDeployComponentUnderTest {
+		atmosApply(t, subjectOptions)
+	}
+	if !*skipDeployComponentUnderTest && !*skipDestroyComponentUnderTest {
+		defer atmosDestroy(t, subjectOptions)
+	}
 
 	for _, component := range ct.assert {
 		componentOptions := component.getAtmosOptions(t, testOptions, map[string]interface{}{})
 
-		atmosApply(t, componentOptions)
-		defer atmosDestroy(t, componentOptions)
+		if !*skipDeployAsserts {
+			atmosApply(t, componentOptions)
+		}
+		if !*skipDeployAsserts && !*skipDestroyAsserts {
+			defer atmosDestroy(t, componentOptions)
+		}
 	}
 }
 
