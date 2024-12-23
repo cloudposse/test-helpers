@@ -135,8 +135,13 @@ func (ts *XTestSuites) Run(t *testing.T, options *atmos.Options) {
 		fmt.Println("Skip Vendor Pull")
 	}
 
-	err := createStateDir(ts.TempDir)
-	assert.NoError(t, err)
+	if !*skipTmpDir {
+		err := createStateDir(ts.TempDir)
+		assert.NoError(t, err)
+	} else {
+		err := createStateDir(ts.SourceDir)
+		assert.NoError(t, err)
+	}
 
 	if *runParallel {
 		fmt.Println("Run suites in parallel mode")
