@@ -7,6 +7,7 @@ import (
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/require"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -40,7 +41,20 @@ func (ts *XTestSuite) getAtmosOptions(t *testing.T, options *atmos.Options, vars
 		result, _ = options.Clone()
 	}
 
-	err := mergo.Merge(&result.Vars, vars)
+	currentTFDataDir := ".terraform"
+	if value, ok := options.EnvVars["TF_DATA_DIR"]; ok {
+		currentTFDataDir = value
+	}
+
+	envvars := map[string]string{
+		// We need to split the TF_DATA_DIR for parallel suites mode
+		"TF_DATA_DIR": filepath.Join(currentTFDataDir, fmt.Sprintf("suite-%s", ts.RandomIdentifier)),
+	}
+
+	err := mergo.Merge(&result.EnvVars, envvars)
+	require.NoError(t, err)
+
+	err = mergo.Merge(&result.Vars, vars)
 	require.NoError(t, err)
 
 	suiteVars := map[string]interface{}{

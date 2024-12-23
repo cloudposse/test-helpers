@@ -157,6 +157,8 @@ func (ts *XTestSuites) getAtmosOptions(t *testing.T, options *atmos.Options, var
 
 	result.AtmosBasePath = ts.WorkDir()
 	result.NoColor = true
+	result.Lock = false
+	result.Upgrade = true
 
 	envvars := map[string]string{
 		"TEST_ACCOUNT_ID":       ts.AwsAccountId,
