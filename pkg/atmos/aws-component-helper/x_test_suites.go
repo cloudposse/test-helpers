@@ -21,6 +21,7 @@ var (
 var (
 	skipTmpDir              = flag.Bool("cth.skip-tmp-dir", false, "Run in the current directory")
 	skipVendorDependencies  = flag.Bool("cth.skip-vendor", false, "skip vendor dependencies")
+	runParallel             = flag.Bool("cth.parallel", false, "Run parallel")
 	forceNewSuite           = flag.Bool("cth.force-new-suite", false, "force new suite")
 	suiteIndex              = flag.Int("cth.suite-index", -1, "suite index")
 	skipAwsNuke             = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
@@ -137,7 +138,10 @@ func (ts *XTestSuites) Run(t *testing.T, options *atmos.Options) {
 	err := createStateDir(ts.TempDir)
 	assert.NoError(t, err)
 
-	// t.Parallel()
+	if *runParallel {
+		fmt.Println("Run suites in parallel mode")
+		t.Parallel()
+	}
 	for name, suite := range ts.suites {
 		t.Run(name, func(t *testing.T) {
 			suite.Run(t, suitesOptions)

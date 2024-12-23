@@ -3,6 +3,7 @@ package aws_component_helper
 import (
 	"dario.cat/mergo"
 	"flag"
+	"fmt"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/stretchr/testify/require"
@@ -11,8 +12,8 @@ import (
 )
 
 var (
-	skipDeploySuiteDependencies  = flag.Bool("cth.skip-suite-deps", false, "skip deploy suite deps")
-	skipDestroySuiteDependencies = flag.Bool("cth.skip-suite-deps-teardown", false, "skip destroy suite deps")
+	skipDeploySuiteDependencies  = flag.Bool("cth.skip-deploy-suite-deps", false, "skip deploy suite deps")
+	skipDestroySuiteDependencies = flag.Bool("cth.skip-destroy-suite-deps", false, "skip destroy suite deps")
 )
 
 type XTestSuite struct {
@@ -82,7 +83,10 @@ func (ts *XTestSuite) Run(t *testing.T, options *atmos.Options) {
 		}
 	}
 
-	//t.Parallel()
+	if *runParallel {
+		fmt.Println("Run tests in parallel mode")
+		t.Parallel()
+	}
 	for name, item := range ts.tests {
 		t.Run(name, func(t *testing.T) {
 			item.Run(t, suiteOptions)
