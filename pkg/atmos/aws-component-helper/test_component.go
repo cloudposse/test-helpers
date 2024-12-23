@@ -47,15 +47,15 @@ func (ct *ComponentTest) Run(t *testing.T, options *atmos.Options) {
 	testOptions := ct.getAtmosOptions(t, options, map[string]interface{}{})
 	for _, component := range ct.setup {
 		componentOptions := component.getAtmosOptions(t, testOptions, map[string]interface{}{})
-		if !*skipDeployTestDependencies {
+		if !*skipDeployTestDependencies && !*skipDeployDependencies {
 			atmosApply(t, componentOptions)
 		}
-		if !*skipDeployTestDependencies && !*skipDestroyTestDependencies {
+		if !*skipDeployTestDependencies && !*skipDestroyTestDependencies && !*skipDeployDependencies && !*skipDestroyDependencies {
 			defer atmosDestroy(t, componentOptions)
 		}
 	}
 
-	if !*skipVerifyEnabledFlag {
+	if !*skipVerifyEnabledFlag && !*skipTests {
 		fmt.Println("VerifyEnabledFlag")
 		ct.verifyEnabledFlag(t, ct.Subject, options)
 	} else {
@@ -63,20 +63,20 @@ func (ct *ComponentTest) Run(t *testing.T, options *atmos.Options) {
 	}
 
 	subjectOptions := ct.Subject.getAtmosOptions(t, testOptions, map[string]interface{}{})
-	if !*skipDeployComponentUnderTest {
+	if !*skipDeployComponentUnderTest && !*skipTests {
 		atmosApply(t, subjectOptions)
 	}
-	if !*skipDeployComponentUnderTest && !*skipDestroyComponentUnderTest {
+	if !*skipDeployComponentUnderTest && !*skipDestroyComponentUnderTest && !*skipTests {
 		defer atmosDestroy(t, subjectOptions)
 	}
 
 	for _, component := range ct.assert {
 		componentOptions := component.getAtmosOptions(t, testOptions, map[string]interface{}{})
 
-		if !*skipDeployAsserts {
+		if !*skipDeployAsserts && !*skipTests {
 			atmosApply(t, componentOptions)
 		}
-		if !*skipDeployAsserts && !*skipDestroyAsserts {
+		if !*skipDeployAsserts && !*skipDestroyAsserts && !*skipTests {
 			defer atmosDestroy(t, componentOptions)
 		}
 	}

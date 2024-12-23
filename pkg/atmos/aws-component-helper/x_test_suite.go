@@ -89,10 +89,10 @@ func (ts *XTestSuite) Run(t *testing.T, options *atmos.Options) {
 	suiteOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
 	for _, component := range ts.setup {
 		componentOptions := component.getAtmosOptions(t, suiteOptions, map[string]interface{}{})
-		if !*skipDeploySuiteDependencies {
+		if !*skipDeploySuiteDependencies && !*skipDeployDependencies {
 			atmosApply(t, componentOptions)
 		}
-		if !*skipDeploySuiteDependencies && !*skipDestroySuiteDependencies {
+		if !*skipDeploySuiteDependencies && !*skipDestroySuiteDependencies && !*skipDeployDependencies && !*skipDestroyDependencies {
 			defer atmosDestroy(t, componentOptions)
 		}
 	}
