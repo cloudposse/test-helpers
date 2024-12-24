@@ -2,7 +2,6 @@ package aws_component_helper
 
 import (
 	"context"
-	"dario.cat/mergo"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -126,17 +125,6 @@ func readOrCreateTestSuiteFile(testSuite *TestSuite, testName string) (*TestSuit
 	}
 
 	if err := os.WriteFile(testSuiteFile, data, 0644); err != nil {
-		return &TestSuite{}, err
-	}
-
-	envVars := map[string]string{
-		"ATMOS_BASE_PATH":       testSuite.TempDir,
-		"ATMOS_CLI_CONFIG_PATH": testSuite.TempDir,
-		"TEST_ACCOUNT_ID":       testSuite.AwsAccountId,
-	}
-
-	err = mergo.Merge(&testSuite.AtmosOptions.EnvVars, envVars)
-	if err != nil {
 		return &TestSuite{}, err
 	}
 

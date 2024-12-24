@@ -40,8 +40,12 @@ func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stack
 		BackendConfig: map[string]interface{}{
 			"workspace_key_prefix": strings.Join([]string{suite.RandomIdentifier, stackName}, "-"),
 		},
-		Vars:    mergedVars,
-		EnvVars: suite.AtmosOptions.EnvVars,
+		Vars: mergedVars,
+		EnvVars: map[string]string{
+			"ATMOS_BASE_PATH":       suite.TempDir,
+			"ATMOS_CLI_CONFIG_PATH": suite.TempDir,
+			"TEST_ACCOUNT_ID":       suite.AwsAccountId,
+		},
 	})
 	return atmosOptions
 }
