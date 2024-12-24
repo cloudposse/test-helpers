@@ -40,7 +40,8 @@ func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stack
 		BackendConfig: map[string]interface{}{
 			"workspace_key_prefix": strings.Join([]string{suite.RandomIdentifier, stackName}, "-"),
 		},
-		Vars: mergedVars,
+		Vars:    mergedVars,
+		EnvVars: suite.AtmosOptions.EnvVars,
 	})
 	return atmosOptions
 }
