@@ -14,7 +14,7 @@ package aws_component_helper
 //	AwsRegion                     string
 //	ComponentName                 string
 //	ComponentSrcPath              string
-//	Dependencies                  []*AtmosComponent
+//	Dependencies                  []*ComponentDeployment
 //	FixturesPath                  string
 //	ForceNewSuite                 bool
 //	Index                         int
@@ -46,7 +46,7 @@ package aws_component_helper
 //	}
 //}
 //
-//func (ts *TestSuite) AddCrossStackDependencies(dependencies []AtmosComponent) {
+//func (ts *TestSuite) AddCrossStackDependencies(dependencies []ComponentDeployment) {
 //	for _, dependency := range dependencies {
 //		ts.AddCrossStackDependency(dependency.ComponentName, dependency.StackName)
 //	}
@@ -261,13 +261,13 @@ package aws_component_helper
 //	}
 //}
 //
-//func WithDependency(dependency *AtmosComponent) TestSuiteOption {
+//func WithDependency(dependency *ComponentDeployment) TestSuiteOption {
 //	return func(a *TestSuite) {
 //		a.Dependencies = append(a.Dependencies, dependency)
 //	}
 //}
 //
-//func WithDependencies(dependencies []*AtmosComponent) TestSuiteOption {
+//func WithDependencies(dependencies []*ComponentDeployment) TestSuiteOption {
 //	return func(a *TestSuite) {
 //		a.Dependencies = append(a.Dependencies, dependencies...)
 //	}

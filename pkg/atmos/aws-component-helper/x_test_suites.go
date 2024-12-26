@@ -190,3 +190,9 @@ func (ts *XTestSuites) CreateAndDeployComponent(t *testing.T, componentName stri
 	ts.DeployComponent(t, component, options)
 	return component
 }
+
+func (ts *XTestSuites) Test(t *testing.T, name string, f func(t *testing.T)) {
+	if !*skipTests {
+		t.Run(name, f)
+	}
+}

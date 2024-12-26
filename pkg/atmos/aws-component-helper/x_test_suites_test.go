@@ -94,12 +94,12 @@ func TestComponentTestSuitesRun(t *testing.T) {
 	component := componentTestSuites.CreateAndDeployDependency(t, "vpc", "default-test", &atmos.Options{})
 	defer componentTestSuites.DestroyDependency(t, component, &atmos.Options{})
 
-	t.Run("two-private-subnets", func(t *testing.T) {
+	componentTestSuites.Test(t, "two-private-subnets", func(t *testing.T) {
 		component := componentTestSuites.CreateAndDeployComponent(t, "vpc/private-only", "default-test", &atmos.Options{})
 		defer componentTestSuites.DestroyComponent(t, component, &atmos.Options{})
 	})
 
-	t.Run("public-subnets", func(t *testing.T) {
+	componentTestSuites.Test(t, "public-subnets", func(t *testing.T) {
 		component := componentTestSuites.CreateAndDeployComponent(t, "vpc/full", "default-test", &atmos.Options{})
 		defer componentTestSuites.DestroyComponent(t, component, &atmos.Options{})
 	})
