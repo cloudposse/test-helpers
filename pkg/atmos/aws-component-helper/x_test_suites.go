@@ -173,6 +173,12 @@ func (ts *XTestSuites) DestroyDependency(t *testing.T, component *AtmosComponent
 	}
 }
 
+func (ts *XTestSuites) Output(t *testing.T, component *AtmosComponent, name string) string {
+	suiteOptions := ts.getAtmosOptions(t, &atmos.Options{}, map[string]interface{}{})
+	componentOptions := component.getAtmosOptions(t, suiteOptions, map[string]interface{}{})
+	return atmos.Output(t, componentOptions, name)
+}
+
 func (ts *XTestSuites) CreateAndDeployDependency(t *testing.T, componentName string, stackName string, options *atmos.Options) *AtmosComponent {
 	component := NewAtmosComponent(componentName, stackName)
 	ts.DeployDependency(t, component, options)
