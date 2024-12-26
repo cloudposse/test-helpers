@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/gruntwork-io/terratest/modules/random"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
@@ -28,8 +27,10 @@ var (
 	skipDeployDependencies  = flag.Bool("cth.skip-deploy-deps", false, "skip deploy dependencies")
 	skipDestroyDependencies = flag.Bool("cth.skip-destroy-deps", false, "skip destroy dependencies")
 	skipTeardownTestSuite   = flag.Bool("cth.skip-teardown", false, "skip test suite teardown")
+	skipTests               = flag.Bool("cth.skip-tests", false, "skip tests")
 
-	skipTests = flag.Bool("cth.skip-tests", false, "skip tests")
+	skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
+	skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
 )
 
 type XTestSuites struct {
@@ -39,7 +40,6 @@ type XTestSuites struct {
 	SourceDir        string
 	TempDir          string
 	FixturesPath     string
-	suites           map[string]*XTestSuite
 }
 
 func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir string) *XTestSuites {
@@ -58,49 +58,6 @@ func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir
 		FixturesPath:     fixturesDir,
 		AwsAccountId:     awsAccountId,
 		AwsRegion:        awsRegion,
-		suites:           map[string]*XTestSuite{},
-	}
-
-	describeStacksOptions := suites.getAtmosOptions(t, &atmos.Options{}, map[string]interface{}{})
-	describeStacksOptions.AtmosBasePath = filepath.Join(suites.SourceDir, suites.FixturesPath)
-	describeStacksOptions.EnvVars["ATMOS_BASE_PATH"] = describeStacksOptions.AtmosBasePath
-	describeStacksOptions.EnvVars["ATMOS_CLI_CONFIG_PATH"] = describeStacksOptions.AtmosBasePath
-
-	describeStacksConfigs, err := atmos.DescribeStacksE(t, describeStacksOptions)
-	require.NoError(t, err)
-
-	for stackName, stack := range describeStacksConfigs.Stacks {
-		for componentName, component := range stack.Components.Terraform {
-			if component.Settings.Test == nil {
-				// Skip components that are not part of tests
-				continue
-			}
-
-			suiteName := component.Settings.Test.Suite
-			require.NotEmptyf(t, suiteName, "settings.test.suite is required for component %s in stack %s", componentName, stackName)
-
-			validStages := []string{"testSuiteSetUp", "testSetUp", "subjectUnderTest", "assert"}
-			stage := component.Settings.Test.Stage
-
-			require.NotEmptyf(t, stage, "settings.test.stage is required for component %s in stack %s", componentName, stackName)
-			require.Containsf(t, validStages, stage, "settings.test.stage should be one of %v for component %s in stack %s", validStages, componentName, stackName)
-
-			testName := component.Settings.Test.Test
-			require.False(t, stage != "testSuiteSetUp" && testName == "", "settings.test.test is required for component %s in stack %s", componentName, stackName)
-
-			suite := suites.GetOrCreateSuite(suiteName)
-
-			switch stage {
-			case "testSuiteSetUp":
-				suite.AddSetup(componentName, stackName)
-			case "testSetUp":
-				suite.GetOrCreateTest(testName).AddSetup(componentName, stackName)
-			case "subjectUnderTest":
-				suite.GetOrCreateTest(testName).SetSubject(componentName, stackName)
-			case "assert":
-				suite.GetOrCreateTest(testName).AddSAssert(componentName, stackName)
-			}
-		}
 	}
 
 	return suites
@@ -114,17 +71,16 @@ func (ts *XTestSuites) WorkDir() string {
 	}
 }
 
-func (ts *XTestSuites) Run(t *testing.T, options *atmos.Options) {
+func (ts *XTestSuites) SetUp(t *testing.T, options *atmos.Options) {
 	suitesOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
 	if !*skipTmpDir {
 		fmt.Printf("Create TMP dir: %s \n", ts.TempDir)
 
 		err := os.Mkdir(ts.TempDir, 0777)
-		assert.NoError(t, err)
-		defer os.RemoveAll(ts.TempDir)
+		require.NoError(t, err)
 
 		err = copyDirectoryRecursively(ts.SourceDir, ts.TempDir)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	} else {
 		fmt.Printf("Use source dir: %s \n", ts.SourceDir)
 	}
@@ -137,20 +93,17 @@ func (ts *XTestSuites) Run(t *testing.T, options *atmos.Options) {
 
 	if !*skipTmpDir {
 		err := createStateDir(ts.TempDir)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	} else {
 		err := createStateDir(ts.SourceDir)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
+}
 
-	if *runParallel {
-		fmt.Println("Run suites in parallel mode")
-		t.Parallel()
-	}
-	for name, suite := range ts.suites {
-		t.Run(name, func(t *testing.T) {
-			suite.Run(t, suitesOptions)
-		})
+func (ts *XTestSuites) TearDown(t *testing.T) {
+	if !*skipTmpDir {
+		err := os.RemoveAll(ts.TempDir)
+		require.NoError(t, err)
 	}
 }
 
@@ -187,10 +140,47 @@ func (ts *XTestSuites) getAtmosOptions(t *testing.T, options *atmos.Options, var
 	return result
 }
 
-func (ts *XTestSuites) GetOrCreateSuite(name string) *XTestSuite {
-	if _, ok := ts.suites[name]; !ok {
-		ts.suites[name] = NewXTestSuite()
+func (ts *XTestSuites) DeployComponent(t *testing.T, component *AtmosComponent, options *atmos.Options) {
+	if !*skipDeployComponentUnderTest {
+		suiteOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
+		componentOptions := component.getAtmosOptions(t, suiteOptions, map[string]interface{}{})
+		atmosApply(t, componentOptions)
 	}
-	return ts.suites[name]
+}
 
+func (ts *XTestSuites) DestroyComponent(t *testing.T, component *AtmosComponent, options *atmos.Options) {
+	if !*skipDeployComponentUnderTest && !*skipDestroyComponentUnderTest {
+		suiteOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
+		componentOptions := component.getAtmosOptions(t, suiteOptions, map[string]interface{}{})
+		atmosDestroy(t, componentOptions)
+	}
+}
+
+func (ts *XTestSuites) DeployDependency(t *testing.T, component *AtmosComponent, options *atmos.Options) {
+	if !*skipDeployDependencies {
+		suiteOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
+		componentOptions := component.getAtmosOptions(t, suiteOptions, map[string]interface{}{})
+		atmosApply(t, componentOptions)
+	}
+}
+
+func (ts *XTestSuites) DestroyDependency(t *testing.T, component *AtmosComponent, options *atmos.Options) {
+	if !*skipDeployDependencies && !*skipDestroyDependencies {
+		suiteOptions := ts.getAtmosOptions(t, options, map[string]interface{}{})
+
+		componentOptions := component.getAtmosOptions(t, suiteOptions, map[string]interface{}{})
+		atmosDestroy(t, componentOptions)
+	}
+}
+
+func (ts *XTestSuites) CreateAndDeployDependency(t *testing.T, componentName string, stackName string, options *atmos.Options) *AtmosComponent {
+	component := NewAtmosComponent(componentName, stackName)
+	ts.DeployDependency(t, component, options)
+	return component
+}
+
+func (ts *XTestSuites) CreateAndDeployComponent(t *testing.T, componentName string, stackName string, options *atmos.Options) *AtmosComponent {
+	component := NewAtmosComponent(componentName, stackName)
+	ts.DeployComponent(t, component, options)
+	return component
 }

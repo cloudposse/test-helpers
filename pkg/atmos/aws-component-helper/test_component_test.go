@@ -10,6 +10,6 @@ func TestComponentTestMinimum(t *testing.T) {
 	componentTest := NewComponentTest()
 	componentTest.SetSubject("vpc", "default-test")
 
-	assert.Equal(t, componentTest.Subject.Component, "vpc")
-	assert.Equal(t, componentTest.Subject.Stack, "default-test")
+	assert.Equal(t, componentTest.Subject.ComponentName, "vpc")
+	assert.Equal(t, componentTest.Subject.StackName, "default-test")
 }

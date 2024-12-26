@@ -14,22 +14,13 @@ import (
 
 var (
 	skipVerifyEnabledFlag = flag.Bool("cth.skip-verify-enabled-flag", true, "skip verify enabled flag")
-
-	skipDeployTestDependencies  = flag.Bool("cth.skip-deploy-test-deps", false, "skip deploy test deps")
-	skipDestroyTestDependencies = flag.Bool("cth.skip-destroy-test-deps-teardown", false, "skip destroy test deps")
-
-	skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
-	skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
-
-	skipDeployAsserts  = flag.Bool("cth.skip-deploy-asserts", false, "skip deploy component under test")
-	skipDestroyAsserts = flag.Bool("cth.skip-destroy-asserts", false, "skip destroy component under test")
 )
 
 type ComponentTest struct {
 	RandomIdentifier string
 	setup            []*AtmosComponent
 	Subject          *AtmosComponent
-	assert           []*AtmosComponent
+	assert           map[string]func(t *testing.T, ct *ComponentTest)
 }
 
 func NewComponentTest() *ComponentTest {
@@ -39,46 +30,7 @@ func NewComponentTest() *ComponentTest {
 		RandomIdentifier: randomId,
 		setup:            make([]*AtmosComponent, 0),
 		Subject:          nil,
-		assert:           make([]*AtmosComponent, 0),
-	}
-}
-
-func (ct *ComponentTest) Run(t *testing.T, options *atmos.Options) {
-	testOptions := ct.getAtmosOptions(t, options, map[string]interface{}{})
-	for _, component := range ct.setup {
-		componentOptions := component.getAtmosOptions(t, testOptions, map[string]interface{}{})
-		if !*skipDeployTestDependencies && !*skipDeployDependencies {
-			atmosApply(t, componentOptions)
-		}
-		if !*skipDeployTestDependencies && !*skipDestroyTestDependencies && !*skipDeployDependencies && !*skipDestroyDependencies {
-			defer atmosDestroy(t, componentOptions)
-		}
-	}
-
-	if !*skipVerifyEnabledFlag && !*skipTests {
-		fmt.Println("VerifyEnabledFlag")
-		ct.verifyEnabledFlag(t, ct.Subject, options)
-	} else {
-		fmt.Println("Skipping VerifyEnabledFlag")
-	}
-
-	subjectOptions := ct.Subject.getAtmosOptions(t, testOptions, map[string]interface{}{})
-	if !*skipDeployComponentUnderTest && !*skipTests {
-		atmosApply(t, subjectOptions)
-	}
-	if !*skipDeployComponentUnderTest && !*skipDestroyComponentUnderTest && !*skipTests {
-		defer atmosDestroy(t, subjectOptions)
-	}
-
-	for _, component := range ct.assert {
-		componentOptions := component.getAtmosOptions(t, testOptions, map[string]interface{}{})
-
-		if !*skipDeployAsserts && !*skipTests {
-			atmosApply(t, componentOptions)
-		}
-		if !*skipDeployAsserts && !*skipDestroyAsserts && !*skipTests {
-			defer atmosDestroy(t, componentOptions)
-		}
+		assert:           map[string]func(t *testing.T, ct *ComponentTest){},
 	}
 }
 
@@ -144,7 +96,6 @@ func (ct *ComponentTest) SetSubject(component string, stack string) {
 	ct.Subject = NewAtmosComponent(component, stack)
 }
 
-func (ct *ComponentTest) AddSAssert(component string, stack string) {
-	item := NewAtmosComponent(component, stack)
-	ct.assert = append(ct.assert, item)
+func (ct *ComponentTest) AddSAssert(name string, callback func(t *testing.T, ct *ComponentTest)) {
+	ct.assert[name] = callback
 }

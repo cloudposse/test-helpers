@@ -7,8 +7,6 @@ terraform:
     local:
       path: ../../../../state/{{ .component }}/terraform.tfstate
       workspace_dir: ../../../../state/{{ .component }}/
-  metadata:
-    terraform_workspace_pattern: "{component}-{environment}"
   vars:
     namespace: eg
     tenant: default

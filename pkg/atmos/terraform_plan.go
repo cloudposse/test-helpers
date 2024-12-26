@@ -42,7 +42,7 @@ func PlanExitCodeE(t testing.TestingT, options *Options) (int, error) {
 
 // Custom errors
 var (
-	ErrorComponentRequired    = fmt.Errorf("you must set Component on options struct to use this function")
+	ErrorComponentRequired    = fmt.Errorf("you must set ComponentName on options struct to use this function")
 	ErrorPlanFilePathRequired = fmt.Errorf("you must set PlanFilePath on options struct to use this function")
-	ErrorStackRequired        = fmt.Errorf("you must set Stack on options struct to use this function")
+	ErrorStackRequired        = fmt.Errorf("you must set StackName on options struct to use this function")
 )

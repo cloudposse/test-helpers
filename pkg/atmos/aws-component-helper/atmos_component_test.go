@@ -10,6 +10,6 @@ func TestAtmosComponent(t *testing.T) {
 	// Create a temporary atmos component
 	component := NewAtmosComponent("vpc", "default-test")
 
-	assert.Equal(t, component.Component, "vpc")
-	assert.Equal(t, component.Stack, "default-test")
+	assert.Equal(t, component.ComponentName, "vpc")
+	assert.Equal(t, component.StackName, "default-test")
 }

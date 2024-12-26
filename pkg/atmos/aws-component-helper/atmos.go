@@ -35,8 +35,8 @@ var (
 //
 //	atmosOptions := atmos.WithDefaultRetryableErrors(t, &atmos.Options{
 //		AtmosBasePath: suite.TempDir,
-//		Component:     componentName,
-//		Stack:         stackName,
+//		ComponentName:     componentName,
+//		StackName:         stackName,
 //		NoColor:       true,
 //		BackendConfig: map[string]interface{}{
 //			"workspace_key_prefix": strings.Join([]string{suite.RandomIdentifier, stackName}, "-"),
@@ -48,7 +48,7 @@ var (
 //
 //func deployDependencies(t *testing.T, suite *TestSuite) error {
 //	for _, dependency := range suite.Dependencies {
-//		_, _, err := deployComponent(t, suite, dependency.ComponentName, dependency.StackName, map[string]interface{}{})
+//		_, _, err := DeployComponent(t, suite, dependency.ComponentName, dependency.StackName, map[string]interface{}{})
 //		if err != nil {
 //			return err
 //		}
@@ -60,7 +60,7 @@ var (
 //func destroyDependencies(t *testing.T, suite *TestSuite) error {
 //	// iterate over dependencies in reverse order and destroy them
 //	for i := len(suite.Dependencies) - 1; i >= 0; i-- {
-//		_, _, err := destroyComponent(t, suite, suite.Dependencies[i].ComponentName, suite.Dependencies[i].StackName, map[string]interface{}{})
+//		_, _, err := DestroyComponent(t, suite, suite.Dependencies[i].ComponentName, suite.Dependencies[i].StackName, map[string]interface{}{})
 //		if err != nil {
 //			return err
 //		}
@@ -68,7 +68,7 @@ var (
 //	return nil
 //}
 //
-//func deployComponent(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) (*atmos.Options, string, error) {
+//func DeployComponent(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) (*atmos.Options, string, error) {
 //	options := GetAtmosOptions(t, suite, componentName, stackName, vars)
 //	out, err := atmos.ApplyE(t, options)
 //
@@ -94,7 +94,7 @@ var (
 //	return options, nil
 //}
 
-//func destroyComponent(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) (*atmos.Options, string, error) {
+//func DestroyComponent(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) (*atmos.Options, string, error) {
 //	options := GetAtmosOptions(t, suite, componentName, stackName, vars)
 //	out, err := atmos.DestroyE(t, options)
 //
