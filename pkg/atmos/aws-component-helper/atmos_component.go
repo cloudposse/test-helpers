@@ -1,14 +1,15 @@
 package aws_component_helper
 
 import (
-	"dario.cat/mergo"
 	"fmt"
-	"github.com/cloudposse/test-helpers/pkg/atmos"
-	"github.com/gruntwork-io/terratest/modules/random"
-	"github.com/stretchr/testify/require"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"dario.cat/mergo"
+	"github.com/cloudposse/test-helpers/pkg/atmos"
+	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/stretchr/testify/require"
 )
 
 type AtmosComponent struct {

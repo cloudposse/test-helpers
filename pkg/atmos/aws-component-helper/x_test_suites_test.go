@@ -2,12 +2,13 @@ package aws_component_helper
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	tt "github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/gruntwork-io/terratest/modules/files"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,28 +16,28 @@ import (
 const atmosExamplePath = "test/fixtures/aws-component-helper"
 
 func mockAtmos() {
-	atmosApply = func(t tt.TestingT, options *atmos.Options) string {
+	atmosApply = func(_ tt.TestingT, options *atmos.Options) string {
 		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "terraform", "apply", "-input=false", "-auto-approve")...)
 		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 		fmt.Println(description)
 		return ""
 	}
 
-	atmosDestroy = func(t tt.TestingT, options *atmos.Options) string {
+	atmosDestroy = func(_ tt.TestingT, options *atmos.Options) string {
 		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "terraform", "destroy", "-input=false", "-auto-approve")...)
 		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 		fmt.Println(description)
 		return ""
 	}
 
-	atmosPlanExitCodeE = func(t tt.TestingT, options *atmos.Options) (int, error) {
+	atmosPlanExitCodeE = func(_ tt.TestingT, options *atmos.Options) (int, error) {
 		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "terraform", "plan", "-input=false", "-detailed-exitcode")...)
 		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 		fmt.Println(description)
 		return 0, nil
 	}
 
-	atmosVendorPull = func(t tt.TestingT, options *atmos.Options) string {
+	atmosVendorPull = func(_ tt.TestingT, options *atmos.Options) string {
 		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "vendor", "pull")...)
 		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 		fmt.Println(description)

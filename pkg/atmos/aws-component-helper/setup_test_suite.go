@@ -3,11 +3,12 @@ package aws_component_helper
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 //func setupTestSuite(ts *TestSuite) error {
@@ -30,9 +31,17 @@ import (
 //}
 
 func createStateDir(tempDir string) error {
-	stateDir := filepath.Join(tempDir, "state")
-	if _, err := os.Stat(stateDir); os.IsNotExist(err) {
-		err := os.MkdirAll(stateDir, 0777)
+	return createDir(tempDir, "state")
+}
+
+func createCacheDir(tempDir string) error {
+	return createDir(tempDir, ".cache")
+}
+
+func createDir(tempDir string, name string) error {
+	dir := filepath.Join(tempDir, name)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, 0777)
 		return err
 	}
 

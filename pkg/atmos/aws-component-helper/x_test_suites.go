@@ -1,16 +1,17 @@
 package aws_component_helper
 
 import (
-	"dario.cat/mergo"
 	"flag"
 	"fmt"
-	"github.com/cloudposse/test-helpers/pkg/atmos"
-	"github.com/gruntwork-io/terratest/modules/random"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"dario.cat/mergo"
+	"github.com/cloudposse/test-helpers/pkg/atmos"
+	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -65,10 +66,14 @@ func NewTestSuites(t *testing.T, sourceDir string, awsRegion string, fixturesDir
 
 func (ts *XTestSuites) WorkDir() string {
 	if !*skipTmpDir {
-		return filepath.Join(ts.TempDir, ts.FixturesPath)
+		return ts.TempDir
 	} else {
-		return filepath.Join(ts.SourceDir, ts.FixturesPath)
+		return ts.SourceDir
 	}
+}
+
+func (ts *XTestSuites) FixtureDir() string {
+	return filepath.Join(ts.WorkDir(), ts.FixturesPath)
 }
 
 func (ts *XTestSuites) SetUp(t *testing.T, options *atmos.Options) {
@@ -91,13 +96,11 @@ func (ts *XTestSuites) SetUp(t *testing.T, options *atmos.Options) {
 		fmt.Println("Skip Vendor Pull")
 	}
 
-	if !*skipTmpDir {
-		err := createStateDir(ts.TempDir)
-		require.NoError(t, err)
-	} else {
-		err := createStateDir(ts.SourceDir)
-		require.NoError(t, err)
-	}
+	err := createStateDir(ts.WorkDir())
+	require.NoError(t, err)
+
+	err = createCacheDir(ts.WorkDir())
+	require.NoError(t, err)
 }
 
 func (ts *XTestSuites) TearDown(t *testing.T) {
@@ -113,7 +116,7 @@ func (ts *XTestSuites) getAtmosOptions(t *testing.T, options *atmos.Options, var
 		result, _ = options.Clone()
 	}
 
-	result.AtmosBasePath = ts.WorkDir()
+	result.AtmosBasePath = ts.FixtureDir()
 	result.NoColor = true
 	result.Lock = false
 	result.Upgrade = true
@@ -122,6 +125,7 @@ func (ts *XTestSuites) getAtmosOptions(t *testing.T, options *atmos.Options, var
 		"TEST_ACCOUNT_ID":       ts.AwsAccountId,
 		"ATMOS_BASE_PATH":       result.AtmosBasePath,
 		"ATMOS_CLI_CONFIG_PATH": result.AtmosBasePath,
+		"TF_PLUGIN_CACHE_DIR":   filepath.Join(ts.WorkDir(), ".cache"),
 	}
 
 	err := mergo.Merge(&result.EnvVars, envvars)
