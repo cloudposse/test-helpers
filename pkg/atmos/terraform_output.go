@@ -275,7 +275,7 @@ func OutputJson(t testing.TestingT, options *Options, key string) string {
 // result as the json string.
 // If key is an empty string, it will return all the output variables.
 func OutputJsonE(t testing.TestingT, options *Options, key string) (string, error) {
-	args := []string{"terraform", "output", options.Component, "--skip-init", "--json", "-s", options.Stack}
+	args := []string{"terraform", "output", options.Component, "--skip-init", "-s", options.Stack, "--json"}
 	if key != "" {
 		args = append(args, key)
 	}
