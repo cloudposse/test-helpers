@@ -45,8 +45,8 @@ func mockAtmos() {
 	}
 }
 
-func TestComponentTestSuitesMinimum(t *testing.T) {
-	componentTestSuites := &XTestSuites{
+func TestFixtureMinimum(t *testing.T) {
+	componentTestSuites := &Fixture{
 		FixturesPath: "testdata/fixtures",
 		TempDir:      "testdata/tmp",
 		AwsAccountId: "123456789012",
@@ -58,7 +58,7 @@ func TestComponentTestSuitesMinimum(t *testing.T) {
 	assert.Equal(t, componentTestSuites.AwsRegion, "us-west-2")
 }
 
-func TestComponentTestSuitesCreate(t *testing.T) {
+func TestFixtureCreate(t *testing.T) {
 	getAwsAaccountIdCallback = func() (string, error) {
 		return "123456789012", nil
 	}
@@ -69,12 +69,12 @@ func TestComponentTestSuitesCreate(t *testing.T) {
 
 	fmt.Printf("running in %s\n", testFolder)
 
-	componentTestSuites := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
+	componentTestSuites := NewFixture(t, testFolder, "us-west-2", atmosExamplePath)
 
 	assert.Equal(t, componentTestSuites.SourceDir, testFolder)
 }
 
-func TestComponentTestSuitesRun(t *testing.T) {
+func TestFixtureSuitesRun(t *testing.T) {
 	getAwsAaccountIdCallback = func() (string, error) {
 		return "123456789012", nil
 	}
@@ -87,21 +87,33 @@ func TestComponentTestSuitesRun(t *testing.T) {
 
 	fmt.Printf("running in %s\n", testFolder)
 
-	componentTestSuites := NewTestSuites(t, testFolder, "us-west-2", atmosExamplePath)
+	fixture := NewFixture(t, testFolder, "us-west-2", atmosExamplePath)
 
-	componentTestSuites.SetUp(t, &atmos.Options{})
-	defer componentTestSuites.TearDown(t)
+	fixture.SetUp(&atmos.Options{})
+	defer fixture.TearDown()
 
-	component := componentTestSuites.CreateAndDeployDependency(t, "vpc", "default-test", &atmos.Options{})
-	defer componentTestSuites.DestroyDependency(t, component, &atmos.Options{})
+	fixture.Suite("default", func(t *testing.T, suite *Suite) {
+		// suite.AddDependency(t, "vpc", "default-test")
 
-	componentTestSuites.Test(t, "two-private-subnets", func(t *testing.T) {
-		component := componentTestSuites.CreateAndDeployComponent(t, "vpc/private-only", "default-test", &atmos.Options{})
-		defer componentTestSuites.DestroyComponent(t, component, &atmos.Options{})
+		// var deps *AtmosComponent
+
+		// suite.Setup(t, func(t *testing.T, atm *Atmos) {
+		// 	deps = atm.GetAndDeploy(t, "vpc/deps", "default-test")
+		// })
+
+		// suite.Test(t, "two-private-subnets", func(t *testing.T, atm *Atmos) {
+		// 	component := atm.GetAndDeploy(t, "vpc/private-only", "default-test")
+		// 	defer atm.Destroy(t, component)
+		// })
+
+		// suite.Test(t, "public-subnets", func(t *testing.T, atm *Atmos) {
+		// 	component := atm.GetAndDeploy(t, "vpc/full", "default-test")
+		// 	defer atm.Destroy(t, component)
+		// })
+
+		// suite.TearDown(t, func(t *testing.T, atm *Atmos) {
+		// 	atm.Destroy(t, deps)
+		// })
 	})
 
-	componentTestSuites.Test(t, "public-subnets", func(t *testing.T) {
-		component := componentTestSuites.CreateAndDeployComponent(t, "vpc/full", "default-test", &atmos.Options{})
-		defer componentTestSuites.DestroyComponent(t, component, &atmos.Options{})
-	})
 }

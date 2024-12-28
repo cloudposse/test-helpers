@@ -34,7 +34,7 @@ import (
 func TestCreateStateDir(t *testing.T) {
 	tempDir := t.TempDir()
 
-	err := createStateDir(tempDir)
+	err := createDir(tempDir, "state")
 	assert.NoError(t, err)
 
 	stateDir := filepath.Join(tempDir, "state")

@@ -11,7 +11,7 @@ import (
 	//"github.com/stretchr/testify/require"
 )
 
-var suite *helper.TestSuite
+var suite *helper.Suite
 
 // TestMain is the entry point for the test suite. It initializes the test
 // suite and runs the tests.

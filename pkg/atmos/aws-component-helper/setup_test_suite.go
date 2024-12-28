@@ -30,14 +30,6 @@ import (
 //	return nil
 //}
 
-func createStateDir(tempDir string) error {
-	return createDir(tempDir, "state")
-}
-
-func createCacheDir(tempDir string) error {
-	return createDir(tempDir, ".cache")
-}
-
 func createDir(tempDir string, name string) error {
 	dir := filepath.Join(tempDir, name)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {

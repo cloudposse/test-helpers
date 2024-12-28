@@ -1,7 +1,16 @@
 package aws_component_helper
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"dario.cat/mergo"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
+	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -10,6 +19,68 @@ var (
 	atmosPlanExitCodeE = atmos.PlanExitCodeE
 	atmosVendorPull    = atmos.VendorPull
 )
+
+type Atmos struct {
+	t       *testing.T
+	options *atmos.Options
+}
+
+func NewAtmos(t *testing.T, options *atmos.Options) *Atmos {
+	return &Atmos{
+		t:       t,
+		options: options,
+	}
+}
+
+func (ts *Atmos) GetAndDeploy(t *testing.T, componentName string, stackName string) *AtmosComponent {
+	component := NewAtmosComponent(componentName, stackName)
+	ts.Deploy(t, component)
+	return component
+}
+
+func (ts *Atmos) Deploy(t *testing.T, component *AtmosComponent) {
+	options := ts.getAtmosOptions()
+	options.Component = component.ComponentName
+	options.Stack = component.StackName
+	defer os.RemoveAll(options.AtmosBasePath)
+	copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+	atmosApply(t, options)
+}
+
+func (ts *Atmos) Destroy(t *testing.T, component *AtmosComponent) {
+	options := ts.getAtmosOptions()
+	options.Component = component.ComponentName
+	options.Stack = component.StackName
+	defer os.RemoveAll(options.AtmosBasePath)
+	copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+	atmosDestroy(t, options)
+}
+
+func (ts *Atmos) getAtmosOptions() *atmos.Options {
+	result, err := ts.options.Clone()
+	require.NoError(ts.t, err)
+
+	randID := random.UniqueId()
+	randomId := strings.ToLower(randID)
+
+	basePath := filepath.Dir(filepath.Clean(ts.options.AtmosBasePath))
+	dirName := filepath.Base(ts.options.AtmosBasePath)
+	tmpDir := filepath.Join(basePath, fmt.Sprintf(".%s-%s", dirName, randomId))
+
+	result.AtmosBasePath = tmpDir
+	resultEnvVars := result.EnvVars
+	envvars := map[string]string{
+		"ATMOS_BASE_PATH":       result.AtmosBasePath,
+		"ATMOS_CLI_CONFIG_PATH": result.AtmosBasePath,
+	}
+
+	err = mergo.Merge(&envvars, resultEnvVars)
+	require.NoError(t, err)
+
+	result.EnvVars = envvars
+
+	return result
+}
 
 //func GetAtmosOptions(t *testing.T, suite *TestSuite, componentName string, stackName string, vars map[string]interface{}) *atmos.Options {
 //	mergedVars := map[string]interface{}{
