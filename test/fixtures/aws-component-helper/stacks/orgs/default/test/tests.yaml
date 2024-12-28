@@ -5,36 +5,15 @@ import:
 
 components:
   terraform:
-    vpc:
-      settings:
-        test:
-          suite: default
-          test: two-private-subnets
-          stage: subjectUnderTest
-      vars:
-        name: "vpc"
-        availability_zones:
-          - "a"
-          - "b"
-        # If we want to do functional testing of the bastion, we need public subnets,
-        # internet gateway, and NAT gateway, but those are expensive and for now,
-        # we are just doing basic smoke testing, so we skip them.
-        #        public_subnets_enabled: true
-        #        max_nats: 1
-        #        nat_gateway_enabled: true
-        public_subnets_enabled: false
-        nat_gateway_enabled: false
-        nat_instance_enabled: false
-        subnet_type_tag_key: "eg.cptest.co/subnet/type"
-        max_subnet_count: 3
-        vpc_flow_logs_enabled: false
-        ipv4_primary_cidr_block: "172.16.0.0/16"
-
-    assert:
-      settings:
-        test:
-          suite: default
-          test: two-private-subnets
-          stage: assert
-      vars:
-        name: "assert"
+    terraform-basic-configuration:
+      vars: {}
+    terraform-no-error:
+      vars: {}
+    terraform-with-plan-error:
+      vars: {}
+    terraform-with-error:
+      vars: {}
+    terraform-not-idempotent:
+      vars: {}
+    terraform-parallelism:
+      vars: {}

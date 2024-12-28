@@ -1,15 +1,16 @@
 package aws_component_helper
 
 import (
-	"dario.cat/mergo"
 	"flag"
 	"fmt"
-	"github.com/cloudposse/test-helpers/pkg/atmos"
-	"github.com/gruntwork-io/terratest/modules/random"
-	"github.com/stretchr/testify/require"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"dario.cat/mergo"
+	"github.com/cloudposse/test-helpers/pkg/atmos"
+	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -36,13 +37,8 @@ func NewComponentTest() *ComponentTest {
 
 func (ct *ComponentTest) verifyEnabledFlag(t *testing.T, component *AtmosComponent, options *atmos.Options) *atmos.Options {
 	testOptions := ct.getAtmosOptions(t, options, map[string]interface{}{})
-	vars := map[string]interface{}{
-		"enabled": false,
-	}
 
-	componentOptions := component.getAtmosOptions(t, testOptions, vars)
-
-	exitCode, err := atmosPlanExitCodeE(t, componentOptions)
+	exitCode, err := atmosPlanExitCodeE(t, testOptions)
 	require.NoError(t, err)
 
 	if exitCode != 0 {
@@ -88,12 +84,12 @@ func (ct *ComponentTest) getAtmosOptions(t *testing.T, options *atmos.Options, v
 }
 
 func (ct *ComponentTest) AddSetup(component string, stack string) {
-	item := NewAtmosComponent(component, stack)
+	item := NewAtmosComponent(component, stack, nil)
 	ct.setup = append(ct.setup, item)
 }
 
 func (ct *ComponentTest) SetSubject(component string, stack string) {
-	ct.Subject = NewAtmosComponent(component, stack)
+	ct.Subject = NewAtmosComponent(component, stack, nil)
 }
 
 func (ct *ComponentTest) AddSAssert(name string, callback func(t *testing.T, ct *ComponentTest)) {

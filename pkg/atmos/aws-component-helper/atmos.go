@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -18,6 +19,7 @@ var (
 	atmosDestroy       = atmos.Destroy
 	atmosPlanExitCodeE = atmos.PlanExitCodeE
 	atmosVendorPull    = atmos.VendorPull
+	atmosOutputAll     = atmos.OutputStruct
 )
 
 type Atmos struct {
@@ -32,31 +34,85 @@ func NewAtmos(t *testing.T, options *atmos.Options) *Atmos {
 	}
 }
 
-func (ts *Atmos) GetAndDeploy(t *testing.T, componentName string, stackName string) *AtmosComponent {
-	component := NewAtmosComponent(componentName, stackName)
-	ts.Deploy(t, component)
+func (ts *Atmos) GetAndDeploy(componentName string, stackName string, vars map[string]interface{}) *AtmosComponent {
+	component := NewAtmosComponent(componentName, stackName, vars)
+	ts.Deploy(component)
 	return component
 }
 
-func (ts *Atmos) Deploy(t *testing.T, component *AtmosComponent) {
-	options := ts.getAtmosOptions()
+func (ts *Atmos) GetAndDestroy(componentName string, stackName string, vars map[string]interface{}) *AtmosComponent {
+	component := NewAtmosComponent(componentName, stackName, vars)
+	ts.Destroy(component)
+	return component
+}
+
+func (ts *Atmos) Deploy(component *AtmosComponent) {
+	options := ts.getAtmosOptions(component.Vars)
 	options.Component = component.ComponentName
 	options.Stack = component.StackName
 	defer os.RemoveAll(options.AtmosBasePath)
-	copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
-	atmosApply(t, options)
+	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+	require.NoError(ts.t, err)
+	atmosApply(ts.t, options)
+	atmosOutputAll(ts.t, options, "", &component.output)
 }
 
-func (ts *Atmos) Destroy(t *testing.T, component *AtmosComponent) {
-	options := ts.getAtmosOptions()
+func (ts *Atmos) Destroy(component *AtmosComponent) {
+	options := ts.getAtmosOptions(component.Vars)
 	options.Component = component.ComponentName
 	options.Stack = component.StackName
 	defer os.RemoveAll(options.AtmosBasePath)
-	copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
-	atmosDestroy(t, options)
+	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+	require.NoError(ts.t, err)
+	atmosDestroy(ts.t, options)
 }
 
-func (ts *Atmos) getAtmosOptions() *atmos.Options {
+func (ts *Atmos) loadOutputAll(component *AtmosComponent) {
+	if component.output != nil {
+		return
+	}
+	options := ts.getAtmosOptions(nil)
+	options.Component = component.ComponentName
+	options.Stack = component.StackName
+	defer os.RemoveAll(options.AtmosBasePath)
+	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+	require.NoError(ts.t, err)
+	atmosOutputAll(ts.t, options, "", &component.output)
+}
+
+func (ts *Atmos) OutputAll(component *AtmosComponent) map[string]Output {
+	ts.loadOutputAll(component)
+	return component.output
+}
+
+func (ts *Atmos) Output(component *AtmosComponent, key string) string {
+	ts.loadOutputAll(component)
+
+	if value, ok := component.output[key]; ok {
+		return value.Value.(string)
+	}
+	require.Fail(ts.t, fmt.Sprintf("Output key %s not found", key))
+	return ""
+}
+
+func (ts *Atmos) OutputList(component *AtmosComponent, key string) []string {
+	ts.loadOutputAll(component)
+	if value, ok := component.output[key]; ok {
+		if outputList, isList := value.Value.([]interface{}); isList {
+			result, err := parseListOutputTerraform(outputList, key)
+			require.NoError(ts.t, err)
+			return result
+		}
+		error := atmos.UnexpectedOutputType{Key: key, ExpectedType: "map or list", ActualType: reflect.TypeOf(value).String()}
+		require.Fail(ts.t, error.Error())
+
+	} else {
+		require.Fail(ts.t, fmt.Sprintf("Output key %s not found", key))
+	}
+	return []string{}
+}
+
+func (ts *Atmos) getAtmosOptions(vars map[string]interface{}) *atmos.Options {
 	result, err := ts.options.Clone()
 	require.NoError(ts.t, err)
 
@@ -75,9 +131,15 @@ func (ts *Atmos) getAtmosOptions() *atmos.Options {
 	}
 
 	err = mergo.Merge(&envvars, resultEnvVars)
-	require.NoError(t, err)
+	require.NoError(ts.t, err)
 
 	result.EnvVars = envvars
+
+	if vars != nil {
+		err = mergo.Merge(&result.Vars, vars)
+		require.NoError(ts.t, err)
+
+	}
 
 	return result
 }

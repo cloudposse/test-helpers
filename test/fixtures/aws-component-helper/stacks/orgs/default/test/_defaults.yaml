@@ -5,8 +5,13 @@ terraform:
   backend_type: local
   backend:
     local:
-      path: ../../../../state/{{ .component }}/terraform.tfstate
-      workspace_dir: ../../../../state/{{ .component }}/
+      path: ../../../../../state/{{ getenv "TEST_SUITE_NAME" | default "" }}/{{ .component }}/terraform.tfstate
+      workspace_dir: ../../../../../state/{{ getenv "TEST_SUITE_NAME" | default "" }}/{{ .component }}/
+  remote_state_backend_type: local
+  remote_state_backend:
+    local:
+      path: ../../../../../state/{{ getenv "TEST_SUITE_NAME" | default "" }}/{{ .component }}/terraform.tfstate
+      workspace_dir: ../../../../../state/{{ getenv "TEST_SUITE_NAME" | default "" }}/{{ .component }}/
   vars:
     namespace: eg
     tenant: default

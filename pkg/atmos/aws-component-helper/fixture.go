@@ -19,19 +19,24 @@ var (
 )
 
 var (
-	skipTmpDir              = flag.Bool("cth.skip-tmp-dir", false, "Run in the current directory")
-	skipVendorDependencies  = flag.Bool("cth.skip-vendor", false, "skip vendor dependencies")
-	runParallel             = flag.Bool("cth.parallel", false, "Run parallel")
-	forceNewSuite           = flag.Bool("cth.force-new-suite", false, "force new suite")
-	suiteIndex              = flag.Int("cth.suite-index", -1, "suite index")
-	skipAwsNuke             = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
-	skipDeployDependencies  = flag.Bool("cth.skip-deploy-deps", false, "skip deploy dependencies")
-	skipDestroyDependencies = flag.Bool("cth.skip-destroy-deps", false, "skip destroy dependencies")
-	skipTeardownTestSuite   = flag.Bool("cth.skip-teardown", false, "skip test suite teardown")
-	skipTests               = flag.Bool("cth.skip-tests", false, "skip tests")
+	skipTmpDir             = flag.Bool("skip-tmp-dir", false, "Run in the current directory")
+	skipVendorDependencies = flag.Bool("skip-vendor", false, "skip vendor dependencies")
+	skipTeardownFixtures   = flag.Bool("skip-fixtures-teardown", false, "skip fixtures teardown")
+	skipTeardown           = flag.Bool("skip-teardown", false, "skip teardown")
+	// runParallel            = flag.Bool("parallel", false, "Run parallel")
 
-	skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
-	skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
+	// forceNewSuite           = flag.Bool("cth.force-new-suite", false, "force new suite")
+	// suiteIndex              = flag.Int("cth.suite-index", -1, "suite index")
+	// skipAwsNuke             = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
+
+	// skipDependencies  = flag.Bool("cth.skip-deps", false, "skip deploy dependencies")
+	// skipDeployDependencies  = flag.Bool("cth.skip-deps-deploy", false, "skip deploy dependencies")
+	// skipDestroyDependencies = flag.Bool("cth.skip-deps-destroy", false, "skip destroy dependencies")
+	// skipTeardownTestSuite = flag.Bool("skip-teardown", false, "skip test suite teardown")
+	// skipTests             = flag.Bool("skip-tests", false, "skip tests")
+
+	// skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
+	// skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
 )
 
 type Fixture struct {
@@ -96,7 +101,7 @@ func (ts *Fixture) GlobalStateDir() string {
 func (ts *Fixture) SetUp(options *atmos.Options) {
 	suitesOptions := ts.getAtmosOptions(options, map[string]interface{}{})
 	if !*skipTmpDir {
-		fmt.Printf("Create TMP dir: %s \n", ts.TempDir)
+		fmt.Printf("Create fixtures tmp dir: %s \n", ts.TempDir)
 
 		err := os.Mkdir(ts.TempDir, 0777)
 		require.NoError(ts.t, err)
@@ -104,7 +109,7 @@ func (ts *Fixture) SetUp(options *atmos.Options) {
 		err = copyDirectoryRecursively(ts.SourceDir, ts.TempDir)
 		require.NoError(ts.t, err)
 	} else {
-		fmt.Printf("Use source dir: %s \n", ts.SourceDir)
+		fmt.Printf("Use fixtures source dir: %s \n", ts.SourceDir)
 	}
 
 	if !*skipVendorDependencies {
@@ -121,10 +126,14 @@ func (ts *Fixture) SetUp(options *atmos.Options) {
 }
 
 func (ts *Fixture) TearDown() {
+	if *skipTeardown {
+		fmt.Println("Skip teardown")
+		return
+	}
 	for i := len(ts.suites) - 1; i >= 0; i-- {
 		ts.suites[i].runTeardown(ts.t)
 	}
-	if !*skipTmpDir {
+	if !*skipTmpDir && !*skipTeardownFixtures {
 		err := os.RemoveAll(ts.TempDir)
 		require.NoError(ts.t, err)
 	}

@@ -37,3 +37,14 @@ func copyDirectoryRecursively(srcDir string, destDir string) error {
 		}
 	})
 }
+
+// Parse a list output in the format it is returned by Terraform 0.12 and newer versions
+func parseListOutputTerraform(outputList []interface{}, key string) ([]string, error) {
+	list := []string{}
+
+	for _, item := range outputList {
+		list = append(list, fmt.Sprintf("%v", item))
+	}
+
+	return list, nil
+}

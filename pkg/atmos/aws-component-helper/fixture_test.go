@@ -43,6 +43,13 @@ func mockAtmos() {
 		fmt.Println(description)
 		return ""
 	}
+
+	atmosOutputAll = func(_ tt.TestingT, options *atmos.Options, key string, v interface{}) {
+		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "terraform", "output", "--skip-init", "--json")...)
+		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
+		fmt.Println(description)
+	}
+
 }
 
 func TestFixtureMinimum(t *testing.T) {
@@ -93,27 +100,37 @@ func TestFixtureSuitesRun(t *testing.T) {
 	defer fixture.TearDown()
 
 	fixture.Suite("default", func(t *testing.T, suite *Suite) {
-		// suite.AddDependency(t, "vpc", "default-test")
+		suite.AddDependency("vpc/deps", "default-test")
 
-		// var deps *AtmosComponent
+		suite.Setup(t, func(t *testing.T, atm *Atmos) {
+			atm.GetAndDeploy("vpc/manual-deps", "default-test", nil)
+		})
 
-		// suite.Setup(t, func(t *testing.T, atm *Atmos) {
-		// 	deps = atm.GetAndDeploy(t, "vpc/deps", "default-test")
-		// })
+		suite.Test(t, "two-private-subnets", func(t *testing.T, atm *Atmos) {
+			inputs := map[string]interface{}{
+				"name":                    "vpc-terraform",
+				"availability_zones":      []string{"a", "b"},
+				"public_subnets_enabled":  false,
+				"nat_gateway_enabled":     false,
+				"nat_instance_enabled":    false,
+				"subnet_type_tag_key":     "eg.cptest.co/subnet/type",
+				"max_subnet_count":        3,
+				"vpc_flow_logs_enabled":   false,
+				"ipv4_primary_cidr_block": "172.16.0.0/16",
+			}
 
-		// suite.Test(t, "two-private-subnets", func(t *testing.T, atm *Atmos) {
-		// 	component := atm.GetAndDeploy(t, "vpc/private-only", "default-test")
-		// 	defer atm.Destroy(t, component)
-		// })
+			component := atm.GetAndDeploy("vpc/private-only", "default-test", inputs)
+			defer atm.Destroy(component)
+		})
 
-		// suite.Test(t, "public-subnets", func(t *testing.T, atm *Atmos) {
-		// 	component := atm.GetAndDeploy(t, "vpc/full", "default-test")
-		// 	defer atm.Destroy(t, component)
-		// })
+		suite.Test(t, "public-subnets", func(t *testing.T, atm *Atmos) {
+			component := atm.GetAndDeploy("vpc/full", "default-test", nil)
+			defer atm.Destroy(component)
+		})
 
-		// suite.TearDown(t, func(t *testing.T, atm *Atmos) {
-		// 	atm.Destroy(t, deps)
-		// })
+		suite.TearDown(t, func(t *testing.T, atm *Atmos) {
+			atm.GetAndDestroy("vpc/manual-deps", "default-test", nil)
+		})
 	})
 
 }
