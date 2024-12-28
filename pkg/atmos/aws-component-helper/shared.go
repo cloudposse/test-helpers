@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 func copyDirectoryRecursively(srcDir string, destDir string) error {
@@ -47,4 +49,30 @@ func parseListOutputTerraform(outputList []interface{}, key string) ([]string, e
 	}
 
 	return list, nil
+}
+
+func matchFilter(name string) (bool, error) {
+	nameParts := strings.Split(name, "/")
+
+	if len(nameParts) == 1 {
+		return false, fmt.Errorf("Invalid test name: %s. Should contains at least 1 '/'", name)
+	}
+	nameParts = nameParts[1:]
+
+	matchParts := strings.Split(*matchSuiteAndTest, "/")
+
+	partsCount := min(len(nameParts), len(matchParts))
+
+	for i := 0; i < partsCount; i++ {
+		fmt.Printf("Matching %s with %s\n", matchParts[i], nameParts[i])
+		result, err := regexp.MatchString(matchParts[i], nameParts[i])
+		if err != nil {
+			return false, err
+		}
+		if !result {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }

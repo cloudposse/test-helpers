@@ -90,29 +90,29 @@ func (ts *Suite) AddDependency(componentName string, stackName string) {
 	component := NewAtmosComponent(componentName, stackName, nil)
 	ts.dependencies = append(ts.dependencies, component)
 	ts.teardown = append(ts.teardown, &teadDown{component: component, callback: nil})
-	ts.getAtmos(ts.t).Deploy(component)
+	ts.getAtmos().Deploy(component)
 }
 
-func (ts *Suite) getAtmos(t *testing.T) *Atmos {
+func (ts *Suite) getAtmos() *Atmos {
 	return NewAtmos(ts.t, ts.getAtmosOptions(map[string]interface{}{}))
 }
 
-func (ts *Suite) getTestAtmos(t *testing.T) *Atmos {
-	return ts.getAtmos(ts.t)
+func (ts *Suite) getTestAtmos() *Atmos {
+	return ts.getAtmos()
 }
 
-func (ts *Suite) runTeardown(t *testing.T) {
+func (ts *Suite) runTeardown() {
 	if *skipTeardown {
 		fmt.Printf("Skip teardown suite %s\n", ts.name)
 		fmt.Printf("Suite %s preserve states %s\n", ts.name, ts.StateDir())
 		return
 	}
-	atm := ts.getAtmos(t)
+	atm := ts.getAtmos()
 	var f *teadDown
 	for i := len(ts.teardown) - 1; i >= 0; i-- {
 		f = ts.teardown[i]
 		if f.callback != nil {
-			(*f.callback)(t, atm)
+			(*f.callback)(ts.t, atm)
 		}
 		if f.component != nil {
 			atm.Destroy(f.component)
@@ -132,7 +132,7 @@ func (ts *Suite) Setup(t *testing.T, f func(t *testing.T, atm *Atmos)) {
 		fmt.Printf("Skip suite %s setup callback\n", ts.name)
 		return
 	}
-	atm := ts.getAtmos(ts.t)
+	atm := ts.getAtmos()
 	f(t, atm)
 }
 
@@ -145,10 +145,15 @@ func (ts *Suite) Test(t *testing.T, name string, f func(t *testing.T, atm *Atmos
 		fmt.Printf("Skip test %s/%s\n", ts.name, name)
 		return
 	}
-	atm := ts.getTestAtmos(ts.t)
-	t.Run(name, func(t *testing.T) {
-		f(t, atm)
-	})
+	atm := ts.getTestAtmos()
+	testRunName := fmt.Sprintf("%s/%s", t.Name(), name)
+	if ok, err := matchFilter(testRunName); ok {
+		t.Run(name, func(t *testing.T) {
+			f(t, atm)
+		})
+	} else {
+		require.NoError(t, err)
+	}
 }
 
 func (ts *Suite) getAtmosOptions(vars map[string]interface{}) *atmos.Options {

@@ -23,6 +23,7 @@ var (
 	skipVendorDependencies = flag.Bool("skip-vendor", false, "skip vendor dependencies")
 	skipTeardownFixtures   = flag.Bool("skip-fixtures-teardown", false, "skip fixtures teardown")
 	skipTeardown           = flag.Bool("skip-teardown", false, "skip teardown")
+	matchSuiteAndTest      = flag.String("match", "", "regular expression to select suite and tests to run")
 	// runParallel            = flag.Bool("parallel", false, "Run parallel")
 
 	// forceNewSuite           = flag.Bool("cth.force-new-suite", false, "force new suite")
@@ -131,7 +132,7 @@ func (ts *Fixture) TearDown() {
 		return
 	}
 	for i := len(ts.suites) - 1; i >= 0; i-- {
-		ts.suites[i].runTeardown(ts.t)
+		ts.suites[i].runTeardown()
 	}
 	if !*skipTmpDir && !*skipTeardownFixtures {
 		err := os.RemoveAll(ts.TempDir)
@@ -178,5 +179,11 @@ func (ts *Fixture) Suite(name string, f func(t *testing.T, suite *Suite)) {
 	suite := NewSuite(ts.t, name, ts)
 	ts.suites = append(ts.suites, suite)
 	ts.suitesNames = append(ts.suitesNames, name)
-	f(ts.t, suite)
+	if ok, err := matchFilter(fmt.Sprintf("%s/%s", ts.t.Name(), suite.name)); ok {
+		ts.t.Run(name, func(t *testing.T) {
+			f(t, suite)
+		})
+	} else {
+		require.NoError(ts.t, err)
+	}
 }
