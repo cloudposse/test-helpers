@@ -9,8 +9,8 @@ terraform:
   backend_type: local
   backend:
     local:
-      path: ../../../state/{{ .component }}/terraform.tfstate
-      workspace_dir: ../../../state/{{ .component }}/
+      path: ../../../state/{{ getenv "TEST_SUITE_NAME" | default "" }}/{{ .component }}/terraform.tfstate
+      workspace_dir: ../../../state/{{ getenv "TEST_SUITE_NAME" | default "" }}/{{ .component }}/
   settings: {}
   vars:
     label_order:

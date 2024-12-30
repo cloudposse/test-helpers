@@ -1,11 +1,16 @@
 package aws_component_helper
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 func copyDirectoryRecursively(srcDir string, destDir string) error {
@@ -64,7 +69,6 @@ func matchFilter(name string) (bool, error) {
 	partsCount := min(len(nameParts), len(matchParts))
 
 	for i := 0; i < partsCount; i++ {
-		fmt.Printf("Matching %s with %s\n", matchParts[i], nameParts[i])
 		result, err := regexp.MatchString(matchParts[i], nameParts[i])
 		if err != nil {
 			return false, err
@@ -75,4 +79,50 @@ func matchFilter(name string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func createDir(tempDir string, name string) error {
+	dir := filepath.Join(tempDir, name)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, 0777)
+		return err
+	}
+
+	return nil
+}
+
+func createTerraformComponentsDir(tempDir string) error {
+	stateDir := filepath.Join(tempDir, "components", "terraform")
+	if _, err := os.Stat(stateDir); os.IsNotExist(err) {
+		err := os.MkdirAll(stateDir, 0777)
+		return err
+	}
+
+	return nil
+}
+
+func getTestName() (string, error) {
+	_, filename, _, ok := runtime.Caller(0)
+
+	if !ok {
+		return "", fmt.Errorf("unable to get the test file name")
+	}
+
+	testName := filepath.Base(filename[:len(filename)-3]) + "_"
+	return testName, nil
+}
+
+func getAwsAccountId() (string, error) {
+	ctx := context.Background()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return "", err
+	}
+	stsClient := sts.NewFromConfig(cfg)
+	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		return "", err
+	}
+
+	return *identity.Account, nil
 }

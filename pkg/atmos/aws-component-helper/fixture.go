@@ -48,6 +48,7 @@ type Fixture struct {
 	SourceDir        string
 	TempDir          string
 	FixturesPath     string
+	State            *State
 	suites           []*Suite
 	suitesNames      []string
 }
@@ -59,10 +60,13 @@ func NewFixture(t *testing.T, sourceDir string, awsRegion string, fixturesDir st
 	randID := random.UniqueId()
 	randomId := strings.ToLower(randID)
 
-	tmpdir := filepath.Join(os.TempDir(), "test-suites-"+randomId)
+	tmpdir := filepath.Join(os.TempDir(), "fixtures-"+randomId)
 
 	realSourcePath, err := filepath.Abs(sourceDir)
 	require.NoError(t, err)
+
+	state_namespace := strings.ReplaceAll(filepath.Join(t.Name(), fixturesDir), "/", "-")
+	state := NewState(state_namespace, filepath.Join(realSourcePath, "state"))
 
 	suites := &Fixture{
 		t:                t,
@@ -74,6 +78,7 @@ func NewFixture(t *testing.T, sourceDir string, awsRegion string, fixturesDir st
 		AwsRegion:        awsRegion,
 		suites:           []*Suite{},
 		suitesNames:      []string{},
+		State:            state,
 	}
 
 	return suites
@@ -89,14 +94,6 @@ func (ts *Fixture) WorkDir() string {
 
 func (ts *Fixture) FixtureDir() string {
 	return filepath.Join(ts.WorkDir(), ts.FixturesPath)
-}
-
-func (ts *Fixture) StateDir() string {
-	return ""
-}
-
-func (ts *Fixture) GlobalStateDir() string {
-	return filepath.Join(ts.WorkDir(), "state")
 }
 
 func (ts *Fixture) SetUp(options *atmos.Options) {
@@ -119,7 +116,7 @@ func (ts *Fixture) SetUp(options *atmos.Options) {
 		fmt.Println("Skip Vendor Pull")
 	}
 
-	err := createDir(ts.WorkDir(), "state")
+	err := ts.State.SetUp()
 	require.NoError(ts.t, err)
 
 	err = createDir(ts.WorkDir(), ".cache")
@@ -138,6 +135,8 @@ func (ts *Fixture) TearDown() {
 		err := os.RemoveAll(ts.TempDir)
 		require.NoError(ts.t, err)
 	}
+	err := ts.State.Teardown()
+	require.NoError(ts.t, err)
 }
 
 func (ts *Fixture) getAtmosOptions(options *atmos.Options, vars map[string]interface{}) *atmos.Options {
@@ -161,11 +160,11 @@ func (ts *Fixture) getAtmosOptions(options *atmos.Options, vars map[string]inter
 	err := mergo.Merge(&result.EnvVars, envvars)
 	require.NoError(ts.t, err)
 
-	suiteVars := map[string]interface{}{
+	fixtureVars := map[string]interface{}{
 		"region": ts.AwsRegion,
 	}
 
-	err = mergo.Merge(&result.Vars, suiteVars)
+	err = mergo.Merge(&result.Vars, fixtureVars)
 	require.NoError(ts.t, err)
 
 	err = mergo.Merge(&result.Vars, vars)
@@ -176,10 +175,14 @@ func (ts *Fixture) getAtmosOptions(options *atmos.Options, vars map[string]inter
 
 func (ts *Fixture) Suite(name string, f func(t *testing.T, suite *Suite)) {
 	require.NotContains(ts.t, ts.suitesNames, name, "Suite %s already exists", name)
+
 	suite := NewSuite(ts.t, name, ts)
+
 	ts.suites = append(ts.suites, suite)
 	ts.suitesNames = append(ts.suitesNames, name)
-	if ok, err := matchFilter(fmt.Sprintf("%s/%s", ts.t.Name(), suite.name)); ok {
+
+	suiteRunName := fmt.Sprintf("%s/%s", ts.t.Name(), suite.name)
+	if ok, err := matchFilter(suiteRunName); ok {
 		ts.t.Run(name, func(t *testing.T) {
 			f(t, suite)
 		})

@@ -79,6 +79,9 @@ func TestFixtureCreate(t *testing.T) {
 	componentTestSuites := NewFixture(t, testFolder, "us-west-2", atmosExamplePath)
 
 	assert.Equal(t, componentTestSuites.SourceDir, testFolder)
+
+	defer componentTestSuites.TearDown()
+	componentTestSuites.SetUp(&atmos.Options{})
 }
 
 func TestFixtureSuitesRun(t *testing.T) {

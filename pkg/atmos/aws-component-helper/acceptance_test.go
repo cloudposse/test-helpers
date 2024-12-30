@@ -44,11 +44,5 @@ func TestAcceptance(t *testing.T) {
 			assert.Equal(t, atm.Output(component, "test"), "Hello, World")
 			assert.Equal(t, atm.OutputList(component, "test_list"), []string{"a", "b", "c"})
 		})
-
-		// suite.Test(t, "public-subnets", func(t *testing.T, atm *Atmos) {
-		// 	component := atm.GetAndDeploy("vpc/full", "default-test", nil)
-		// 	defer atm.Destroy(component)
-		// })
 	})
-
 }

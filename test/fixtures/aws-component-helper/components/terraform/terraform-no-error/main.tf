@@ -1,5 +1,10 @@
 variable "region" {}
 
+variable "attributes" {
+  type    = list
+  default = []
+}
+
 output "test" {
   value = "Hello, World"
 }

@@ -1,6 +1,7 @@
 package aws_component_helper
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -104,4 +105,30 @@ func TestMatchFilter(t *testing.T) {
 		assert.False(t, result)
 	})
 
+}
+
+func TestCreateStateDir(t *testing.T) {
+	tempDir := t.TempDir()
+
+	err := createDir(tempDir, "state")
+	assert.NoError(t, err)
+
+	stateDir := filepath.Join(tempDir, "state")
+	assert.DirExists(t, stateDir)
+}
+
+func TestCreateTerraformComponentsDir(t *testing.T) {
+	tempDir := t.TempDir()
+
+	err := createTerraformComponentsDir(tempDir)
+	assert.NoError(t, err)
+
+	componentsDir := filepath.Join(tempDir, "components", "terraform")
+	assert.DirExists(t, componentsDir)
+}
+
+func TestGetTestName(t *testing.T) {
+	testName, err := getTestName()
+	assert.NoError(t, err)
+	assert.Contains(t, testName, "shared_")
 }
