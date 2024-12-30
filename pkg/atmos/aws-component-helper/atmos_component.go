@@ -12,7 +12,7 @@ type Output struct {
 }
 
 type AtmosComponent struct {
-	RandomIdentifier string
+	randomIdentifier string
 	ComponentName    string
 	StackName        string
 	Vars             map[string]interface{}
@@ -24,9 +24,13 @@ func NewAtmosComponent(component string, stack string, vars map[string]interface
 	randomId := strings.ToLower(randID)
 
 	return &AtmosComponent{
-		RandomIdentifier: randomId,
+		randomIdentifier: randomId,
 		ComponentName:    component,
 		StackName:        stack,
 		Vars:             vars,
 	}
+}
+
+func (ts *AtmosComponent) GetRandomIdentifier() string {
+	return ts.randomIdentifier
 }

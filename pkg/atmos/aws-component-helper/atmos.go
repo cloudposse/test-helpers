@@ -147,7 +147,7 @@ func (ts *Atmos) getAtmosOptions(component *AtmosComponent) *atmos.Options {
 	result.EnvVars = envvars
 
 	if _, ok := result.Vars["attributes"]; !ok {
-		result.Vars["attributes"] = []string{component.RandomIdentifier}
+		result.Vars["attributes"] = []string{component.randomIdentifier}
 	}
 
 	if component.Vars != nil {

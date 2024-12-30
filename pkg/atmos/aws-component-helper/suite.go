@@ -44,7 +44,7 @@ type Suite struct {
 	dependencies     []*AtmosComponent
 	teardown         []*teadDown
 	options          *atmos.Options
-	State            *State
+	state            *State
 }
 
 func NewSuite(t *testing.T, name string, fixture *Fixture) *Suite {
@@ -58,7 +58,7 @@ func NewSuite(t *testing.T, name string, fixture *Fixture) *Suite {
 		name:             name,
 		randomIdentifier: randomId,
 		dependencies:     []*AtmosComponent{},
-		State:            suiteState,
+		state:            suiteState,
 		teardown:         []*teadDown{},
 		options:          fixture.getAtmosOptions(&atmos.Options{}, map[string]interface{}{}),
 	}
@@ -73,7 +73,7 @@ func (ts *Suite) AddDependency(componentName string, stackName string) {
 		fmt.Printf("Skip suite %s setup dependency component: %s stack: %s\n", ts.name, componentName, stackName)
 		return
 	}
-	ts.getAtmos(ts.State).Deploy(component)
+	ts.getAtmos(ts.state).Deploy(component)
 }
 
 func (ts *Suite) getAtmos(state *State) *Atmos {
@@ -91,7 +91,7 @@ func (ts *Suite) runTeardown() {
 		fmt.Printf("Skip teardown suite %s\n", ts.name)
 		return
 	}
-	atm := ts.getAtmos(ts.State)
+	atm := ts.getAtmos(ts.state)
 	var f *teadDown
 	for i := len(ts.teardown) - 1; i >= 0; i-- {
 		f = ts.teardown[i]
@@ -102,7 +102,7 @@ func (ts *Suite) runTeardown() {
 			atm.Destroy(f.component)
 		}
 	}
-	err := ts.State.Teardown()
+	err := ts.state.Teardown()
 	assert.NoError(ts.t, err)
 }
 
@@ -111,7 +111,7 @@ func (ts *Suite) Setup(t *testing.T, f func(t *testing.T, atm *Atmos)) {
 		fmt.Printf("Skip suite %s setup callback\n", ts.name)
 		return
 	}
-	atm := ts.getAtmos(ts.State)
+	atm := ts.getAtmos(ts.state)
 	f(t, atm)
 }
 
@@ -125,7 +125,7 @@ func (ts *Suite) Test(t *testing.T, name string, f func(t *testing.T, atm *Atmos
 		return
 	}
 
-	testState, err := ts.State.Fork(name)
+	testState, err := ts.state.Fork(name)
 	require.NoError(t, err)
 	defer testState.Teardown()
 
@@ -148,4 +148,8 @@ func (ts *Suite) getAtmosOptions(vars map[string]interface{}) *atmos.Options {
 	require.NoError(ts.t, err)
 
 	return result
+}
+
+func (ts *Suite) GetRandomIdentifier() string {
+	return ts.randomIdentifier
 }
