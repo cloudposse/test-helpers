@@ -23,6 +23,7 @@ var (
 	skipVendorDependencies = flag.Bool("skip-vendor", false, "skip vendor dependencies")
 	skipTeardownFixtures   = flag.Bool("skip-fixtures-teardown", false, "skip fixtures teardown")
 	skipTeardown           = flag.Bool("skip-teardown", false, "skip teardown")
+	useCache               = flag.Bool("cache", false, "use cache for terraform plugins")
 	matchSuiteAndTest      = flag.String("match", "", "regular expression to select suite and tests to run")
 	// runParallel            = flag.Bool("parallel", false, "Run parallel")
 
@@ -119,8 +120,10 @@ func (ts *Fixture) SetUp(options *atmos.Options) {
 	err := ts.State.SetUp()
 	require.NoError(ts.t, err)
 
-	err = createDir(ts.WorkDir(), ".cache")
-	require.NoError(ts.t, err)
+	if *useCache {
+		err = createDir(ts.WorkDir(), ".cache")
+		require.NoError(ts.t, err)
+	}
 }
 
 func (ts *Fixture) TearDown() {
@@ -154,7 +157,10 @@ func (ts *Fixture) getAtmosOptions(options *atmos.Options, vars map[string]inter
 		"TEST_ACCOUNT_ID":       ts.AwsAccountId,
 		"ATMOS_BASE_PATH":       result.AtmosBasePath,
 		"ATMOS_CLI_CONFIG_PATH": result.AtmosBasePath,
-		"TF_PLUGIN_CACHE_DIR":   filepath.Join(ts.WorkDir(), ".cache"),
+	}
+
+	if *useCache {
+		envvars["TF_PLUGIN_CACHE_DIR"] = filepath.Join(ts.WorkDir(), ".cache")
 	}
 
 	err := mergo.Merge(&result.EnvVars, envvars)

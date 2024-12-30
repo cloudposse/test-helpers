@@ -44,12 +44,12 @@ func mockAtmos() {
 		return ""
 	}
 
-	atmosOutputAll = func(_ tt.TestingT, options *atmos.Options, _ string, _ interface{}) {
+	atmosOutputAllE = func(_ tt.TestingT, options *atmos.Options, _ string, _ interface{}) error {
 		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "terraform", "output", "--skip-init", "--json")...)
 		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 		fmt.Println(description)
+		return nil
 	}
-
 }
 
 func TestFixtureMinimum(t *testing.T) {

@@ -1,11 +1,14 @@
 package aws_component_helper
 
 import (
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -21,7 +24,7 @@ var (
 	atmosDestroy       = atmos.Destroy
 	atmosPlanExitCodeE = atmos.PlanExitCodeE
 	atmosVendorPull    = atmos.VendorPull
-	atmosOutputAll     = atmos.OutputStruct
+	atmosOutputAllE    = atmos.OutputStructE
 )
 var (
 	skipDeploy  = flag.Bool("skip-deploy", false, "skip all deployments")
@@ -61,7 +64,8 @@ func (ts *Atmos) Deploy(component *AtmosComponent) {
 	require.NoError(ts.t, err)
 	if !*skipDeploy {
 		atmosApply(ts.t, options)
-		atmosOutputAll(ts.t, options, "", &component.output)
+		err := atmosOutputAllE(ts.t, options, "", &component.output)
+		require.NoError(ts.t, err)
 	}
 }
 
@@ -83,7 +87,16 @@ func (ts *Atmos) loadOutputAll(component *AtmosComponent) {
 	defer os.RemoveAll(options.AtmosBasePath)
 	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
 	require.NoError(ts.t, err)
-	atmosOutputAll(ts.t, options, "", &component.output)
+
+	err = atmosOutputAllE(ts.t, options, "", &component.output)
+	if err != nil && strings.Contains(err.Error(), "Backend initialization required") {
+		// Run 'terraform workspace' instead of 'terraform init' as it also select the workspace
+		// So terraform output will not fail with "Switch to workspace" json parse error
+		_, err := atmos.RunAtmosCommandE(ts.t, options, atmos.FormatArgs(options, "terraform", "workspace")...)
+		require.NoError(ts.t, err)
+		err = atmosOutputAllE(ts.t, options, "", &component.output)
+		require.NoError(ts.t, err)
+	}
 }
 
 func (ts *Atmos) OutputAll(component *AtmosComponent) map[string]Output {
@@ -116,6 +129,34 @@ func (ts *Atmos) OutputList(component *AtmosComponent, key string) []string {
 		require.Fail(ts.t, fmt.Sprintf("Output key %s not found", key))
 	}
 	return []string{}
+}
+
+func (ts *Atmos) OutputMapOfObjects(component *AtmosComponent, key string) map[string]interface{} {
+	ts.loadOutputAll(component)
+	if value, ok := component.output[key]; ok {
+		if outputMap, isMap := value.Value.(map[string]interface{}); isMap {
+			return outputMap
+		}
+		error := atmos.UnexpectedOutputType{Key: key, ExpectedType: "map of objects", ActualType: reflect.TypeOf(value).String()}
+		require.Fail(ts.t, error.Error())
+
+	} else {
+		require.Fail(ts.t, fmt.Sprintf("Output key %s not found", key))
+	}
+	return map[string]interface{}{}
+}
+
+func (ts *Atmos) OutputStruct(component *AtmosComponent, key string, v any) {
+	ts.loadOutputAll(component)
+	if value, ok := component.output[key]; ok {
+		jsonByte, err := json.Marshal(value.Value)
+		require.NoError(ts.t, err)
+		jsonString := cleanOutput(string(jsonByte))
+		err = json.Unmarshal([]byte(jsonString), &v)
+		require.NoError(ts.t, err)
+	} else {
+		require.Fail(ts.t, fmt.Sprintf("Output key %s not found", key))
+	}
 }
 
 func (ts *Atmos) getAtmosOptions(component *AtmosComponent) *atmos.Options {
@@ -158,4 +199,77 @@ func (ts *Atmos) getAtmosOptions(component *AtmosComponent) *atmos.Options {
 	atmosOptions := atmos.WithDefaultRetryableErrors(ts.t, result)
 
 	return atmosOptions
+}
+
+func parseMap(m map[string]interface{}) (map[string]interface{}, error) {
+
+	result := make(map[string]interface{})
+
+	for k, v := range m {
+		switch vt := v.(type) {
+		case map[string]interface{}:
+			nestedMap, err := parseMap(vt)
+			if err != nil {
+				return nil, err
+			}
+			result[k] = nestedMap
+		case []interface{}:
+			nestedList, err := parseListOfMaps(vt)
+			if err != nil {
+				return nil, err
+			}
+			result[k] = nestedList
+		case float64:
+			testInt, err := strconv.ParseInt((fmt.Sprintf("%v", vt)), 10, 0)
+			if err == nil {
+				result[k] = int(testInt)
+			} else {
+				result[k] = vt
+			}
+		default:
+			result[k] = vt
+		}
+
+	}
+	return result, nil
+}
+
+// parseListOfMaps takes a list of maps and parses the types.
+// It is mainly a wrapper for parseMap to support lists.
+func parseListOfMaps(l []interface{}) ([]map[string]interface{}, error) {
+	var result []map[string]interface{}
+
+	for _, v := range l {
+
+		asMap, isMap := v.(map[string]interface{})
+		if !isMap {
+			err := errors.New("Type switching to map[string]interface{} failed.")
+			return nil, err
+		}
+
+		m, err := parseMap(asMap)
+
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, m)
+	}
+
+	return result, nil
+
+}
+
+func cleanOutput(out string) string {
+	var result []rune
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(line, "INFO") {
+			continue
+		}
+		for _, r := range line {
+			if r >= 32 && r < 127 { // Keep printable ASCII characters only
+				result = append(result, r)
+			}
+		}
+	}
+	return string(result)
 }

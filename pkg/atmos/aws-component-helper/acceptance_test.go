@@ -41,8 +41,36 @@ func TestAcceptance(t *testing.T) {
 			defer atm.GetAndDestroy("terraform-no-error", "default-test", nil)
 			component := atm.GetAndDeploy("terraform-no-error", "default-test", nil)
 
-			assert.Equal(t, atm.Output(component, "test"), "Hello, World")
-			assert.Equal(t, atm.OutputList(component, "test_list"), []string{"a", "b", "c"})
+			mapOfObjects := map[string]interface{}{
+				"a": map[string]interface{}{"b": "c"},
+				"d": map[string]interface{}{"e": "f"},
+			}
+
+			assert.Equal(t, "Hello, World", atm.Output(component, "test"))
+			assert.Equal(t, []string{"a", "b", "c"}, atm.OutputList(component, "test_list"))
+			assert.Equal(t, mapOfObjects, atm.OutputMapOfObjects(component, "test_map_of_objects"))
+
+			type structValue1 struct {
+				B string
+			}
+
+			type structValue2 struct {
+				E string
+			}
+
+			type structValue struct {
+				A structValue1
+				D structValue2
+			}
+
+			structResult := structValue{}
+			structExpected := structValue{
+				A: structValue1{B: "c"},
+				D: structValue2{E: "f"},
+			}
+
+			atm.OutputStruct(component, "test_map_of_objects", &structResult)
+			assert.Equal(t, structExpected, structResult)
 		})
 	})
 }
