@@ -1,6 +1,7 @@
 package aws_component_helper
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,6 +22,10 @@ var (
 	atmosPlanExitCodeE = atmos.PlanExitCodeE
 	atmosVendorPull    = atmos.VendorPull
 	atmosOutputAll     = atmos.OutputStruct
+)
+var (
+	skipDeploy  = flag.Bool("skip-deploy", false, "skip all deployments")
+	skipDestroy = flag.Bool("skip-destroy", false, "skip all destroy")
 )
 
 type Atmos struct {
@@ -54,8 +59,10 @@ func (ts *Atmos) Deploy(component *AtmosComponent) {
 	defer os.RemoveAll(options.AtmosBasePath)
 	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
 	require.NoError(ts.t, err)
-	atmosApply(ts.t, options)
-	atmosOutputAll(ts.t, options, "", &component.output)
+	if !*skipDeploy {
+		atmosApply(ts.t, options)
+		atmosOutputAll(ts.t, options, "", &component.output)
+	}
 }
 
 func (ts *Atmos) Destroy(component *AtmosComponent) {
@@ -63,7 +70,9 @@ func (ts *Atmos) Destroy(component *AtmosComponent) {
 	defer os.RemoveAll(options.AtmosBasePath)
 	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
 	assert.NoError(ts.t, err)
-	atmosDestroy(ts.t, options)
+	if !*skipDestroy {
+		atmosDestroy(ts.t, options)
+	}
 }
 
 func (ts *Atmos) loadOutputAll(component *AtmosComponent) {
@@ -96,7 +105,7 @@ func (ts *Atmos) OutputList(component *AtmosComponent, key string) []string {
 	ts.loadOutputAll(component)
 	if value, ok := component.output[key]; ok {
 		if outputList, isList := value.Value.([]interface{}); isList {
-			result, err := parseListOutputTerraform(outputList, key)
+			result, err := parseListOutputTerraform(outputList)
 			require.NoError(ts.t, err)
 			return result
 		}

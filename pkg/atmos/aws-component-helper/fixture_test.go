@@ -44,7 +44,7 @@ func mockAtmos() {
 		return ""
 	}
 
-	atmosOutputAll = func(_ tt.TestingT, options *atmos.Options, key string, v interface{}) {
+	atmosOutputAll = func(_ tt.TestingT, options *atmos.Options, _ string, _ interface{}) {
 		options, args := atmos.GetCommonOptions(options, atmos.FormatArgs(options, "terraform", "output", "--skip-init", "--json")...)
 		description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 		fmt.Println(description)

@@ -64,7 +64,7 @@ func parseListOfMaps(l []interface{}) ([]map[string]interface{}, error) {
 			return nil, err
 		}
 
-		m, err := ParseMap(asMap)
+		m, err := parseMap(asMap)
 
 		if err != nil {
 			return nil, err
@@ -76,7 +76,7 @@ func parseListOfMaps(l []interface{}) ([]map[string]interface{}, error) {
 
 }
 
-// ParseMap takes a map of interfaces and parses the types.
+// parseMap takes a map of interfaces and parses the types.
 // It is recursive which allows it to support complex nested structures.
 // At this time, this function uses https://golang.org/pkg/strconv/#ParseInt
 // to determine if a number should be a float or an int. For this reason, if you are
@@ -87,14 +87,14 @@ func parseListOfMaps(l []interface{}) ([]map[string]interface{}, error) {
 // types. ie, if you are expecting a value of "1" you are implicitly expecting an int.
 //
 // This also allows the work to be executed recursively to support complex data types.
-func ParseMap(m map[string]interface{}) (map[string]interface{}, error) {
+func parseMap(m map[string]interface{}) (map[string]interface{}, error) {
 
 	result := make(map[string]interface{})
 
 	for k, v := range m {
 		switch vt := v.(type) {
 		case map[string]interface{}:
-			nestedMap, err := ParseMap(vt)
+			nestedMap, err := parseMap(vt)
 			if err != nil {
 				return nil, err
 			}
@@ -145,7 +145,7 @@ func OutputMapOfObjectsE(t testing.TestingT, options *Options, key string) (map[
 		return nil, err
 	}
 
-	return ParseMap(output)
+	return parseMap(output)
 }
 
 // OutputListOfObjects calls terraform output for the given variable and returns its value as a list of maps/lists.
@@ -175,7 +175,7 @@ func OutputListOfObjectsE(t testing.TestingT, options *Options, key string) ([]m
 	var result []map[string]interface{}
 
 	for _, m := range output {
-		newMap, err := ParseMap(m)
+		newMap, err := parseMap(m)
 
 		if err != nil {
 			return nil, err
