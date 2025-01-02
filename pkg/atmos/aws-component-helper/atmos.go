@@ -66,6 +66,8 @@ func (ts *Atmos) Deploy(component *AtmosComponent) {
 		atmosApply(ts.t, options)
 		err := atmosOutputAllE(ts.t, options, "", &component.output)
 		require.NoError(ts.t, err)
+	} else {
+		fmt.Printf("Skip deploy component %s stack %s\n", component.ComponentName, component.StackName)
 	}
 }
 
@@ -76,7 +78,10 @@ func (ts *Atmos) Destroy(component *AtmosComponent) {
 	assert.NoError(ts.t, err)
 	if !*skipDestroy {
 		atmosDestroy(ts.t, options)
+	} else {
+		fmt.Printf("Skip destroy component %s stack %s\n", component.ComponentName, component.StackName)
 	}
+
 }
 
 func (ts *Atmos) loadOutputAll(component *AtmosComponent) {
