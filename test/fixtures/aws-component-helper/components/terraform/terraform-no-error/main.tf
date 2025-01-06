@@ -1,7 +1,8 @@
 variable "region" {}
 
 variable "attributes" {
-  type    = list
+  type    = list(string)
+  description = "Additional attributes for resource naming"
   default = []
 }
 
