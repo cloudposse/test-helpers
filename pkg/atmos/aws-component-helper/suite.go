@@ -16,20 +16,6 @@ import (
 var (
 	skipTests = flag.Bool("skip-tests", false, "skip tests")
 	skipSetup = flag.Bool("skip-setup", false, "skip setup")
-
-	// runParallel            = flag.Bool("parallel", false, "Run parallel")
-
-	// forceNewSuite           = flag.Bool("cth.force-new-suite", false, "force new suite")
-	// suiteIndex              = flag.Int("cth.suite-index", -1, "suite index")
-	// skipAwsNuke             = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
-
-	// skipDependencies  = flag.Bool("cth.skip-deps", false, "skip deploy dependencies")
-	// skipDeployDependencies  = flag.Bool("cth.skip-deps-deploy", false, "skip deploy dependencies")
-	// skipDestroyDependencies = flag.Bool("cth.skip-deps-destroy", false, "skip destroy dependencies")
-	// skipTeardownTestSuite = flag.Bool("skip-teardown", false, "skip test suite teardown")
-
-	// skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
-	// skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
 )
 
 type teadDown struct {

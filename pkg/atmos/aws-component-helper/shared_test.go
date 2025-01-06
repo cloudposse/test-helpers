@@ -8,7 +8,6 @@ import (
 )
 
 func TestMatchFilter(t *testing.T) {
-	t.Parallel()
 	t.Run("wrong", func(t *testing.T) {
 		matchRegexp := ""
 		matchSuiteAndTest = &matchRegexp

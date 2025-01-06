@@ -25,20 +25,6 @@ var (
 	skipTeardown           = flag.Bool("skip-teardown", false, "skip teardown")
 	useCache               = flag.Bool("cache", false, "use cache for terraform plugins")
 	matchSuiteAndTest      = flag.String("match", "", "regular expression to select suite and tests to run")
-	// runParallel            = flag.Bool("parallel", false, "Run parallel")
-
-	// forceNewSuite           = flag.Bool("cth.force-new-suite", false, "force new suite")
-	// suiteIndex              = flag.Int("cth.suite-index", -1, "suite index")
-	// skipAwsNuke             = flag.Bool("cth.skip-aws-nuke", false, "skip aws nuke")
-
-	// skipDependencies  = flag.Bool("cth.skip-deps", false, "skip deploy dependencies")
-	// skipDeployDependencies  = flag.Bool("cth.skip-deps-deploy", false, "skip deploy dependencies")
-	// skipDestroyDependencies = flag.Bool("cth.skip-deps-destroy", false, "skip destroy dependencies")
-	// skipTeardownTestSuite = flag.Bool("skip-teardown", false, "skip test suite teardown")
-	// skipTests             = flag.Bool("skip-tests", false, "skip tests")
-
-	// skipDeployComponentUnderTest  = flag.Bool("cth.skip-deploy-cut", false, "skip deploy component under test")
-	// skipDestroyComponentUnderTest = flag.Bool("cth.skip-destroy-cut", false, "skip destroy component under test")
 )
 
 type Fixture struct {

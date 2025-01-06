@@ -8,18 +8,6 @@ components:
         environment: gbl
         stage: root
 
-#      This remote state is only for Cloud Posse internal use.
-#      It references the Cloud Posse test organizations actual infrastructure.
-#      remote_state_backend:
-#        s3:
-#          bucket: cptest-core-ue2-root-tfstate-core
-#          dynamodb_table: cptest-core-ue2-root-tfstate-core-lock
-#          role_arn: arn:aws:iam::822777368227:role/cptest-core-gbl-root-tfstate-core-ro
-#          encrypt: true
-#          key: terraform.tfstate
-#          acl: bucket-owner-full-control
-#          region: us-east-2
-
       remote_state_backend_type: static
       remote_state_backend:
         # This static backend is used for tests that only need to use the account map iam-roles module
