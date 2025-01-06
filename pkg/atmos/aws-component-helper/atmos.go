@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Atmos package variables for easier testing
 var (
 	atmosApply         = atmos.Apply
 	atmosDestroy       = atmos.Destroy
@@ -26,17 +27,21 @@ var (
 	atmosVendorPull    = atmos.VendorPull
 	atmosOutputAllE    = atmos.OutputStructE
 )
+
+// Command-line flags to skip deploy and destroy operations
 var (
 	skipDeploy  = flag.Bool("skip-deploy", false, "skip all deployments")
 	skipDestroy = flag.Bool("skip-destroy", false, "skip all destroy")
 )
 
+// Atmos struct encapsulates testing information and options
 type Atmos struct {
 	t       *testing.T
 	options *atmos.Options
 	state   *State
 }
 
+// Constructor for Atmos
 func NewAtmos(t *testing.T, state *State, options *atmos.Options) *Atmos {
 	return &Atmos{
 		t:       t,
@@ -45,25 +50,28 @@ func NewAtmos(t *testing.T, state *State, options *atmos.Options) *Atmos {
 	}
 }
 
+// Get and deploy a component with given variables
 func (ts *Atmos) GetAndDeploy(componentName string, stackName string, vars map[string]interface{}) *AtmosComponent {
 	component := NewAtmosComponent(componentName, stackName, vars)
 	ts.Deploy(component)
 	return component
 }
 
+// Get and destroy a component with given variables
 func (ts *Atmos) GetAndDestroy(componentName string, stackName string, vars map[string]interface{}) *AtmosComponent {
 	component := NewAtmosComponent(componentName, stackName, vars)
 	ts.Destroy(component)
 	return component
 }
 
+// Deploy a component using Atmos
 func (ts *Atmos) Deploy(component *AtmosComponent) {
 	options := ts.getAtmosOptions(component)
-	defer os.RemoveAll(options.AtmosBasePath)
+	defer os.RemoveAll(options.AtmosBasePath) // Clean up temporary directories
 	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
 	require.NoError(ts.t, err)
 	if !*skipDeploy {
-		atmosApply(ts.t, options)
+		atmosApply(ts.t, options) // Apply the deployment
 		err := atmosOutputAllE(ts.t, options, "", &component.output)
 		require.NoError(ts.t, err)
 	} else {
@@ -71,19 +79,20 @@ func (ts *Atmos) Deploy(component *AtmosComponent) {
 	}
 }
 
+// Destroy a component using Atmos
 func (ts *Atmos) Destroy(component *AtmosComponent) {
 	options := ts.getAtmosOptions(component)
-	defer os.RemoveAll(options.AtmosBasePath)
+	defer os.RemoveAll(options.AtmosBasePath) // Clean up temporary directories
 	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
 	assert.NoError(ts.t, err)
 	if !*skipDestroy {
-		atmosDestroy(ts.t, options)
+		atmosDestroy(ts.t, options) // Destroy the deployment
 	} else {
 		fmt.Printf("Skip destroy component %s stack %s\n", component.ComponentName, component.StackName)
 	}
-
 }
 
+// Load all outputs for a given component
 func (ts *Atmos) loadOutputAll(component *AtmosComponent) {
 	if component.output != nil {
 		return
@@ -104,14 +113,15 @@ func (ts *Atmos) loadOutputAll(component *AtmosComponent) {
 	}
 }
 
+// Get all outputs for a component
 func (ts *Atmos) OutputAll(component *AtmosComponent) map[string]Output {
 	ts.loadOutputAll(component)
 	return component.output
 }
 
+// Get a specific output by key as a string
 func (ts *Atmos) Output(component *AtmosComponent, key string) string {
 	ts.loadOutputAll(component)
-
 	if value, ok := component.output[key]; ok {
 		return value.Value.(string)
 	}
@@ -119,6 +129,7 @@ func (ts *Atmos) Output(component *AtmosComponent, key string) string {
 	return ""
 }
 
+// Get a list output by key
 func (ts *Atmos) OutputList(component *AtmosComponent, key string) []string {
 	ts.loadOutputAll(component)
 	if value, ok := component.output[key]; ok {
@@ -129,13 +140,13 @@ func (ts *Atmos) OutputList(component *AtmosComponent, key string) []string {
 		}
 		error := atmos.UnexpectedOutputType{Key: key, ExpectedType: "map or list", ActualType: reflect.TypeOf(value).String()}
 		require.Fail(ts.t, error.Error())
-
 	} else {
 		require.Fail(ts.t, fmt.Sprintf("Output key %s not found", key))
 	}
 	return []string{}
 }
 
+// Get a map of objects output by key
 func (ts *Atmos) OutputMapOfObjects(component *AtmosComponent, key string) map[string]interface{} {
 	ts.loadOutputAll(component)
 	if value, ok := component.output[key]; ok {
@@ -144,13 +155,13 @@ func (ts *Atmos) OutputMapOfObjects(component *AtmosComponent, key string) map[s
 		}
 		error := atmos.UnexpectedOutputType{Key: key, ExpectedType: "map of objects", ActualType: reflect.TypeOf(value).String()}
 		require.Fail(ts.t, error.Error())
-
 	} else {
 		require.Fail(ts.t, fmt.Sprintf("Output key %s not found", key))
 	}
 	return map[string]interface{}{}
 }
 
+// Deserialize a specific output key into a given struct
 func (ts *Atmos) OutputStruct(component *AtmosComponent, key string, v any) {
 	ts.loadOutputAll(component)
 	if value, ok := component.output[key]; ok {
@@ -164,6 +175,7 @@ func (ts *Atmos) OutputStruct(component *AtmosComponent, key string, v any) {
 	}
 }
 
+// Generate Atmos options for a component
 func (ts *Atmos) getAtmosOptions(component *AtmosComponent) *atmos.Options {
 	result, err := ts.options.Clone()
 	require.NoError(ts.t, err)
@@ -206,10 +218,9 @@ func (ts *Atmos) getAtmosOptions(component *AtmosComponent) *atmos.Options {
 	return atmosOptions
 }
 
+// Helper to parse a map recursively
 func parseMap(m map[string]interface{}) (map[string]interface{}, error) {
-
 	result := make(map[string]interface{})
-
 	for k, v := range m {
 		switch vt := v.(type) {
 		case map[string]interface{}:
@@ -234,36 +245,28 @@ func parseMap(m map[string]interface{}) (map[string]interface{}, error) {
 		default:
 			result[k] = vt
 		}
-
 	}
 	return result, nil
 }
 
-// parseListOfMaps takes a list of maps and parses the types.
-// It is mainly a wrapper for parseMap to support lists.
+// Helper to parse a list of maps
 func parseListOfMaps(l []interface{}) ([]map[string]interface{}, error) {
 	var result []map[string]interface{}
-
 	for _, v := range l {
-
 		asMap, isMap := v.(map[string]interface{})
 		if !isMap {
-			err := errors.New("Type switching to map[string]interface{} failed.")
-			return nil, err
+			return nil, errors.New("Type switching to map[string]interface{} failed.")
 		}
-
 		m, err := parseMap(asMap)
-
 		if err != nil {
 			return nil, err
 		}
 		result = append(result, m)
 	}
-
 	return result, nil
-
 }
 
+// Clean output by removing non
 func cleanOutput(out string) string {
 	var result []rune
 	for _, line := range strings.Split(out, "\n") {
