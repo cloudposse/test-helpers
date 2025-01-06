@@ -118,6 +118,10 @@ func getAwsAccountId() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// Add retries for better reliability
+	cfg.RetryMode = aws.RetryModeAdaptive
+	cfg.RetryMaxAttempts = 3
+
 	stsClient := sts.NewFromConfig(cfg)
 	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {

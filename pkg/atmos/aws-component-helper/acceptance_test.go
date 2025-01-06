@@ -18,7 +18,11 @@ func TestAcceptance(t *testing.T) {
 
 	testFolder, err := files.CopyFolderToTemp("../../../", t.Name(), func(path string) bool { return true })
 	require.NoError(t, err)
-	defer os.RemoveAll(testFolder)
+	defer func() {
+		if err := os.RemoveAll(testFolder); err != nil {
+			t.Errorf("failed to cleanup test folder: %v", err)
+		}
+	}()
 
 	fmt.Printf("running in %s\n", testFolder)
 
