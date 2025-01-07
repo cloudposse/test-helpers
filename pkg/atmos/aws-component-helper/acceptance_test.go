@@ -14,7 +14,7 @@ import (
 // TestAcceptance is an end-to-end acceptance test for AWS component helper functionality.
 func TestAcceptance(t *testing.T) {
 	// Mock AWS account ID retrieval callback
-	getAwsAaccountIdCallback = func() (string, error) {
+	getAwsAccountIdCallback = func() (string, error) {
 		return "123456789012", nil
 	}
 

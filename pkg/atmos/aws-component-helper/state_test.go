@@ -20,7 +20,11 @@ func TestState(t *testing.T) {
 		// Copy a folder to a temporary test folder
 		testFolder, err := files.CopyFolderToTemp("../../../", strings.Replace(t.Name(), "/", "-", -1), func(path string) bool { return true })
 		require.NoError(t, err)
-		defer os.RemoveAll(testFolder) // Ensure test folder is removed after the test
+		defer func() { // Ensure test folder is removed after the test
+			if err := os.RemoveAll(testFolder); err != nil {
+				t.Errorf("failed to cleanup test folder: %v", err)
+			}
+		}()
 
 		// Create a new State instance
 		state := NewState("default", testFolder)
@@ -50,7 +54,11 @@ func TestState(t *testing.T) {
 		// Copy a folder to a temporary test folder
 		testFolder, err := files.CopyFolderToTemp("../../../", strings.Replace(t.Name(), "/", "-", -1), func(path string) bool { return true })
 		require.NoError(t, err)
-		defer os.RemoveAll(testFolder) // Ensure test folder is removed after the test
+		defer func() { // Ensure test folder is removed after the test
+			if err := os.RemoveAll(testFolder); err != nil {
+				t.Errorf("failed to cleanup test folder: %v", err)
+			}
+		}()
 
 		// Create a new State instance
 		state := NewState("default", testFolder)

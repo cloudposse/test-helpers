@@ -20,7 +20,7 @@ var (
 )
 
 // Structure to define a teardown step
-type teadDown struct {
+type tearDown struct {
 	component *AtmosComponent                 // The component to be torn down
 	callback  *func(t *testing.T, atm *Atmos) // Optional teardown callback
 }
@@ -31,7 +31,7 @@ type Suite struct {
 	randomIdentifier string            // Unique identifier for the suite
 	name             string            // Suite name
 	dependencies     []*AtmosComponent // Dependencies for the suite
-	teardown         []*teadDown       // Teardown steps
+	teardown         []*tearDown       // Teardown steps
 	options          *atmos.Options    // Atmos options for the suite
 	state            *State            // State associated with the suite
 }
@@ -55,7 +55,7 @@ func NewSuite(t *testing.T, name string, fixture *Fixture) *Suite {
 		randomIdentifier: randomId,
 		dependencies:     []*AtmosComponent{},
 		state:            suiteState,
-		teardown:         []*teadDown{},
+		teardown:         []*tearDown{},
 		options:          fixture.getAtmosOptions(&atmos.Options{}, map[string]interface{}{}),
 	}
 }
@@ -64,7 +64,7 @@ func NewSuite(t *testing.T, name string, fixture *Fixture) *Suite {
 func (ts *Suite) AddDependency(componentName string, stackName string) {
 	component := NewAtmosComponent(componentName, stackName, nil)
 	ts.dependencies = append(ts.dependencies, component)
-	ts.teardown = append(ts.teardown, &teadDown{component: component, callback: nil})
+	ts.teardown = append(ts.teardown, &tearDown{component: component, callback: nil})
 
 	if *skipSetup {
 		fmt.Printf("Skip suite %s setup dependency component: %s stack: %s\n", ts.name, componentName, stackName)
@@ -127,7 +127,7 @@ func (ts *Suite) Setup(t *testing.T, f func(t *testing.T, atm *Atmos)) {
 
 // TearDown adds a custom teardown callback to the suite
 func (ts *Suite) TearDown(t *testing.T, f func(t *testing.T, atm *Atmos)) {
-	ts.teardown = append(ts.teardown, &teadDown{component: nil, callback: &f})
+	ts.teardown = append(ts.teardown, &tearDown{component: nil, callback: &f})
 }
 
 // Test runs a test within the suite

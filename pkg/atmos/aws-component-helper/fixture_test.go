@@ -76,7 +76,7 @@ func TestFixtureMinimum(t *testing.T) {
 // TestFixtureCreate validates the setup of a Fixture with a temporary folder
 func TestFixtureCreate(t *testing.T) {
 	// Mock AWS Account ID retrieval
-	getAwsAaccountIdCallback = func() (string, error) {
+	getAwsAccountIdCallback = func() (string, error) {
 		return "123456789012", nil
 	}
 
@@ -99,7 +99,7 @@ func TestFixtureCreate(t *testing.T) {
 // TestFixtureSuitesRun validates the execution of test suites within a Fixture
 func TestFixtureSuitesRun(t *testing.T) {
 	// Mock AWS Account ID retrieval
-	getAwsAaccountIdCallback = func() (string, error) {
+	getAwsAccountIdCallback = func() (string, error) {
 		return "123456789012", nil
 	}
 

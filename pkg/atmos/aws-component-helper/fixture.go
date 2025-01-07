@@ -16,7 +16,7 @@ import (
 
 // Define global callback function to retrieve AWS account ID
 var (
-	getAwsAaccountIdCallback = getAwsAccountId
+	getAwsAccountIdCallback = getAwsAccountId
 )
 
 // Define global flags for configuring test behavior
@@ -45,7 +45,7 @@ type Fixture struct {
 
 // NewFixture initializes a new Fixture instance
 func NewFixture(t *testing.T, sourceDir string, awsRegion string, fixturesDir string) *Fixture {
-	awsAccountId, err := getAwsAaccountIdCallback()
+	awsAccountId, err := getAwsAccountIdCallback()
 	require.NoError(t, err) // Ensure AWS account ID retrieval succeeded
 
 	randID := random.UniqueId()

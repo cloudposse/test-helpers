@@ -41,6 +41,8 @@ func (s *State) Fork(name string) (*State, error) {
 
 	// Copy the current state directory to the new state directory
 	if err := copyDirectoryRecursively(s.CurrentDir(), result.CurrentDir()); err != nil {
+		// Clean up the partially created state
+		_ = os.RemoveAll(result.CurrentDir())
 		return nil, err
 	}
 
