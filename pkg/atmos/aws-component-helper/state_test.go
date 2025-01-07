@@ -77,6 +77,8 @@ func TestState(t *testing.T) {
 
 		// Create a temporary file in the current state directory
 		file, err := os.CreateTemp(state.CurrentDir(), "tmpfile")
+		require.NoError(t, err)
+		defer file.Close()
 		assert.FileExists(t, file.Name())
 		fileName := filepath.Base(file.Name()) // Store the file name for verification later
 
