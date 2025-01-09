@@ -1,6 +1,8 @@
 package aws_component_helper
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"os"
@@ -17,6 +19,11 @@ var (
 type State struct {
 	basepath  string // Base directory for the state
 	namespace string // Namespace identifier for the state
+}
+
+func (s *State) GetIdentifier() string {
+	hash := md5.Sum([]byte(s.namespace))
+	return hex.EncodeToString(hash[:])[:6]
 }
 
 // NewState initializes a new State instance with the given namespace and root directory

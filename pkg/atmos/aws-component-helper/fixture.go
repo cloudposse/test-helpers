@@ -31,16 +31,15 @@ var (
 
 // Fixture struct holds test-specific configurations and state
 type Fixture struct {
-	t                *testing.T // Testing object
-	RandomIdentifier string     // Unique identifier for the fixture
-	AwsAccountId     string     // AWS Account ID
-	AwsRegion        string     // AWS Region
-	SourceDir        string     // Source directory for the fixture
-	TempDir          string     // Temporary directory for the fixture
-	FixturesPath     string     // Path to the fixture directory
-	State            *State     // State management object
-	suites           []*Suite   // List of test suites
-	suitesNames      []string   // Names of test suites
+	t            *testing.T // Testing object
+	AwsAccountId string     // AWS Account ID
+	AwsRegion    string     // AWS Region
+	SourceDir    string     // Source directory for the fixture
+	TempDir      string     // Temporary directory for the fixture
+	FixturesPath string     // Path to the fixture directory
+	State        *State     // State management object
+	suites       []*Suite   // List of test suites
+	suitesNames  []string   // Names of test suites
 }
 
 // NewFixture initializes a new Fixture instance
@@ -63,16 +62,15 @@ func NewFixture(t *testing.T, sourceDir string, awsRegion string, fixturesDir st
 
 	// Return initialized Fixture instance
 	return &Fixture{
-		t:                t,
-		RandomIdentifier: randomId,
-		SourceDir:        realSourcePath,
-		TempDir:          tmpdir,
-		FixturesPath:     fixturesDir,
-		AwsAccountId:     awsAccountId,
-		AwsRegion:        awsRegion,
-		suites:           []*Suite{},
-		suitesNames:      []string{},
-		State:            state,
+		t:            t,
+		SourceDir:    realSourcePath,
+		TempDir:      tmpdir,
+		FixturesPath: fixturesDir,
+		AwsAccountId: awsAccountId,
+		AwsRegion:    awsRegion,
+		suites:       []*Suite{},
+		suitesNames:  []string{},
+		State:        state,
 	}
 }
 

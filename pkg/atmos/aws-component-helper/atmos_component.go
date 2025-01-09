@@ -1,6 +1,9 @@
 package aws_component_helper
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 	"strings"
 
 	"github.com/gruntwork-io/terratest/modules/random"
@@ -37,5 +40,10 @@ func NewAtmosComponent(component string, stack string, vars map[string]interface
 
 // GetRandomIdentifier retrieves the unique identifier of the component
 func (ts *AtmosComponent) GetRandomIdentifier() string {
+	if *devMode {
+		name := fmt.Sprintf("%s-%s", ts.ComponentName, ts.StackName)
+		hash := md5.Sum([]byte(name))
+		return hex.EncodeToString(hash[:])[:6]
+	}
 	return ts.randomIdentifier
 }

@@ -15,7 +15,6 @@ import (
 	"dario.cat/mergo"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/gruntwork-io/terratest/modules/random"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,6 +31,7 @@ var (
 var (
 	skipDeploy  = flag.Bool("skip-deploy", false, "skip all deployments")
 	skipDestroy = flag.Bool("skip-destroy", false, "skip all destroy")
+	devMode     = flag.Bool("dev", false, "Development mode")
 )
 
 // Atmos struct encapsulates testing information and options
@@ -67,9 +67,11 @@ func (ts *Atmos) GetAndDestroy(componentName string, stackName string, vars map[
 // Deploy a component using Atmos
 func (ts *Atmos) Deploy(component *AtmosComponent) {
 	options := ts.getAtmosOptions(component)
-	defer os.RemoveAll(options.AtmosBasePath) // Clean up temporary directories
-	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
-	require.NoError(ts.t, err)
+	if ts.options.AtmosBasePath != options.AtmosBasePath {
+		defer os.RemoveAll(options.AtmosBasePath) // Clean up temporary directories
+		err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+		require.NoError(ts.t, err)
+	}
 	if !*skipDeploy {
 		atmosApply(ts.t, options) // Apply the deployment
 		err := atmosOutputAllE(ts.t, options, "", &component.output)
@@ -82,9 +84,11 @@ func (ts *Atmos) Deploy(component *AtmosComponent) {
 // Destroy a component using Atmos
 func (ts *Atmos) Destroy(component *AtmosComponent) {
 	options := ts.getAtmosOptions(component)
-	defer os.RemoveAll(options.AtmosBasePath) // Clean up temporary directories
-	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
-	assert.NoError(ts.t, err)
+	if ts.options.AtmosBasePath != options.AtmosBasePath {
+		defer os.RemoveAll(options.AtmosBasePath) // Clean up temporary directories
+		err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+		require.NoError(ts.t, err)
+	}
 	if !*skipDestroy {
 		atmosDestroy(ts.t, options) // Destroy the deployment
 	} else {
@@ -98,11 +102,12 @@ func (ts *Atmos) loadOutputAll(component *AtmosComponent) {
 		return
 	}
 	options := ts.getAtmosOptions(component)
-	defer os.RemoveAll(options.AtmosBasePath)
-	err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
-	require.NoError(ts.t, err)
-
-	err = atmosOutputAllE(ts.t, options, "", &component.output)
+	if ts.options.AtmosBasePath != options.AtmosBasePath {
+		defer os.RemoveAll(options.AtmosBasePath) // Clean up temporary directories
+		err := copyDirectoryRecursively(ts.options.AtmosBasePath, options.AtmosBasePath)
+		require.NoError(ts.t, err)
+	}
+	err := atmosOutputAllE(ts.t, options, "", &component.output)
 	if err != nil && strings.Contains(err.Error(), "Backend initialization required") {
 		// Run 'terraform workspace' instead of 'terraform init' as it also select the workspace
 		// So terraform output will not fail with "Switch to workspace" json parse error
@@ -183,20 +188,23 @@ func (ts *Atmos) getAtmosOptions(component *AtmosComponent) *atmos.Options {
 	result.Component = component.ComponentName
 	result.Stack = component.StackName
 
-	randID := random.UniqueId()
-	randomId := strings.ToLower(randID)
+	if !*devMode {
+		randID := random.UniqueId()
+		randomId := strings.ToLower(randID)
 
-	basePath := filepath.Dir(filepath.Clean(ts.options.AtmosBasePath))
-	dirName := filepath.Base(ts.options.AtmosBasePath)
-	tmpDir := filepath.Join(basePath, fmt.Sprintf(".%s-%s", dirName, randomId))
+		basePath := filepath.Dir(filepath.Clean(ts.options.AtmosBasePath))
+		dirName := filepath.Base(ts.options.AtmosBasePath)
+		tmpDir := filepath.Join(basePath, fmt.Sprintf(".%s-%s", dirName, randomId))
+		result.AtmosBasePath = tmpDir
+	}
 
-	result.AtmosBasePath = tmpDir
 	resultEnvVars := result.EnvVars
 	envvars := map[string]string{
 		"ATMOS_BASE_PATH":       result.AtmosBasePath,
 		"ATMOS_CLI_CONFIG_PATH": result.AtmosBasePath,
 		"TEST_SUITE_NAME":       ts.state.NamespaceDir(),
 		"TEST_STATE_DIR":        ts.state.BaseDir(),
+		"TF_DATA_DIR":           fmt.Sprintf(".terraform/%s-%s", ts.state.GetIdentifier(), component.GetRandomIdentifier()),
 	}
 
 	err = mergo.Merge(&envvars, resultEnvVars)
@@ -205,7 +213,7 @@ func (ts *Atmos) getAtmosOptions(component *AtmosComponent) *atmos.Options {
 	result.EnvVars = envvars
 
 	if _, ok := result.Vars["attributes"]; !ok {
-		result.Vars["attributes"] = []string{component.randomIdentifier}
+		result.Vars["attributes"] = []string{ts.state.GetIdentifier(), component.GetRandomIdentifier()}
 	}
 
 	if component.Vars != nil {

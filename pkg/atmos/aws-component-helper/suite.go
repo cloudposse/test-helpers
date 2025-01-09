@@ -78,7 +78,7 @@ func (ts *Suite) AddDependency(componentName string, stackName string) {
 // getAtmos returns an Atmos instance configured for the suite's state
 func (ts *Suite) getAtmos(state *State) *Atmos {
 	return NewAtmos(ts.t, state, ts.getAtmosOptions(map[string]interface{}{
-		"attributes": []string{ts.randomIdentifier},
+		"attributes": []string{ts.GetRandomIdentifier()},
 	}))
 }
 
@@ -170,5 +170,8 @@ func (ts *Suite) getAtmosOptions(vars map[string]interface{}) *atmos.Options {
 
 // GetRandomIdentifier returns the suite's unique random identifier
 func (ts *Suite) GetRandomIdentifier() string {
+	if *devMode {
+		return ts.state.GetIdentifier()
+	}
 	return ts.randomIdentifier
 }
