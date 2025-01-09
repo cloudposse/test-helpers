@@ -11,6 +11,8 @@ import (
 const terraformCmd = "terraform"
 const vendorCmd = "vendor"
 
+const describeCmd = "describe"
+
 // TerraformCommandsWithPlanFileSupport is a list of all the Terraform commands that support interacting with plan
 // files.
 var TerraformCommandsWithPlanFileSupport = []string{
@@ -120,9 +122,24 @@ func FormatAtmosVendorArgs(options *Options, args ...string) []string {
 	return vendorArgs
 }
 
+func FormatAtmosDescribeArgs(options *Options, args ...string) []string {
+	var describeArgs []string
+	commandType := args[0]
+
+	describeArgs = append(describeArgs, "describe", commandType)
+
+	describeArgs = append(describeArgs, args[1:]...)
+
+	return describeArgs
+}
+
 func FormatArgs(options *Options, args ...string) []string {
 	var atmosArgs []string
 	commandType := args[0]
+
+	if commandType == describeCmd {
+		atmosArgs = append(atmosArgs, FormatAtmosDescribeArgs(options, args[1:]...)...)
+	}
 
 	if commandType == terraformCmd {
 		atmosArgs = append(atmosArgs, FormatAtmosTerraformArgs(options, args[1:]...)...)

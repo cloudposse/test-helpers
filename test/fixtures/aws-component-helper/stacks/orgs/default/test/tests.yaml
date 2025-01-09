@@ -1,0 +1,19 @@
+import:
+  - path: orgs/default/test/_defaults
+    # We need to define a context to enable template substitution
+    context: {}
+
+components:
+  terraform:
+    terraform-basic-configuration:
+      vars: {}
+    terraform-no-error:
+      vars: {}
+    terraform-with-plan-error:
+      vars: {}
+    terraform-with-error:
+      vars: {}
+    terraform-not-idempotent:
+      vars: {}
+    terraform-parallelism:
+      vars: {}
