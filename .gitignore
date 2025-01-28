@@ -15,3 +15,7 @@
 
 bin/
 unit-tests.xml
+
+# atmos cache
+.atmos/
+test_suite.yaml

@@ -3,6 +3,7 @@ vars:
   tenant: test
   environment: use2
   stage: sandbox
+  region: us-east-2
 
 # This should be moved to the catalog
 terraform:
@@ -35,16 +36,18 @@ terraform:
 
 components:
   terraform:
-    dep1:
+    component1:
       metadata:
-        component: basic
-      vars:
-        revision: 21
-    dep2:
-      metadata:
-        component: basic
-      vars:
-        revision: 22
-    basic:
+        component: target
       vars:
         revision: 1
+    component2:
+      metadata:
+        component: target
+      vars:
+        revision: 2
+    component3:
+      metadata:
+        component: target
+      vars:
+        revision: 3
