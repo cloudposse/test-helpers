@@ -28,8 +28,11 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 		BackendConfig: map[string]interface{}{
 			"workspace_key_prefix": strings.Join([]string{config.RandomIdentifier, stackName}, "-"),
 		},
-		Vars:    mergedVars,
-		EnvVars: map[string]string{"ATMOS_BASE_PATH": config.TempDir},
+		Vars: mergedVars,
+		EnvVars: map[string]string{
+			"ATMOS_BASE_PATH":            config.TempDir,
+			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
+		},
 	}
 	return atmosOptions
 }
