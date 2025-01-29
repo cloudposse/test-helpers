@@ -15,19 +15,6 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 		"attributes": []string{config.RandomIdentifier},
 	}
 
-	// If we are not skipping the nuking of the test account, add the default tags
-	// if !suite.SkipNukeTestAccount {
-	// 	nukeVars := map[string]interface{}{
-	// 		"default_tags": map[string]string{
-	// 			"CreatedByAtmosTestHelpers": config.RandomIdentifier,
-	// 		},
-	// 	}
-
-	// 	err := mergo.Merge(&mergedVars, nukeVars)
-	// 	require.NoError(t, err)
-	// }
-
-	// Merge in any additional vars passed in
 	if vars != nil {
 		err := mergo.Merge(&mergedVars, vars)
 		require.NoError(t, err)
@@ -41,7 +28,8 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 		BackendConfig: map[string]interface{}{
 			"workspace_key_prefix": strings.Join([]string{config.RandomIdentifier, stackName}, "-"),
 		},
-		Vars: mergedVars,
+		Vars:    mergedVars,
+		EnvVars: map[string]string{"ATMOS_BASE_PATH": config.TempDir},
 	}
 	return atmosOptions
 }
