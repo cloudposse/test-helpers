@@ -198,6 +198,8 @@ Finally, The Helper will clean up the temporary directory and any other resource
 | -------------------------- | ----------------------------------------------------- | ----------------- |
 | -config                    | The path to the config file                           | test_suite.yaml   |
 | -fixtures-dir              | The path to the fixtures directory                    | fixtures          |
+| -only-deploy-dependencies  | Only run the deploy dependencies phase of tests       | false             |
+| -skip-deploy-component     | Skips running the deploy component phase of tests     | false             |
 | -skip-deploy-dependencies  | Skips running the deploy dependencies phase of tests  | false             |
 | -skip-destroy-component    | Skips running the destroy component phase of tests    | false             |
 | -skip-destroy-dependencies | Skips running the destroy dependencies phase of tests | false             |

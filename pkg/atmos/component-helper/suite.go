@@ -78,11 +78,22 @@ func (s *TestSuite) DeployAtmosComponent(t *testing.T, componentName string, sta
 }
 
 func (s *TestSuite) DestroyAtmosComponent(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}) {
+	phaseName := fmt.Sprintf("destroy/atmos component/%s/%s", stackName, componentName)
+
+	if s.Config.SkipDestroyComponent {
+		s.logPhaseStatus(phaseName, "skipped")
+		return
+	}
+
+	s.logPhaseStatus(phaseName, "started")
+
 	mergedVars := s.getMergedVars(t, additionalVars)
 	atmosOptions := getAtmosOptions(t, s.Config, componentName, stackName, &mergedVars)
 
 	_, err := atmos.DestroyE(t, atmosOptions)
 	require.NoError(t, err)
+
+	s.logPhaseStatus(phaseName, "completed")
 }
 
 // Setup runs the setup phase of the test suite.

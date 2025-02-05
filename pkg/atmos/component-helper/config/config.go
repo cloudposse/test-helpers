@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	log "github.com/charmbracelet/log"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -15,6 +16,7 @@ import (
 func init() {
 	flag.String("config", "test_suite.yaml", "The path to the config file")
 	flag.String("fixtures-dir", "fixtures", "The path to the fixtures directory")
+	flag.Bool("only-deploy-dependencies", true, "Only run the deploy dependencies phase of tests")
 	flag.Bool("skip-deploy-component", true, "Disables running the deploy component phase of tests")
 	flag.Bool("skip-deploy-dependencies", true, "Disables running the deploy dependencies phase of tests")
 	flag.Bool("skip-destroy-component", true, "Disables running the destroy component phase of tests")
@@ -32,6 +34,7 @@ type Config struct {
 	ConfigFilePath          string
 	FixturesDir             string
 	RandomIdentifier        string
+	OnlyDeployDependencies  bool
 	SkipDeployComponent     bool
 	SkipDeployDependencies  bool
 	SkipDestroyComponent    bool
@@ -89,6 +92,7 @@ func InitConfig(t *testing.T) *Config {
 
 	randID := random.UniqueId()
 	viper.SetDefault("RandomIdentifier", strings.ToLower(randID))
+	viper.SetDefault("OnlyDeployDependencies", false)
 	viper.SetDefault("SkipDeployComponent", false)
 	viper.SetDefault("SkipDeployDependencies", false)
 	viper.SetDefault("SkipDestroyComponent", false)
@@ -111,6 +115,9 @@ func InitConfig(t *testing.T) *Config {
 	require.NoError(t, err)
 
 	err = viper.BindPFlag("FixturesDir", pflag.Lookup("fixtures-dir"))
+	require.NoError(t, err)
+
+	err = viper.BindPFlag("OnlyDeployDependencies", pflag.Lookup("only-deploy-dependencies"))
 	require.NoError(t, err)
 
 	err = viper.BindPFlag("SkipEnabledFlagTest", pflag.Lookup("skip-enabled-flag-test"))
@@ -162,6 +169,19 @@ func InitConfig(t *testing.T) *Config {
 
 	err = writeConfigWithoutPFlags(viper.GetString("ConfigFilePath"))
 	require.NoError(t, err)
+
+	log.Info("OnlyDeployDependencies", "deps", config.OnlyDeployDependencies)
+	log.Info("SkipDeployComponent", "component", config.SkipDeployComponent)
+	// if config.OnlyDeployDependencies {
+	// 	config.SkipDeployComponent = true
+	// 	config.SkipDeployDependencies = false
+	// 	config.SkipDestroyComponent = true
+	// 	config.SkipDestroyDependencies = true
+	// 	config.SkipEnabledFlagTest = true
+	// 	config.SkipSetupTestSuite = false
+	// 	config.SkipTeardownTestSuite = true
+	// 	config.SkipVendorDependencies = true
+	// }
 
 	return config
 }
