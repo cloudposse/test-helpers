@@ -3,7 +3,8 @@ package component_helper
 import "github.com/cloudposse/test-helpers/pkg/atmos/component-helper/config"
 
 func anyPhasesSkipped(config *config.Config) bool {
-	return config.SkipDeployComponent ||
+	return config.OnlyDeployDependencies ||
+		config.SkipDeployComponent ||
 		config.SkipDeployDependencies ||
 		config.SkipDestroyComponent ||
 		config.SkipDestroyDependencies ||
@@ -11,3 +12,5 @@ func anyPhasesSkipped(config *config.Config) bool {
 		config.SkipTeardownTestSuite ||
 		config.SkipVendorDependencies
 }
+
+
