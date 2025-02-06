@@ -30,4 +30,7 @@ func TestOutputNoError(t *testing.T) {
 
 	output := Output(t, atmosOptions, "test")
 	require.Equal(t, "Hello, World", output)
+
+	outputList := OutputList(t, atmosOptions, "test_list")
+	require.Equal(t, []string{"Hello", "World"}, outputList)
 }
