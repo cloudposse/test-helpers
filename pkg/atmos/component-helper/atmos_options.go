@@ -31,6 +31,7 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 		Vars: mergedVars,
 		EnvVars: map[string]string{
 			"ATMOS_BASE_PATH":            config.TempDir,
+			"ATMOS_CLI_CONFIG_PATH":      config.TempDir,
 			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
 		},
 	}
