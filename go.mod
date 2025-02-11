@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.9
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/charmbracelet/log v0.4.0
-	github.com/ekristen/aws-nuke v2.10.0+incompatible
+	github.com/ekristen/aws-nuke/v3 v3.48.0
 	github.com/gruntwork-io/terratest v0.47.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/rebuy-de/aws-nuke/v2 v2.25.0
