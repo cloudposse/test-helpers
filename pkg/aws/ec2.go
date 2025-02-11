@@ -1,3 +1,5 @@
+package aws
+
 func GetNatsByVpcIdE(t *testing.T, vpcId string, awsRegion string) ([]types.NatGateway, error) {
 	client, err := aws.NewEc2ClientE(t, awsRegion)
 	if err != nil {
