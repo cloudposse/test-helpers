@@ -10,7 +10,6 @@ func (s *TestSuite) DriftTest(componentName, stackName string, additionalVars *m
 
 	mergedVars := map[string]interface{}{
 		"attributes": []string{s.Config.RandomIdentifier},
-		"enabled":      false,
 	}
 
 	// Merge in any additional vars passed in
