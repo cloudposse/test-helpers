@@ -45,7 +45,7 @@ func StartDeploymentJob(t *testing.T, client *amplify.Client, id *string, branch
 		JobId:      branch.Branch.ActiveJobId,
 		JobType:    jobType,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return jobStart.JobSummary.JobId
 }
 
