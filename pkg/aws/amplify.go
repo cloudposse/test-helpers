@@ -25,8 +25,8 @@ func NewAmplifyClientE(t *testing.T, region string) (*amplify.Client, error) {
 	return amplify.NewFromConfig(*sess), nil
 }
 
-func StartDeploymentJob(t *testing.T, client *amplify.Client, id *string, branchName *string) *string {
-	branch, err := client.GetBranch(context.Background(), &amplify.GetBranchInput{
+func StartDeploymentJob(t *testing.T, ctx context.Context, client *amplify.Client, id *string, branchName *string) *string {
+	branch, err := client.GetBranch(ctx, &amplify.GetBranchInput{
 		AppId:      id,
 		BranchName: branchName,
 	})
@@ -38,7 +38,7 @@ func StartDeploymentJob(t *testing.T, client *amplify.Client, id *string, branch
 	} else {
 		jobType = types.JobTypeRetry
 	}
-	jobStart, err := client.StartJob(context.Background(), &amplify.StartJobInput{
+	jobStart, err := client.StartJob(ctx, &amplify.StartJobInput{
 		AppId:      id,
 		BranchName: branchName,
 		JobId:      branch.Branch.ActiveJobId,
