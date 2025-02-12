@@ -26,8 +26,8 @@ func (s *TestSuite) VerifyEnabledFlag(componentName, stackName string, additiona
 
 	atmosOptions := getAtmosOptions(s.T(), s.Config, componentName, stackName, &mergedVars)
 
-	ouputs, err := atmos.PlanE(s.T(), atmosOptions)
+	outputs, err := atmos.PlanE(s.T(), atmosOptions)
 	require.NoError(s.T(), err)
-	noChanges := strings.Contains(ouputs, "No changes. Your infrastructure matches the configuration.") || strings.Contains(ouputs, "without changing any real infrastructure.")
+	noChanges := strings.Contains(outputs, "No changes. Your infrastructure matches the configuration.") || strings.Contains(outputs, "without changing any real infrastructure.")
 	require.True(s.T(), noChanges)
 }
