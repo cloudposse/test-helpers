@@ -1,6 +1,7 @@
 package component_helper
 
 import (
+	"strings"
 	"dario.cat/mergo"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/stretchr/testify/require"
@@ -20,7 +21,8 @@ func (s *TestSuite) DriftTest(componentName, stackName string, additionalVars *m
 
 	atmosOptions := getAtmosOptions(s.T(), s.Config, componentName, stackName, &mergedVars)
 
-	code, err := atmos.PlanExitCodeE(s.T(), atmosOptions)
+	outputs, err := atmos.PlanE(s.T(), atmosOptions)
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), 0, code)
+	noChanges := strings.Contains(outputs, "No changes. Your infrastructure matches the configuration.") || strings.Contains(outputs, "without changing any real infrastructure.")
+	require.True(s.T(), noChanges)
 }
