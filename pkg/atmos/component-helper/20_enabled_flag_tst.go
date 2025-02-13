@@ -21,7 +21,5 @@ func (s *TestSuite) VerifyEnabledFlag(componentName, stackName string, additiona
 		require.NoError(s.T(), err)
 	}
 
-	atmosOptions := getAtmosOptions(s.T(), s.Config, componentName, stackName, &mergedVars)
-
 	s.DriftTest(componentName, stackName, &mergedVars)
 }
