@@ -38,6 +38,11 @@ func (s *TestSuite) AddDependency(t *testing.T, componentName string, stackName 
 	})
 }
 
+func (s *TestSuite) GetAtmosOptions(componentName string, stackName string, additionalVars *map[string]interface{}) *atmos.Options {
+	mergedVars := s.getMergedVars(s.T(), additionalVars)
+	return getAtmosOptions(s.T(), s.Config, componentName, stackName, &mergedVars)
+}
+
 func (s *TestSuite) getMergedVars(t *testing.T, additionalVars *map[string]interface{}) map[string]interface{} {
 
 	mergedVars := map[string]interface{}{
