@@ -1,7 +1,6 @@
 package component_helper
 
 import (
-	"strings"
 	"dario.cat/mergo"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	"github.com/stretchr/testify/require"
