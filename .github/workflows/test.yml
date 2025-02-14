@@ -35,6 +35,7 @@ jobs:
         uses: cloudposse/github-action-setup-atmos@v2
         with:
           install-wrapper: false
+          atmos-version: 1.129.0
 
       - name: Get dependencies
         run: go mod download
