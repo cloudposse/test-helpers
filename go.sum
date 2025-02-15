@@ -42,6 +42,8 @@ github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.47.4 h1:4hiC8jzPP89L+MTljvKs1
 github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.47.4/go.mod h1:Kj+z0vXRl21DsnPR+lA5DjVWCaRTvAmwQ/shTGHeY84=
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.44.0 h1:OREVd94+oXW5a+3SSUAo4K0L5ci8cucCLu+PSiek8OU=
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.44.0/go.mod h1:Qbr4yfpNqVNl69l/GEDK+8wxLf/vHi0ChoiSDzD7thU=
+github.com/aws/aws-sdk-go-v2/service/docdb v1.40.10 h1:M+Pc9FI5Inm5P7IisViLbw8tnLyTvteTeuwN0mWPX8U=
+github.com/aws/aws-sdk-go-v2/service/docdb v1.40.10/go.mod h1:T0Kj3lj/4DSrtuqAt0yFLbhv5qydUgXEuL8enHpxpcg=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.37.1 h1:vucMirlM6D+RDU8ncKaSZ/5dGrXNajozVwpmWNPn2gQ=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.37.1/go.mod h1:fceORfs010mNxZbQhfqUjUeHlTwANmIT4mvHamuUaUg=
 github.com/aws/aws-sdk-go-v2/service/ec2 v1.202.4 h1:gdFRXlTMgV0+yrhQLAJKb+vX2K32Vw3n2TntDd+8AEM=
