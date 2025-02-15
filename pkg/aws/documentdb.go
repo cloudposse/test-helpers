@@ -7,14 +7,14 @@ import (
 	"testing"
 )
 
-func NewDocDBlient(t *testing.T, region string) *docdb.Client {
-	client, err := NewDocDBlientE(t, region)
+func NewDocDBClient(t *testing.T, region string) *docdb.Client {
+	client, err := NewDocDBClientE(t, region)
 	require.NoError(t, err)
 
 	return client
 }
 
-func NewDocDBlientE(t *testing.T, region string) (*docdb.Client, error) {
+func NewDocDBClientE(t *testing.T, region string) (*docdb.Client, error) {
 	sess, err := aws.NewAuthenticatedSession(region)
 	if err != nil {
 		return nil, err
