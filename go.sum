@@ -38,6 +38,8 @@ github.com/aws/aws-sdk-go-v2/service/autoscaling v1.51.0 h1:1KzQVZi7OTixxaVJ8fWa
 github.com/aws/aws-sdk-go-v2/service/autoscaling v1.51.0/go.mod h1:I1+/2m+IhnK5qEbhS3CrzjeiVloo9sItE/2K+so0fkU=
 github.com/aws/aws-sdk-go-v2/service/backup v1.40.10 h1:/qkt3SKl7VUI48CV47dMdJGte/kg6YIs9HGucKRomY4=
 github.com/aws/aws-sdk-go-v2/service/backup v1.40.10/go.mod h1:Vdu4P8UrQhIh69PlgCuJFVicDJgy4Z6i0lAEpJLBw2Q=
+github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.47.4 h1:4hiC8jzPP89L+MTljvKs1LLC12gKJLMJwysjOrbJz1E=
+github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.47.4/go.mod h1:Kj+z0vXRl21DsnPR+lA5DjVWCaRTvAmwQ/shTGHeY84=
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.44.0 h1:OREVd94+oXW5a+3SSUAo4K0L5ci8cucCLu+PSiek8OU=
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.44.0/go.mod h1:Qbr4yfpNqVNl69l/GEDK+8wxLf/vHi0ChoiSDzD7thU=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.37.1 h1:vucMirlM6D+RDU8ncKaSZ/5dGrXNajozVwpmWNPn2gQ=
