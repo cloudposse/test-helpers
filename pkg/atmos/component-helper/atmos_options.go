@@ -8,6 +8,7 @@ import (
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	c "github.com/cloudposse/test-helpers/pkg/atmos/component-helper/config"
 	"github.com/stretchr/testify/require"
+	"github.com/gruntwork-io/terratest/modules/aws"
 )
 
 func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stackName string, vars *map[string]interface{}) *atmos.Options {
@@ -33,6 +34,7 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 			"ATMOS_BASE_PATH":            config.TempDir,
 			"ATMOS_CLI_CONFIG_PATH":      config.TempDir,
 			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
+			"TEST_ACCOUNT_ID": 			  aws.GetAccountId(t),
 		},
 	}
 	return atmosOptions
