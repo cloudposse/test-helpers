@@ -18,7 +18,7 @@ func NewSESV2Client(t *testing.T, region string) *sesv2.Client {
 	return client
 }
 
-// NewElbV2ClientE creates an ELB client.
+// NewSESV2ClientE creates an SES v2 client.
 func NewSESV2ClientE(t *testing.T, region string) (*sesv2.Client, error) {
 	sess, err := aws.NewAuthenticatedSession(region)
 	if err != nil {
