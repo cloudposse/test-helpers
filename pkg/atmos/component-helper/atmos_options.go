@@ -34,23 +34,7 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 			"ATMOS_BASE_PATH":            config.TempDir,
 			"ATMOS_CLI_CONFIG_PATH":      config.TempDir,
 			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
-func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stackName string, vars *map[string]interface{}) *atmos.Options {
-	accountID, err := aws.GetAccountId(t)
-	require.NoError(t, err, "Failed to get AWS Account ID")
-
-	mergedVars := map[string]interface{}{
-		"attributes": []string{config.RandomIdentifier},
-	}
-
-	// ... rest of the function ...
-
-	return &atmos.Options{
-		ATMOS_BASE_PATH:            config.TempDir,
-		ATMOS_CLI_CONFIG_PATH:      config.TempDir,
-		COMPONENT_HELPER_STATE_DIR: config.StateDir,
-		TEST_ACCOUNT_ID:            accountID,
-	}
-}
+			"TEST_ACCOUNT_ID":            accountID,
 		},
 	}
 	return atmosOptions
