@@ -124,7 +124,13 @@ func (s *TestSuite) BootstrapTempDir(t *testing.T, config *c.Config) {
 func (s *TestSuite) CopyComponentToTempDir(t *testing.T, config *c.Config) {
 	s.logPhaseStatus("setup/copy component to temp dir", "started")
 
-	destPath := filepath.Join(config.TempDir, "components", "terraform", "target")
+	var destPath string
+	if config.ComponentDestDir != "" {
+		destPath = filepath.Join(config.TempDir, config.ComponentDestDir)
+	} else {
+		destPath = filepath.Join(config.TempDir, "components", "terraform", "target")
+	}
+
 	err := s.copyDirectoryContents(config.SrcDir, destPath)
 	if err != nil {
 		s.logPhaseStatus("setup/copy component to temp dir", "failed")
