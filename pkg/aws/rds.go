@@ -10,13 +10,13 @@ import (
 )
 
 
-func GetWhetherDatabaseExistsInRdsPostgresInstance(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) bool {
-	output, err := GetWhetherDatabaseExistsInRdsPostgresInstanceE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName)
+func AssertDatabaseExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) bool {
+	output, err := AssertDatabaseExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 	require.NoError(t, err)
 	return output
 }
 
-func GetWhetherDatabaseExistsInRdsPostgresInstanceE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) (bool, error) {
+func AssertDatabaseExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) (bool, error) {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 
 	db, connErr := sql.Open("pgx", connectionString)
@@ -27,15 +27,15 @@ func GetWhetherDatabaseExistsInRdsPostgresInstanceE(t *testing.T, dbUrl string, 
 	return true, nil
 }
 
-func GetWhetherSchemaExistsInRdsPostgresInstance(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
-	output, err := GetWhetherSchemaExistsInRdsPostgresInstanceE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
+func AssertSchemaExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
+	output, err := AssertSchemaExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return output
 }
 
-func GetWhetherSchemaExistsInRdsPostgresInstanceE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
+func AssertSchemaExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 
 	db, connErr := sql.Open("pgx", connectionString)
@@ -55,15 +55,15 @@ func GetWhetherSchemaExistsInRdsPostgresInstanceE(t *testing.T, dbUrl string, db
 	return true, nil
 }
 
-func GetWhetherGrantsExistsInRdsPostgresInstance(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
-	output, err := GetWhetherGrantsExistsInRdsPostgresInstanceE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
+func AssertGrantsExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
+	output, err := AssertGrantsExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return output
 }
 
-func GetWhetherGrantsExistsInRdsPostgresInstanceE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
+func AssertGrantsExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 
 	db, connErr := sql.Open("pgx", connectionString)
