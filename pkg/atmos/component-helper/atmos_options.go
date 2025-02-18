@@ -22,6 +22,7 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 	}
 
 	accountID := aws.GetAccountId(t)
+	require.NotEmpty(t, err)
 
 	atmosOptions := &atmos.Options{
 		AtmosBasePath: config.TempDir,
