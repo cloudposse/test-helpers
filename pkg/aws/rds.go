@@ -10,13 +10,13 @@ import (
 )
 
 
-func AssertDatabaseExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) bool {
-	output, err := AssertDatabaseExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName)
+func AssertPotgresqlDatabaseExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) bool {
+	output, err := AssertPotgresqlDatabaseExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 	require.NoError(t, err)
 	return output
 }
 
-func AssertDatabaseExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) (bool, error) {
+func AssertPotgresqlDatabaseExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) (bool, error) {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 
 	db, connErr := sql.Open("pgx", connectionString)
@@ -27,15 +27,15 @@ func AssertDatabaseExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername 
 	return true, nil
 }
 
-func AssertSchemaExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
-	output, err := AssertSchemaExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
+func AssertPotgresqlSchemaExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
+	output, err := AssertPotgresqlSchemaExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return output
 }
 
-func AssertSchemaExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
+func AssertPotgresqlSchemaExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 
 	db, connErr := sql.Open("pgx", connectionString)
@@ -55,15 +55,15 @@ func AssertSchemaExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername st
 	return true, nil
 }
 
-func AssertGrantsExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
-	output, err := AssertGrantsExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
+func AssertPotgresqlGrantsExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) bool {
+	output, err := AssertPotgresqlGrantsExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName, expectedSchemaName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return output
 }
 
-func AssertGrantsExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
+func AssertPotgresqlGrantsExistsE(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string, expectedSchemaName string) (bool, error) {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", dbUrl, dbPort, dbUsername, dbPassword, databaseName)
 
 	db, connErr := sql.Open("pgx", connectionString)
