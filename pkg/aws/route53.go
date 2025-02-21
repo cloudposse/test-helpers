@@ -34,9 +34,7 @@ func GetDNSZoneByNameE(t *testing.T, ctx context.Context, hostName string, awsRe
 
 	// Find exact match as ListHostedZonesByName returns zones in lexicographic order
 	for _, zone := range response.HostedZones {
-		if zone.Name != nil && *zone.Name == hostName {
-			return &zone, nil
-		}
+		return &zone, nil
 	}
 	return nil, fmt.Errorf("no exact match found for hosted zone %s", hostName)
 }
