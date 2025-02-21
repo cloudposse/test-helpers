@@ -194,19 +194,20 @@ Finally, The Helper will clean up the temporary directory and any other resource
 
 ## Flags reference
 
-| Flag                       | Description                                           | Default           |
-| -------------------------- | ----------------------------------------------------- | ----------------- |
-| -config                    | The path to the config file                           | test_suite.yaml   |
-| -fixtures-dir              | The path to the fixtures directory                    | fixtures          |
-| -only-deploy-dependencies  | Only run the deploy dependencies phase of tests       | false             |
-| -skip-deploy-component     | Skips running the deploy component phase of tests     | false             |
-| -skip-deploy-dependencies  | Skips running the deploy dependencies phase of tests  | false             |
-| -skip-destroy-component    | Skips running the destroy component phase of tests    | false             |
-| -skip-destroy-dependencies | Skips running the destroy dependencies phase of tests | false             |
-| -skip-enabled-flag-test    | Skips running the Enabled flag test                   | false             |
-| -skip-setup                | Skips running the setup test suite phase of tests     | false             |
-| -skip-teardown             | Skips running the teardown test suite phase of tests  | false             |
-| -skip-vendor               | Skips running the vendor dependencies phase of tests  | false             |
-| -src-dir                   | The path to the component source directory            | src               |
-| -state-dir                 | The path to the terraform state directory             | {temp_dir}/state  |
-| -temp-dir                  | The path to the temp directory                        | {random temp dir} |
+| Flag                       | Description                                                                     | Default                     |
+| -------------------------- | ------------------------------------------------------------------------------- | --------------------------- |
+| -component-dest-dir        | The path to the component destination directory, relative to the temp directory | components/terraform/target |
+| -config                    | The path to the config file                                                     | test_suite.yaml             |
+| -fixtures-dir              | The path to the fixtures directory                                              | fixtures                    |
+| -only-deploy-dependencies  | Only run the deploy dependencies phase of tests                                 | false                       |
+| -skip-deploy-component     | Skips running the deploy component phase of tests                               | false                       |
+| -skip-deploy-dependencies  | Skips running the deploy dependencies phase of tests                            | false                       |
+| -skip-destroy-component    | Skips running the destroy component phase of tests                              | false                       |
+| -skip-destroy-dependencies | Skips running the destroy dependencies phase of tests                           | false                       |
+| -skip-enabled-flag-test    | Skips running the Enabled flag test                                             | false                       |
+| -skip-setup                | Skips running the setup test suite phase of tests                               | false                       |
+| -skip-teardown             | Skips running the teardown test suite phase of tests                            | false                       |
+| -skip-vendor               | Skips running the vendor dependencies phase of tests                            | false                       |
+| -src-dir                   | The path to the component source directory                                      | src                         |
+| -state-dir                 | The path to the terraform state directory                                       | {temp_dir}/state            |
+| -temp-dir                  | The path to the temp directory                                                  | {random temp dir}           |

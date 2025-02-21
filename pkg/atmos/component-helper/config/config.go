@@ -14,6 +14,7 @@ import (
 )
 
 func init() {
+	flag.String("component-dest-dir", "", "The path to the component destination directory, relative to the temp directory")
 	flag.String("config", "test_suite.yaml", "The path to the config file")
 	flag.String("fixtures-dir", "fixtures", "The path to the fixtures directory")
 	flag.Bool("only-deploy-dependencies", true, "Only run the deploy dependencies phase of tests")
@@ -31,6 +32,7 @@ func init() {
 }
 
 type Config struct {
+	ComponentDestDir        string
 	ConfigFilePath          string
 	FixturesDir             string
 	RandomIdentifier        string
@@ -89,9 +91,11 @@ func InitConfig(t *testing.T) *Config {
 
 	viper.SetDefault("ConfigFilePath", "test_suite.yaml")
 	viper.SetDefault("FixturesDir", "fixtures")
+	viper.SetDefault("ComponentDestDir", "")
 
 	randID := random.UniqueId()
 	viper.SetDefault("RandomIdentifier", strings.ToLower(randID))
+
 	viper.SetDefault("OnlyDeployDependencies", false)
 	viper.SetDefault("SkipDeployComponent", false)
 	viper.SetDefault("SkipDeployDependencies", false)
@@ -109,6 +113,9 @@ func InitConfig(t *testing.T) *Config {
 	pflag.Parse()
 
 	err := viper.BindPFlags(pflag.CommandLine)
+	require.NoError(t, err)
+
+	err = viper.BindPFlag("ComponentDestDir", pflag.Lookup("component-dest-dir"))
 	require.NoError(t, err)
 
 	err = viper.BindPFlag("ConfigFilePath", pflag.Lookup("config"))
@@ -172,16 +179,6 @@ func InitConfig(t *testing.T) *Config {
 
 	log.Info("OnlyDeployDependencies", "deps", config.OnlyDeployDependencies)
 	log.Info("SkipDeployComponent", "component", config.SkipDeployComponent)
-	// if config.OnlyDeployDependencies {
-	// 	config.SkipDeployComponent = true
-	// 	config.SkipDeployDependencies = false
-	// 	config.SkipDestroyComponent = true
-	// 	config.SkipDestroyDependencies = true
-	// 	config.SkipEnabledFlagTest = true
-	// 	config.SkipSetupTestSuite = false
-	// 	config.SkipTeardownTestSuite = true
-	// 	config.SkipVendorDependencies = true
-	// }
 
 	return config
 }

@@ -21,7 +21,9 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.44.328
 	github.com/aws/aws-sdk-go-v2 v1.36.1
+	github.com/aws/aws-sdk-go-v2/service/amplify v1.28.8
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.202.4
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.43.12
 	github.com/sirupsen/logrus v1.9.3
 )
 
@@ -38,7 +40,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.32 // indirect
 	github.com/aws/aws-sdk-go-v2/service/acm v1.30.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/amplify v1.28.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.51.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/backup v1.40.10 // indirect
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.47.4 // indirect
