@@ -1,7 +1,6 @@
 package component_helper
 
 import (
-	"strings"
 	"testing"
 
 	"dario.cat/mergo"
