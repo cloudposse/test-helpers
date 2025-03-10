@@ -27,7 +27,7 @@ func NewWAFClientE(t *testing.T, region string) (*wafv2.Client, error) {
 	return wafv2.NewFromConfig(*sess), nil
 }
 
-func CreateRegexPatternSet(client *wafv2.Client, name string, description string, patterns []string) (*types.RegexPatternSetSummary, error) {
+func WafCreateRegexPatternSet(client *wafv2.Client, name string, description string, patterns []string) (*types.RegexPatternSetSummary, error) {
 	if len(patterns) < 1 {
 		return nil, fmt.Errorf("at least one pattern is required")
 	}
@@ -53,7 +53,7 @@ func CreateRegexPatternSet(client *wafv2.Client, name string, description string
 	return output.Summary, nil
 }
 
-func GetIPSetByARN(t *testing.T, client *wafv2.Client, arn string) *wafv2.GetIPSetOutput {
+func WafGetIPSetByARN(t *testing.T, client *wafv2.Client, arn string) *wafv2.GetIPSetOutput {
 	ipSets, err := client.ListIPSets(context.Background(), &wafv2.ListIPSetsInput{
 		Scope: types.ScopeRegional,
 	})
