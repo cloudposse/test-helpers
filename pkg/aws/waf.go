@@ -11,8 +11,8 @@ import (
 )
 
 
-func NeWAFClient(t *testing.T, region string) *wafv2.Client {
-	client, err := NeWAFClientE(t, region)
+func NewWAFClient(t *testing.T, region string) *wafv2.Client {
+	client, err := NewWAFClientE(t, region)
 	require.NoError(t, err)
 
 	return client
