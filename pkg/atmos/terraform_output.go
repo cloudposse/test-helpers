@@ -319,6 +319,9 @@ func cleanOutput(out string) string {
 		if strings.Contains(line, "INFO") {
 			continue
 		}
+		if strings.Contains(line, "Switched to workspace") {
+			continue
+		}
 		for _, r := range line {
 			if r >= 32 && r < 127 { // Keep printable ASCII characters only
 				result = append(result, r)
