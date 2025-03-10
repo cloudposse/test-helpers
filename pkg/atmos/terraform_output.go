@@ -284,8 +284,7 @@ func OutputJsonE(t testing.TestingT, options *Options, key string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	re := regexp.MustCompile(`Switched to workspace ".*"`)
-	out = re.ReplaceAllString(out, "")
+	out = cleanOutput(out)
 	return out, nil
 }
 
