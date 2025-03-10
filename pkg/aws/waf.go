@@ -49,16 +49,21 @@ func GetIPSetByARN(t *testing.T, client *wafv2.Client, arn string) *wafv2.GetIPS
 	ipSets, err := client.ListIPSets(context.Background(), &wafv2.ListIPSetsInput{
 		Scope: types.ScopeRegional,
 	})
+	require.NoError(t, err)
+	require.NotNil(t, ipSets)
 
 	var ipSetId string
 	var ipSetName string
+	found := false
 	for _, ipSet := range ipSets.IPSets {
 		if *ipSet.ARN == arn {
 			ipSetId = *ipSet.Id
 			ipSetName = *ipSet.Name
+			found = true
 			break
 		}
 	}
+	require.True(t, found, "IP set with ARN %s not found", arn)
 
 	ipSet, err := client.GetIPSet(context.Background(), &wafv2.GetIPSetInput{
 		Id:    &ipSetId,
