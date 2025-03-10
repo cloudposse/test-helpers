@@ -18,7 +18,7 @@ func NewWAFClient(t *testing.T, region string) *wafv2.Client {
 	return client
 }
 
-func NeWAFClientE(t *testing.T, region string) (*wafv2.Client, error) {
+func NewWAFClientE(t *testing.T, region string) (*wafv2.Client, error) {
 	sess, err := aws.NewAuthenticatedSession(region)
 	if err != nil {
 		return nil, err
