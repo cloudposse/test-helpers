@@ -27,14 +27,21 @@ func NeWAFClientE(t *testing.T, region string) (*wafv2.Client, error) {
 }
 
 func CreateRegexPatternSet(client *wafv2.Client, name string, description string, patterns []string) (*types.RegexPatternSetSummary, error) {
+	if len(patterns) < 1 {
+		return nil, fmt.Errorf("at least one pattern is required")
+	}
+
+	var regexList []types.Regex
+	for _, pattern := range patterns {
+		p := pattern // Create a new variable to avoid loop variable capture issues
+		regexList = append(regexList, types.Regex{RegexString: &p})
+	}
+
 	regexSetInput := &wafv2.CreateRegexPatternSetInput{
-		Name:        &name,
-		Scope:       types.ScopeRegional,
-		Description: &description,
-		RegularExpressionList: []types.Regex{
-			{RegexString: &patterns[0]},
-			{RegexString: &patterns[1]},
-		},
+		Name:                  &name,
+		Scope:                 types.ScopeRegional,
+		Description:           &description,
+		RegularExpressionList: regexList,
 	}
 
 	output, err := client.CreateRegexPatternSet(context.Background(), regexSetInput)
