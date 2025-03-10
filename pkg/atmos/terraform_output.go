@@ -279,8 +279,13 @@ func OutputJsonE(t testing.TestingT, options *Options, key string) (string, erro
 	if key != "" {
 		args = append(args, key)
 	}
-
-	return RunAtmosCommandAndGetStdoutE(t, options, args...)
+	out, err := RunAtmosCommandAndGetStdoutE(t, options, args...)
+	if err != nil {
+		return "", err
+	}
+	re := regexp.MustCompile(`^Switched to workspace ".*"$`)
+	out = re.ReplaceAllString(out, "")
+	return out, nil
 }
 
 // OutputStruct calls terraform output for the given variable and stores the
