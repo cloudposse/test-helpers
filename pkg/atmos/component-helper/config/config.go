@@ -80,6 +80,7 @@ func isPFlagBound(key string) bool {
 	// Check if the key corresponds to a defined flag
 	return strings.HasPrefix(key, "skip") ||
 		strings.HasPrefix(key, "test") ||
+		strings.HasPrefix(key, "only") ||
 		flag.Lookup(key) != nil
 }
 

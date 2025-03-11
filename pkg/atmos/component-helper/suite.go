@@ -9,6 +9,7 @@ import (
 	"github.com/cloudposse/test-helpers/pkg/atmos"
 	c "github.com/cloudposse/test-helpers/pkg/atmos/component-helper/config"
 	"github.com/cloudposse/test-helpers/pkg/atmos/component-helper/dependency"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -19,6 +20,11 @@ type TestSuite struct {
 	suite.Suite
 }
 
+type TestingSuite interface {
+	GetConfig(t *testing.T) *c.Config
+	suite.TestingSuite
+}
+
 func NewTestSuite() *TestSuite {
 	tsuite := new(TestSuite)
 	tsuite.Dependencies = make([]*dependency.Dependency, 0)
@@ -26,8 +32,13 @@ func NewTestSuite() *TestSuite {
 	return tsuite
 }
 
-func Run(t *testing.T, s suite.TestingSuite) {
+func Run(t *testing.T, s TestingSuite) {
 	suite.Run(t, s)
+}
+
+func (s *TestSuite) GetConfig(t *testing.T) *c.Config {
+	assert.NotNil(t, s.Config)
+	return s.Config
 }
 
 func (s *TestSuite) AddDependency(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}) {
@@ -101,12 +112,19 @@ func (s *TestSuite) DestroyAtmosComponent(t *testing.T, componentName string, st
 	s.logPhaseStatus(phaseName, "completed")
 }
 
+
 func (s *TestSuite) InitConfig() {
 	t := s.T()
 
 	if s.Config == nil {
 		config := c.InitConfig(t)
 		s.Config = config
+  }
+}
+
+func (s *TestSuite) BeforeTest(suiteName, testName string) {
+	if s.Config.OnlyDeployDependencies {
+		s.T().Skip("Skipping test because OnlyDeployDependencies is true")
 	}
 }
 
