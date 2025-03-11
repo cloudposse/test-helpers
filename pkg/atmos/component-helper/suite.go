@@ -101,12 +101,21 @@ func (s *TestSuite) DestroyAtmosComponent(t *testing.T, componentName string, st
 	s.logPhaseStatus(phaseName, "completed")
 }
 
+func (s *TestSuite) InitConfig() {
+	t := s.T()
+
+	if s.Config == nil {
+		config := c.InitConfig(t)
+		s.Config = config
+	}
+}
+
 // Setup runs the setup phase of the test suite.
 func (s *TestSuite) SetupSuite() {
 	t := s.T()
 
-	config := c.InitConfig(t)
-	s.Config = config
+	s.InitConfig()
+	config := s.Config
 
 	if s.Config.SkipSetupTestSuite {
 		s.logPhaseStatus("setup", "skipped")

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	log "github.com/charmbracelet/log"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -176,9 +175,6 @@ func InitConfig(t *testing.T) *Config {
 
 	err = writeConfigWithoutPFlags(viper.GetString("ConfigFilePath"))
 	require.NoError(t, err)
-
-	log.Info("OnlyDeployDependencies", "deps", config.OnlyDeployDependencies)
-	log.Info("SkipDeployComponent", "component", config.SkipDeployComponent)
 
 	return config
 }

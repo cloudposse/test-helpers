@@ -192,6 +192,18 @@ Finally, The Helper will clean up the temporary directory and any other resource
   component under test and its dependencies. This can be useful for debugging issues with the component or its
   dependencies.
 
+### Custom Component Directory
+
+In some cases, for example where there are a suite of components that need to be tested together, it's not desirable to have the component copied to the `target` directory under `<TEMP_DIR>/components/terraform/target`. In this case, you can specify a custom directory by using the `-component-dest-dir` flag or by creting a custom `SetupSuite()` method on your Test Suite.
+
+```go
+func (s *ExampleTestSuite) SetupSuite() {
+  s.TestSuite.InitConfig()
+  s.TestSuite.Config.ComponentDestDir = "components/terraform/myspecialcomponent"
+  s.TestSuite.SetupSuite()
+}
+```
+
 ## Flags reference
 
 | Flag                       | Description                                                                     | Default                     |
