@@ -112,6 +112,16 @@ func (s *TestSuite) DestroyAtmosComponent(t *testing.T, componentName string, st
 	s.logPhaseStatus(phaseName, "completed")
 }
 
+
+func (s *TestSuite) InitConfig() {
+	t := s.T()
+
+	if s.Config == nil {
+		config := c.InitConfig(t)
+		s.Config = config
+  }
+}
+
 func (s *TestSuite) BeforeTest(suiteName, testName string) {
 	if s.Config.OnlyDeployDependencies {
 		s.T().Skip("Skipping test because OnlyDeployDependencies is true")
@@ -122,8 +132,8 @@ func (s *TestSuite) BeforeTest(suiteName, testName string) {
 func (s *TestSuite) SetupSuite() {
 	t := s.T()
 
-	config := c.InitConfig(t)
-	s.Config = config
+	s.InitConfig()
+	config := s.Config
 
 	if s.Config.SkipSetupTestSuite {
 		s.logPhaseStatus("setup", "skipped")
