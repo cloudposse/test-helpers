@@ -279,8 +279,12 @@ func OutputJsonE(t testing.TestingT, options *Options, key string) (string, erro
 	if key != "" {
 		args = append(args, key)
 	}
-
-	return RunAtmosCommandAndGetStdoutE(t, options, args...)
+	out, err := RunAtmosCommandAndGetStdoutE(t, options, args...)
+	if err != nil {
+		return "", err
+	}
+	out = cleanOutput(out)
+	return out, nil
 }
 
 // OutputStruct calls terraform output for the given variable and stores the
@@ -311,6 +315,9 @@ func cleanOutput(out string) string {
 	var result []rune
 	for _, line := range strings.Split(out, "\n") {
 		if strings.Contains(line, "INFO") {
+			continue
+		}
+		if strings.Contains(line, "Switched to workspace") {
 			continue
 		}
 		for _, r := range line {
