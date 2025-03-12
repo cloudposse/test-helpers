@@ -14,7 +14,7 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/rebuy-de/aws-nuke/v2 v2.25.0
 	github.com/spf13/viper v1.19.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 )
 
@@ -31,6 +31,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.38.16
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.46.2
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.41.5
+	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.58.0
 	github.com/sirupsen/logrus v1.9.3
 )
 
@@ -68,7 +69,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.58.0 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
