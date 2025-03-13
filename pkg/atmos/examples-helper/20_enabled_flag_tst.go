@@ -1,4 +1,4 @@
-package component_helper
+package examples_helper
 
 import (
 	"dario.cat/mergo"
