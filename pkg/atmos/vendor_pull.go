@@ -16,3 +16,8 @@ func VendorPull(t testing.TestingT, options *Options) string {
 func VendorPullE(t testing.TestingT, options *Options) (string, error) {
 	return RunAtmosCommandE(t, options, FormatArgs(options, "vendor", "pull")...)
 }
+
+// VendorPullE runs atmos vendor with the given options and return stdout/stderr.
+func VendorPullComponent(t testing.TestingT, options *Options) (string, error) {
+	return RunAtmosCommandE(t, options, FormatArgs(options, "vendor", "pull", "-c", options.Component)...)
+}

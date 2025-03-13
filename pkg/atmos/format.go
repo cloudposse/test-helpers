@@ -75,6 +75,10 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 		terraformArgs = append(terraformArgs, fmt.Sprintf("--redirect-stderr=%s", options.RedirectStrErrDestination))
 	}
 
+	if !options.GenerateBackend {
+		terraformArgs = append(terraformArgs, fmt.Sprintf("--auto-generate-backend-file=%t", options.GenerateBackend))
+	}
+
 	if lockSupported {
 		// If command supports locking, handle lock arguments
 		terraformArgs = append(terraformArgs, tt.FormatTerraformLockAsArgs(options.Lock, options.LockTimeout)...)

@@ -57,6 +57,7 @@ type Options struct {
 	LockTimeout               string                 // The lock timeout option to pass to the atmos command with -lock-timeout
 	EnvVars                   map[string]string      // Environment variables to set when running Atmos
 	BackendConfig             map[string]interface{} // The vars to pass to the atmos init command for extra configuration for the backend
+	GenerateBackend           bool                   // Whether to generate a backend file or not
 	RetryableAtmosErrors      map[string]string      // If Atmos apply fails with one of these (transient) errors, retry. The keys are a regexp to match against the error and the message is what to display to a user if that error is matched.
 	MaxRetries                int                    // Maximum number of times to retry errors matching RetryableAtmosErrors
 	TimeBetweenRetries        time.Duration          // The amount of time to wait between retries
