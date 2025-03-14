@@ -90,5 +90,5 @@ func NewEksClientE(t testing.TestingT, region string) (*eks.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return eks.NewFromConfig(sess), nil
+	return eks.NewFromConfig(*sess), nil
 }
