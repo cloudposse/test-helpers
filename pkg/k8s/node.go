@@ -1,16 +1,18 @@
-import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
+package k8s
 
+import (
+	"fmt"
+
+	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/stretchr/testify/require"
-@	"github.com/gruntwork-io/terratest/modules/testing"
+	"github.com/gruntwork-io/terratest/modules/testing"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"	
 )
 
 // AssertAnyNodeHasLabelE will return an error if no nodes are found with the given label.
-func AssertAnyNodeHasLabelE(t testing.TestingT, options *KubectlOptions, label string) error {
-	nodes, err := GetNodesByFilterE(t, options, metav1.ListOptions{
+func AssertAnyNodeHasLabelE(t testing.TestingT, options *k8s.KubectlOptions, label string) error {
+	nodes, err := k8s.GetNodesByFilterE(t, options, metav1.ListOptions{
 		LabelSelector: label,
 	})
 
@@ -22,13 +24,13 @@ func AssertAnyNodeHasLabelE(t testing.TestingT, options *KubectlOptions, label s
 }
 
 // AssertAnyNodeHasLabel will fail the test if no nodes are found with the given label.
-func AssertAnyNodeHasLabel(t testing.TestingT, options *KubectlOptions, label string) {
+func AssertAnyNodeHasLabel(t testing.TestingT, options *k8s.KubectlOptions, label string) {
 	err := AssertAnyNodeHasLabelE(t, options, label)
 	require.NoError(t, err)
 }
 
-func AssertAnyNodeHasTaintE(t testing.TestingT, options *KubectlOptions, taintKey string, taintValue string, taintEffect corev1.TaintEffect) error {
-	nodes, err := GetNodesE(t, options)
+func AssertAnyNodeHasTaintE(t testing.TestingT, options *k8s.KubectlOptions, taintKey string, taintValue string, taintEffect corev1.TaintEffect) error {
+	nodes, err := k8s.GetNodesE(t, options)
 	require.NoError(t, err)
 
 	for _, node := range nodes {
@@ -43,7 +45,7 @@ func AssertAnyNodeHasTaintE(t testing.TestingT, options *KubectlOptions, taintKe
 }
 
 // AssertAnyNodeHasTaint will fail the test if no nodes are found with the given taint.
-func AssertAnyNodeHasTaint(t testing.TestingT, options *KubectlOptions, taintKey string, taintValue string, taintEffect corev1.TaintEffect) {
+func AssertAnyNodeHasTaint(t testing.TestingT, options *k8s.KubectlOptions, taintKey string, taintValue string, taintEffect corev1.TaintEffect) {
 	err := AssertAnyNodeHasTaintE(t, options, taintKey, taintValue, taintEffect)
 	require.NoError(t, err)
 }
