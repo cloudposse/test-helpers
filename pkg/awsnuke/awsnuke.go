@@ -1,4 +1,4 @@
-// package awsnuke
+package awsnuke
 
 // import (
 // 	"fmt"
