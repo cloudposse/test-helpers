@@ -99,7 +99,7 @@ func NewEksClientE(t testing.TestingT, region string) (*eks.Client, error) {
 }
 
 
-func newK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
+func NewK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
 	gen, err := token.NewGenerator(true, false)
 	if err != nil {
 		return nil, err
