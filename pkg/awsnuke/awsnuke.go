@@ -5,7 +5,7 @@
 // 	"os"
 // 	"sort"
 
-// 	"github.com/aws/aws-sdk-go-v2/aws/endpoints"
+// 	"github.com/aws/aws-sdk-go/aws/endpoints"
 // 	tt "github.com/cloudposse/test-helpers/pkg/testing"
 // 	"github.com/gruntwork-io/terratest/modules/aws"
 // 	"github.com/gruntwork-io/terratest/modules/testing"
