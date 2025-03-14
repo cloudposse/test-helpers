@@ -1,6 +1,6 @@
 // //go:build integration
 
-// package awsnuke
+package awsnuke
 
 // import (
 // 	"fmt"
