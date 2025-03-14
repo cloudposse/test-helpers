@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"encoding/base64"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
@@ -9,6 +10,10 @@ import (
 	"github.com/gruntwork-io/terratest/modules/testing"
 	terratestAWS "github.com/gruntwork-io/terratest/modules/aws"	
 	"github.com/stretchr/testify/require"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"sigs.k8s.io/aws-iam-authenticator/pkg/token"
 )
 
 // GetEksClusterE fetches information about an EKS cluster.
@@ -91,4 +96,36 @@ func NewEksClientE(t testing.TestingT, region string) (*eks.Client, error) {
 		return nil, err
 	}
 	return eks.NewFromConfig(*sess), nil
+}
+
+
+func newK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
+	gen, err := token.NewGenerator(true, false)
+	if err != nil {
+		return nil, err
+	}
+	opts := &token.GetTokenOptions{
+		ClusterID: *cluster.Name,
+	}
+	tok, err := gen.GetWithOptions(opts)
+	if err != nil {
+		return nil, err
+	}
+	ca, err := base64.StdEncoding.DecodeString(*cluster.CertificateAuthority.Data)
+	if err != nil {
+		return nil, err
+	}
+	clientset, err := kubernetes.NewForConfig(
+		&rest.Config{
+			Host:        *cluster.Endpoint,
+			BearerToken: tok.Token,
+			TLSClientConfig: rest.TLSClientConfig{
+				CAData: ca,
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return clientset, nil
 }
