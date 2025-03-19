@@ -32,9 +32,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.46.2
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.41.5
 	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.58.0
-	k8s.io/api v0.32.0
-	k8s.io/apimachinery v0.32.0
-	k8s.io/client-go v0.32.0
+	k8s.io/api v0.32.3
+	k8s.io/apimachinery v0.32.3
+	k8s.io/client-go v0.32.3
 	sigs.k8s.io/aws-iam-authenticator v0.6.30
 )
 
