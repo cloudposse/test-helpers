@@ -48,13 +48,18 @@ func (s *TestSuite) GetConfig(t *testing.T) *c.Config {
 	assert.NotNil(t, s.Config)
 	return s.Config
 }
-
-func (s *TestSuite) AddDependency(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}, args ...string) {
+func (s *TestSuite) AddCustomDependency(t *testing.T, d *dependency.Dependency) {
+	s.Dependencies = append(s.Dependencies, d)
+}
+func (s *TestSuite) AddDependency(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}, vendor bool, targets []string, addRandomAttribute bool, args ...string) {
 	s.Dependencies = append(s.Dependencies, &dependency.Dependency{
-		AdditionalVars: additionalVars,
-		ComponentName:  componentName,
-		StackName:      stackName,
-		Args:           args,
+		AdditionalVars:     additionalVars,
+		ComponentName:      componentName,
+		StackName:          stackName,
+		Args:               args,
+		Vendor:             vendor,
+		Targets:            targets,
+		AddRandomAttribute: addRandomAttribute,
 	})
 }
 
@@ -95,7 +100,7 @@ func (s *TestSuite) DeployAtmosComponent(t *testing.T, componentName string, sta
 	s.logPhaseStatus(phaseName, "started")
 
 	mergedVars := s.getMergedVars(t, additionalVars)
-	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, componentName, stackName, &mergedVars)
+	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, componentName, stackName, &mergedVars, nil)
 
 	output, err := atmos.ApplyE(t, atmosOptions)
 	if err != nil {
@@ -119,7 +124,7 @@ func (s *TestSuite) DestroyAtmosComponent(t *testing.T, componentName string, st
 	s.logPhaseStatus(phaseName, "started")
 
 	mergedVars := s.getMergedVars(t, additionalVars)
-	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, componentName, stackName, &mergedVars)
+	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, componentName, stackName, &mergedVars, nil)
 
 	_, err := atmos.DestroyE(t, atmosOptions)
 	require.NoError(t, err)

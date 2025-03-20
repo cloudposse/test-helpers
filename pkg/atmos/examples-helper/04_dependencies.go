@@ -37,8 +37,7 @@ func (s *TestSuite) DeployDependencies(t *testing.T, config *c.Config) {
 		} else {
 
 			log.WithPrefix(t.Name()).Info("deploying dependency", "component", dependency.ComponentName, "stack", dependency.StackName)
-			atmosOptions := getAtmosOptionsFromSetupConfiguration(t, config, s.SetupConfiguration, dependency.ComponentName, dependency.StackName, dependency.AdditionalVars)
-
+			atmosOptions := getAtmosOptions(t, config, s, dependency)
 			out, err := atmos.ApplyE(t, atmosOptions)
 			log.WithPrefix(t.Name()).Info("deploying dependency", "component", dependency.ComponentName, "stack", dependency.StackName, "output", out)
 			if err != nil {

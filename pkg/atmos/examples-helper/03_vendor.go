@@ -38,7 +38,7 @@ func (s *TestSuite) VendorDependencies(t *testing.T, config *c.Config) {
 	s.logPhaseStatus(phaseName, "started")
 
 	log.Debug("running atmos vendor pull in tempdir")
-	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, "", "", nil)
+	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, "", "", nil, nil)
 	_, err := atmos.VendorPullE(t, atmosOptions)
 	if err != nil {
 		s.logPhaseStatus(phaseName, "error")
@@ -87,7 +87,7 @@ func (s *TestSuite) pullComponentYamlComponents(t *testing.T, config *c.Config) 
 			component := filepath.Base(filepath.Dir(path))
 
 			// Get the atmos options for the component
-			atmosOptions := getAtmosOptionsFromSetupConfiguration(t, config, s.SetupConfiguration, component, "", nil)
+			atmosOptions := getAtmosOptionsFromSetupConfiguration(t, config, s.SetupConfiguration, component, "", nil, nil)
 			log.WithPrefix(s.T().Name()).Info("found component.yaml", "path", path, "component", component)
 
 			// Pull the component

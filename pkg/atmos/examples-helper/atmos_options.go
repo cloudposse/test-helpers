@@ -1,6 +1,7 @@
 package examples_helper
 
 import (
+	"github.com/cloudposse/test-helpers/pkg/atmos/examples-helper/dependency"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -45,7 +46,7 @@ func GetAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 	return atmosOptions
 }
 
-func getAtmosOptionsFromSetupConfiguration(t *testing.T, config *c.Config, configuration SetupConfiguration, componentName string, stackName string, vars *map[string]interface{}) *atmos.Options {
+func getAtmosOptionsFromSetupConfiguration(t *testing.T, config *c.Config, configuration SetupConfiguration, componentName string, stackName string, vars *map[string]interface{}, targets []string) *atmos.Options {
 	mergedVars := map[string]interface{}{
 		"attributes": []string{config.RandomIdentifier},
 	}
@@ -69,6 +70,39 @@ func getAtmosOptionsFromSetupConfiguration(t *testing.T, config *c.Config, confi
 			"ATMOS_CLI_CONFIG_PATH":      filepath.Join(config.TempDir, configuration.AtmosBaseDir),
 			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
 		},
+		Targets: targets,
+	}
+	return atmosOptions
+}
+
+func getAtmosOptions(t *testing.T, config *c.Config, s *TestSuite, d *dependency.Dependency) *atmos.Options {
+	mergedVars := map[string]interface{}{}
+	if d.AddRandomAttribute {
+		mergedVars = map[string]interface{}{
+			"attributes": []string{config.RandomIdentifier},
+		}
+	}
+
+	if d.AdditionalVars != nil {
+		err := mergo.Merge(&mergedVars, d.AdditionalVars)
+		require.NoError(t, err)
+	}
+
+	atmosOptions := &atmos.Options{
+		AtmosBasePath: filepath.Join(config.TempDir, s.SetupConfiguration.AtmosBaseDir),
+		Component:     d.ComponentName,
+		Stack:         d.StackName,
+		NoColor:       true,
+		BackendConfig: map[string]interface{}{
+			"workspace_key_prefix": strings.Join([]string{config.RandomIdentifier, d.StackName}, "-"),
+		},
+		Vars: mergedVars,
+		EnvVars: map[string]string{
+			"ATMOS_BASE_PATH":            filepath.Join(config.TempDir, s.SetupConfiguration.AtmosBaseDir),
+			"ATMOS_CLI_CONFIG_PATH":      filepath.Join(config.TempDir, s.SetupConfiguration.AtmosBaseDir),
+			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
+		},
+		Targets: d.Targets,
 	}
 	return atmosOptions
 }
