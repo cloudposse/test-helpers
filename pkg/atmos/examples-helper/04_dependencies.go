@@ -25,11 +25,15 @@ func (s *TestSuite) DeployDependencies(t *testing.T, config *c.Config) {
 	}
 
 	for _, dependency := range s.Dependencies {
+		if dependency.VendorOnly {
+			log.WithPrefix(t.Name()).Info("skipping vendor only dependency", "component", dependency.ComponentName)
+			continue
+		}
 		if dependency.Function != nil {
 			s.logPhaseStatus("deploy dependencies/function", "started")
 			err := dependency.Function()
 			if err != nil {
-				log.WithPrefix(t.Name()+"deploy function dependency").Error("failed to run function", "error", err)
+				log.WithPrefix(t.Name()+" deploy function dependency").Error("failed to run function", "error", err)
 			}
 
 			s.logPhaseStatus("deploy dependencies/function", "completed")

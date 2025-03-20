@@ -3,6 +3,7 @@ package examples_helper
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	log "github.com/charmbracelet/log"
@@ -99,7 +100,34 @@ func (s *TestSuite) pullComponentYamlComponents(t *testing.T, config *c.Config) 
 	s.logPhaseStatus(phaseName, "completed")
 }
 
-func (s *TestSuite) VendorComponents(t *testing.T, config *c.Config) {
+func (s *TestSuite) pullComponentPath(t *testing.T, config *c.Config, path string) {
+	component := ""
+	if strings.HasSuffix(path, "component.yaml") {
+		//Get the folder name of component.yaml
+		component = filepath.Base(filepath.Dir(path))
+	} else {
+		component = filepath.Base(path)
+	}
+	s.pullComponent(t, config, component)
+}
+
+func (s *TestSuite) pullComponent(t *testing.T, config *c.Config, component string) {
+	// Get the atmos options for the component
+	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, config, s.SetupConfiguration, component, "", nil, nil)
+
+	// Pull the component
+	_, _ = atmos.VendorPullComponent(t, atmosOptions)
+}
+
+func (s *TestSuite) VendorAllComponents(t *testing.T, config *c.Config) {
 	s.pullVendorYamlComponents(t, config)
 	s.pullComponentYamlComponents(t, config)
+}
+
+func (s *TestSuite) PullDependencies(t *testing.T, config *c.Config) {
+	for _, dependency := range s.Dependencies {
+		if dependency.VendorOnly || dependency.Vendor {
+			s.pullComponent(t, config, dependency.ComponentName)
+		}
+	}
 }

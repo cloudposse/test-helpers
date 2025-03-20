@@ -7,6 +7,7 @@ type Dependency struct {
 	Function           func() error
 	Args               []string
 	Vendor             bool
+	VendorOnly         bool
 	Targets            []string
 	AddRandomAttribute bool
 }

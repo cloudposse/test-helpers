@@ -125,7 +125,7 @@ func (s *TestSuite) UpdateAwsEnvVarsToLocalStack(t *testing.T) {
 	localstackCloudConfig := "https://localhost.localstack.cloud:" + hostport
 	t.Setenv("AWS_S3_ENDPOINT", localstackCloudConfig)
 	t.Setenv("AWS_DYNAMODB_ENDPOINT", localstackCloudConfig)
-	t.Setenv("AWS_STS_ENDPOINT", localstackCloudConfig)
+	t.Setenv("AWS_STS_ENDPOINT", localhostConfig)
 	t.Setenv("AWS_ENDPOINT_URL", localhostConfig)
 
 	t.Setenv("AWS_ENDPOINT_URL_STS", localstackCloudConfig)

@@ -19,6 +19,18 @@ type SetupConfiguration struct {
 	TempContentsCmd         *exec.Cmd
 	AtmosBaseDir            string // Base directory for atmos relative to the temp dir
 	LocalStackConfiguration *LocalStackConfiguration
+	VendorAllComponents     bool
+	PullBeforeDeploy        bool
+}
+
+func NewSetupConfiguration() SetupConfiguration {
+	return SetupConfiguration{
+		TempContentsCmd:         nil,
+		AtmosBaseDir:            "",
+		LocalStackConfiguration: NewLocalStackConfiguration(),
+		VendorAllComponents:     false,
+		PullBeforeDeploy:        true,
+	}
 }
 
 type TestSuite struct {
@@ -63,6 +75,13 @@ func (s *TestSuite) AddDependency(t *testing.T, componentName string, stackName 
 	})
 }
 
+func (s *TestSuite) AddVendorOnlyDependency(t *testing.T, componentName string) {
+	s.Dependencies = append(s.Dependencies, &dependency.Dependency{
+		ComponentName: componentName,
+		VendorOnly:    true,
+	})
+}
+
 func (s *TestSuite) AddFunctionDependency(t *testing.T, fn func() error) {
 	s.Dependencies = append(s.Dependencies, &dependency.Dependency{
 		Function: fn,
@@ -91,6 +110,11 @@ func (s *TestSuite) getMergedVars(t *testing.T, additionalVars *map[string]inter
 
 func (s *TestSuite) DeployAtmosComponent(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}) (*atmos.Options, string) {
 	phaseName := fmt.Sprintf("deploy/atmos component/%s/%s", stackName, componentName)
+	if s.SetupConfiguration.PullBeforeDeploy {
+		s.logPhaseStatus(phaseName, "started")
+		s.pullComponent(t, s.Config, componentName)
+		s.logPhaseStatus(phaseName, "completed")
+	}
 
 	if s.Config.SkipDeployComponent {
 		s.logPhaseStatus(phaseName, "skipped")
@@ -163,7 +187,11 @@ func (s *TestSuite) SetupSuite() {
 
 	s.CreateTempContents(t, config)
 	s.SetupLocalStackContainer(t, config)
-	s.VendorComponents(t, config)
+	if s.SetupConfiguration.VendorAllComponents {
+		s.VendorAllComponents(t, config)
+	} else {
+		s.PullDependencies(t, config)
+	}
 	s.DeployDependencies(t, config)
 
 	s.logPhaseStatus("setup", "completed")
