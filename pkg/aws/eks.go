@@ -99,7 +99,7 @@ func NewEksClientE(t testing.TestingT, region string) (*eks.Client, error) {
 }
 
 
-func NewK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
+func NewK8SClientConfig(cluster *types.Cluster) (*rest.Config, error) {
 	gen, err := token.NewGenerator(true, false)
 	if err != nil {
 		return nil, err
@@ -115,15 +115,24 @@ func NewK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
-	clientset, err := kubernetes.NewForConfig(
-		&rest.Config{
-			Host:        *cluster.Endpoint,
-			BearerToken: tok.Token,
-			TLSClientConfig: rest.TLSClientConfig{
-				CAData: ca,
-			},
+
+	return rest.Config{
+		Host:        *cluster.Endpoint,
+		BearerToken: tok.Token,
+		TLSClientConfig: rest.TLSClientConfig{
+			CAData: ca,
 		},
-	)
+	}, nil
+}
+
+
+func NewK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
+	config, err := NewK8SClientConfig(cluster)
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, err := kubernetes.NewForConfig(&config)
 	if err != nil {
 		return nil, err
 	}
