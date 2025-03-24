@@ -116,7 +116,7 @@ func NewK8SClientConfig(cluster *types.Cluster) (*rest.Config, error) {
 		return nil, err
 	}
 
-	return rest.Config{
+	return &rest.Config{
 		Host:        *cluster.Endpoint,
 		BearerToken: tok.Token,
 		TLSClientConfig: rest.TLSClientConfig{
@@ -132,7 +132,7 @@ func NewK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
 		return nil, err
 	}
 
-	clientset, err := kubernetes.NewForConfig(&config)
+	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
