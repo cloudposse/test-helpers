@@ -111,7 +111,7 @@ func NewK8SClientConfig(cluster *types.Cluster) (*rest.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	ca, err := base64.StdEncoding.DecodeString(*cluster.CertificateAuthority.Data)
+	ca, err := base64.StdEncoding.DecodeString(cluster.CertificateAuthority.Data)
 	if err != nil {
 		return nil, err
 	}
