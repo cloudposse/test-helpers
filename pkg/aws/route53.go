@@ -40,14 +40,14 @@ func GetDNSZoneByNameE(t *testing.T, ctx context.Context, hostName string, awsRe
 }
 
 func CleanDNSZoneID(t *testing.T, ctx context.Context, zoneID string, awsRegion string) error {
-	route53Client, err := NewRoute53ClientE(t, awsRegion)
+	route53Client, err := aws.NewRoute53ClientE(t, awsRegion)
 	if err != nil {
 		return err
 	}
 
 	o, err := route53Client.ListResourceRecordSets(ctx, &route53.ListResourceRecordSetsInput{
 		HostedZoneId:    &zoneID,
-		MaxItems:        aws.Int32(100),
+		MaxItems:        100,
 	})
 	if err != nil {
 		return err
@@ -56,7 +56,6 @@ func CleanDNSZoneID(t *testing.T, ctx context.Context, zoneID string, awsRegion 
 	var changes []types.Change
 
 	for _, record := range o.ResourceRecordSets {
-
 		if record.Type == types.RRTypeNs || record.Type == types.RRTypeSoa {
 			continue
 		}
@@ -79,7 +78,7 @@ func CleanDNSZoneID(t *testing.T, ctx context.Context, zoneID string, awsRegion 
 
 	// Call ChangeResourceRecordSets to delete the records
 	changeInput := &route53.ChangeResourceRecordSetsInput{
-		HostedZoneId: aws.String(defaultDNSZoneId),
+		HostedZoneId: zoneID,
 		ChangeBatch:  changeBatch,
 	}
 
