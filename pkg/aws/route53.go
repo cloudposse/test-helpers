@@ -38,3 +38,55 @@ func GetDNSZoneByNameE(t *testing.T, ctx context.Context, hostName string, awsRe
 	}
 	return nil, fmt.Errorf("no exact match found for hosted zone %s", hostName)
 }
+
+func CleanDNSZoneID(t *testing.T, ctx context.Context, zoneID string, awsRegion string) error {
+	route53Client, err := NewRoute53ClientE(t, awsRegion)
+	if err != nil {
+		return err
+	}
+
+	o, err := route53Client.ListResourceRecordSets(ctx, &route53.ListResourceRecordSetsInput{
+		HostedZoneId:    &zoneID,
+		MaxItems:        aws.Int32(100),
+	})
+	if err != nil {
+		return err
+	}
+
+	var changes []types.Change
+
+	for _, record := range o.ResourceRecordSets {
+
+		if record.Type == types.RRTypeNs || record.Type == types.RRTypeSoa {
+			continue
+		}
+		// Build a deletion change for each record
+		changes = append(changes, types.Change{
+			Action:            types.ChangeActionDelete,
+			ResourceRecordSet: &record,
+		})
+	}
+
+	if len(changes) == 0 {
+		fmt.Println("No deletable records found.")
+		return nil
+	}
+
+	// Prepare the change batch
+	changeBatch := &types.ChangeBatch{
+		Changes: changes,
+	}
+
+	// Call ChangeResourceRecordSets to delete the records
+	changeInput := &route53.ChangeResourceRecordSetsInput{
+		HostedZoneId: aws.String(defaultDNSZoneId),
+		ChangeBatch:  changeBatch,
+	}
+
+	_, err = route53Client.ChangeResourceRecordSets(ctx, changeInput)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

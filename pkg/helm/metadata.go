@@ -12,4 +12,3 @@ type Metadata struct {
 	Values            string `json:"values"`
 	Version           string `json:"version"`
 }
-
