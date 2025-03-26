@@ -43,7 +43,7 @@ func GetDNSZoneByNameE(t *testing.T, ctx context.Context, hostName string, awsRe
 }
 
 func CleanDNSZoneID(t *testing.T, ctx context.Context, zoneID string, awsRegion string) error {
-	route53Client, err := awsTerratests.NewRoute53ClientE(t, awsRegion)
+	route53Client, err := awsTerratest.NewRoute53ClientE(t, awsRegion)
 	if err != nil {
 		return err
 	}
