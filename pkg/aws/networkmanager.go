@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
+// NewNetworkmanagerClient creates a Network Manager client.
 func NewNetworkmanagerClient(t *testing.T, region string) *networkmanager.Client {
 	client, err := NewNetworkmanagerClientE(t, region)
 	require.NoError(t, err)
