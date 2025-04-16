@@ -46,7 +46,7 @@ func GetAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 	return atmosOptions
 }
 
-func getAtmosOptionsFromSetupConfiguration(t *testing.T, config *c.Config, configuration SetupConfiguration, componentName string, stackName string, vars *map[string]interface{}, targets []string) *atmos.Options {
+func getAtmosOptionsFromSetupConfiguration(t *testing.T, config *c.Config, configuration *SetupConfiguration, componentName string, stackName string, vars *map[string]interface{}, targets []string) *atmos.Options {
 	mergedVars := map[string]interface{}{
 		"attributes": []string{config.RandomIdentifier},
 	}
@@ -70,7 +70,8 @@ func getAtmosOptionsFromSetupConfiguration(t *testing.T, config *c.Config, confi
 			"ATMOS_CLI_CONFIG_PATH":      filepath.Join(config.TempDir, configuration.AtmosBaseDir),
 			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
 		},
-		Targets: targets,
+		Targets:            targets,
+		InitRunReconfigure: true,
 	}
 	return atmosOptions
 }
@@ -102,7 +103,8 @@ func getAtmosOptions(t *testing.T, config *c.Config, s *TestSuite, d *dependency
 			"ATMOS_CLI_CONFIG_PATH":      filepath.Join(config.TempDir, s.SetupConfiguration.AtmosBaseDir),
 			"COMPONENT_HELPER_STATE_DIR": config.StateDir,
 		},
-		Targets: d.Targets,
+		Targets:            d.Targets,
+		InitRunReconfigure: true,
 	}
 	return atmosOptions
 }

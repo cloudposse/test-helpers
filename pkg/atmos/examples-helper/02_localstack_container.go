@@ -3,13 +3,20 @@ package examples_helper
 import (
 	"bufio"
 	"context"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/charmbracelet/log"
 	c "github.com/cloudposse/test-helpers/pkg/atmos/examples-helper/config"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/localstack"
 	"io"
+	"os"
+	"strings"
 	"testing"
 )
 
@@ -26,7 +33,7 @@ type LocalStackConfiguration struct {
 func NewLocalStackConfiguration() *LocalStackConfiguration {
 	return &LocalStackConfiguration{
 		Services: []string{"s3", "iam", "lambda", "dynamodb", "sts", "account", "ec2"},
-		Image:    "localstack/localstack:1.4.0",
+		Image:    "localstack/localstack:4.2.0",
 
 		bUpdateAWSEndpointsToLocalStack: true,
 	}
@@ -50,47 +57,27 @@ func streamContainerLogs(ctx context.Context, container testcontainers.Container
 }
 
 func (s *TestSuite) SetupLocalStackContainer(t *testing.T, config *c.Config) {
-	//if s.Config.SkipSetupLocalStack {
-	//	return
-	//}
-
 	ctx := context.Background()
-	// Create a slice with the required ports
-	ports := []int{4566}
 
-	// Append ports from 4510 to 4559
-	for i := 4510; i <= 4559; i++ {
-		ports = append(ports, i)
-	}
-	logger := log.Default().WithPrefix(t.Name()).WithPrefix("localstack")
-	logger.SetLevel(log.DebugLevel)
-	testcontainers.Logger = logger
+	ports := createLocalStackPortArray()
+
 	if s.Config.SkipTearDownLocalStack {
 		t.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
 	}
-	// Open or create the file
-	//file, err := os.Create("localstack.logs.txt")
-	//if err != nil {
-	//	fmt.Println("Error creating file:", err)
-	//	return
-	//}
-	//defer file.Close() // Ensure the file is closed when done
-	//
-	//// Create a writer
-	//writer := os.NewFile(file.Fd(), "localstack.logs.txt")
 
-	//logger.SetOutput(writer)
-
-	LocalStackContainer, err := localstack.Run(
-		ctx, "localstack/localstack:4.2.0",
-		testcontainers.WithLogger(logger),
+	logger := getLocalStackLogger(t)
+	log.WithPrefix(t.Name()).Info("Starting localstack container", "image", s.SetupConfiguration.LocalStackConfiguration.Image)
+	LocalStackContainer, err := localstack.Run(ctx,
+		s.SetupConfiguration.LocalStackConfiguration.Image,
+		//testcontainers.WithLogger(logger),
 
 		testcontainers.WithEnv(map[string]string{
-			"SERVICES":              "s3, iam, lambda, dynamodb, sts, account, ec2, kms",
+			"SERVICES":              s.getLocalStackServices(),
 			"DEBUG":                 "1",
 			"DOCKER_HOST":           "unix:///var/run/docker.sock",
 			"AWS_ACCESS_KEY_ID":     "test",
 			"AWS_SECRET_ACCESS_KEY": "test",
+			"LOCALSTACK_AUTH_TOKEN": os.Getenv("LOCALSTACK_AUTH_TOKEN"),
 		}),
 		testcontainers.WithHostPortAccess(ports...),
 	)
@@ -107,12 +94,33 @@ func (s *TestSuite) SetupLocalStackContainer(t *testing.T, config *c.Config) {
 	s.SetupConfiguration.LocalStackConfiguration.HostPort = hostPort
 	t.Setenv("LOCALSTACK_PORT", hostPort)
 	if s.SetupConfiguration.LocalStackConfiguration.bUpdateAWSEndpointsToLocalStack {
-		s.UpdateAwsEnvVarsToLocalStack(s.T())
 		// Used by awsutils and is required for dependencies
+		s.UpdateAwsEnvVarsToLocalStack(s.T())
 	}
 	assert.NoError(t, err, "failed to start localstack container")
 
 	s.logPhaseStatus("setup/localstack container", "completed")
+}
+
+func (s *TestSuite) getLocalStackServices() string {
+	return strings.Join(s.SetupConfiguration.LocalStackConfiguration.Services, ", ")
+}
+
+func createLocalStackPortArray() []int {
+	ports := []int{4566}
+
+	// Append ports from 4510 to 4559
+	for i := 4510; i <= 4559; i++ {
+		ports = append(ports, i)
+	}
+	return ports
+}
+
+func getLocalStackLogger(t *testing.T) *log.Logger {
+	logger := log.Default().WithPrefix(t.Name()).WithPrefix("localstack")
+	logger.SetLevel(log.DebugLevel)
+	testcontainers.Logger = logger
+	return logger
 }
 
 func (s *TestSuite) UpdateAwsEnvVarsToLocalStack(t *testing.T) {
@@ -381,4 +389,41 @@ func (s *TestSuite) UpdateAwsEnvVarsToLocalStack(t *testing.T) {
 	t.Setenv("AWS_ENDPOINT_URL_WORKSPACES", localstackCloudConfig)
 	t.Setenv("AWS_ENDPOINT_URL_WORKSPACES_WEB", localstackCloudConfig)
 	t.Setenv("AWS_ENDPOINT_URL_XRAY", localstackCloudConfig)
+}
+
+func (s *TestSuite) NewLocalstackS3Client() *s3.Client {
+	hostport := s.SetupConfiguration.LocalStackConfiguration.HostPort
+	// Hardcode or env var your LocalStack S3 endpoint
+	endpoint := "http://localhost:" + hostport // default LocalStack edge port
+	region := "us-east-1"
+
+	// Manually construct config for LocalStack
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("test", "test", "")),
+		config.WithBaseEndpoint(endpoint),
+	)
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	return s3.NewFromConfig(cfg)
+}
+
+func (s *TestSuite) ShutDownExistingLocalStackContainer(t *testing.T) {
+	s.logPhaseStatus("teardown/localstack container", "started")
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Fatalf("Unabel to create docker client, please make sure that docker is installed\n%s", err.Error())
+		os.Exit(1)
+	}
+	list, err := cli.ContainerList(context.Background(), container.ListOptions{})
+	for _, c := range list {
+		if strings.Contains(c.Image, "localstack") || strings.Contains(c.Image, "testcontainers") {
+			log.WithPrefix(t.Name()).Info("Stopping localstack container", "container", c.ID)
+			cli.ContainerStop(context.Background(), c.ID, container.StopOptions{})
+			cli.ContainerRemove(context.Background(), c.ID, container.RemoveOptions{})
+		}
+	}
+	s.logPhaseStatus("teardown/localstack container", "completed")
 }

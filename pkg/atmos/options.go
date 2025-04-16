@@ -1,6 +1,7 @@
 package atmos
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/cloudposse/test-helpers/pkg/testing"
@@ -64,6 +65,7 @@ type Options struct {
 	Upgrade                   bool                   // Whether the -upgrade flag of the atmos init command should be set to true or not
 	Reconfigure               bool                   // Set the -reconfigure flag to the atmos init command
 	MigrateState              bool                   // Set the -migrate-state and -force-copy (suppress 'yes' answer prompt) flag to the atmos init command
+	InitRunReconfigure        bool                   // Set the --init-run-reconfigure= flag to the atmos init command
 	NoColor                   bool                   // Whether the -no-color flag will be set for any Atmos command or not
 	RedirectStrErrDestination string                 // The destination to redirect stderr to. If nil, stderr will not be redirected.
 	SshAgent                  *ssh.SshAgent          // Overrides local SSH agent with the given in-process agent
@@ -109,6 +111,31 @@ func (options *Options) Clone() (*Options, error) {
 	}
 
 	return newOptions, nil
+}
+
+func (o *Options) MergeOptions(overrides *Options) {
+	if overrides == nil {
+		return
+	}
+	dstVal := reflect.ValueOf(o).Elem()
+	srcVal := reflect.ValueOf(overrides).Elem()
+
+	for i := 0; i < dstVal.NumField(); i++ {
+		field := dstVal.Field(i)
+		srcField := srcVal.Field(i)
+
+		// Ensure the field is settable
+		if field.CanSet() && !isZeroValue(srcField) {
+			field.Set(srcField)
+		}
+	}
+}
+
+// isZeroValue checks if a reflect.Value is a zero value for its type.
+
+func isZeroValue(v reflect.Value) bool {
+	zero := reflect.Zero(v.Type()).Interface()
+	return reflect.DeepEqual(v.Interface(), zero)
 }
 
 // WithDefaultRetryableErrors makes a copy of the Options object and returns an updated object with sensible defaults

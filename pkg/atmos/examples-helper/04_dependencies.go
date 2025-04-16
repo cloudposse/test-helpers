@@ -1,6 +1,7 @@
 package examples_helper
 
 import (
+	"fmt"
 	"testing"
 
 	log "github.com/charmbracelet/log"
@@ -38,10 +39,25 @@ func (s *TestSuite) DeployDependencies(t *testing.T, config *c.Config) {
 
 			s.logPhaseStatus("deploy dependencies/function", "completed")
 			continue
+		} else if dependency.WorkflowFile != "" || dependency.WorkflowName != "" {
+			if dependency.WorkflowFile == "" || dependency.WorkflowName == "" {
+				log.WithPrefix(t.Name()).Info("skipping Workflow Dependency - Missing WorkflowName or WorkflowFile", "WorkflowName", dependency.WorkflowName, "WorkflowFile", dependency.WorkflowFile)
+				continue
+			}
+			s.logPhaseStatus("deploy dependencies/workflow "+dependency.WorkflowName+" -f "+dependency.WorkflowFile, "started")
+			output, err := atmos.WorkflowE(t, getAtmosOptions(t, config, s, dependency), dependency.WorkflowName, dependency.WorkflowFile)
+			if err != nil {
+				s.logPhaseStatus(phaseName, "failed")
+				log.WithPrefix(t.Name()).Error("failed to run workflow", "WorkflowName", dependency.WorkflowName, "WorkflowFile", dependency.WorkflowFile, "error", err)
+				continue
+			}
+			log.WithPrefix(t.Name()).WithPrefix(fmt.Sprintf("Workflow [%s -f %s]", dependency.WorkflowName, dependency.WorkflowFile)).Info(output)
+			s.logPhaseStatus("deploy dependencies/workflow "+dependency.WorkflowName+" -f "+dependency.WorkflowFile, "completed")
 		} else {
 
 			log.WithPrefix(t.Name()).Info("deploying dependency", "component", dependency.ComponentName, "stack", dependency.StackName)
 			atmosOptions := getAtmosOptions(t, config, s, dependency)
+			atmosOptions.MergeOptions(dependency.Options)
 			out, err := atmos.ApplyE(t, atmosOptions)
 			log.WithPrefix(t.Name()).Info("deploying dependency", "component", dependency.ComponentName, "stack", dependency.StackName, "output", out)
 			if err != nil {

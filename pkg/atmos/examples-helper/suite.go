@@ -1,7 +1,9 @@
 package examples_helper
 
 import (
+	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"fmt"
@@ -23,8 +25,8 @@ type SetupConfiguration struct {
 	PullBeforeDeploy        bool
 }
 
-func NewSetupConfiguration() SetupConfiguration {
-	return SetupConfiguration{
+func NewSetupConfiguration() *SetupConfiguration {
+	return &SetupConfiguration{
 		TempContentsCmd:         nil,
 		AtmosBaseDir:            "",
 		LocalStackConfiguration: NewLocalStackConfiguration(),
@@ -37,7 +39,7 @@ type TestSuite struct {
 	Config       *c.Config
 	Dependencies []*dependency.Dependency
 	suite.Suite
-	SetupConfiguration SetupConfiguration
+	SetupConfiguration *SetupConfiguration
 }
 
 type TestingSuite interface {
@@ -60,10 +62,17 @@ func (s *TestSuite) GetConfig(t *testing.T) *c.Config {
 	assert.NotNil(t, s.Config)
 	return s.Config
 }
-func (s *TestSuite) AddCustomDependency(t *testing.T, d *dependency.Dependency) {
+func (s *TestSuite) AddDependency(t *testing.T, d *dependency.Dependency) {
 	s.Dependencies = append(s.Dependencies, d)
 }
-func (s *TestSuite) AddDependency(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}, vendor bool, targets []string, addRandomAttribute bool, args ...string) {
+func (s *TestSuite) AddWorkflowDependency(t *testing.T, workflowName string, workflowFile string) {
+	s.Dependencies = append(s.Dependencies, &dependency.Dependency{
+		WorkflowName: workflowName,
+		WorkflowFile: workflowFile,
+	})
+}
+
+func (s *TestSuite) AddComponentDependency(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}, vendor bool, targets []string, addRandomAttribute bool, args ...string) {
 	s.Dependencies = append(s.Dependencies, &dependency.Dependency{
 		AdditionalVars:     additionalVars,
 		ComponentName:      componentName,
@@ -108,6 +117,35 @@ func (s *TestSuite) getMergedVars(t *testing.T, additionalVars *map[string]inter
 	return mergedVars
 }
 
+func (s *TestSuite) DeployAtmosComponentWithOptions(t *testing.T, options *atmos.Options, componentName string, stackName string, additionalVars *map[string]interface{}) (*atmos.Options, string) {
+	phaseName := fmt.Sprintf("deploy/atmos component/%s/%s", stackName, componentName)
+	if s.SetupConfiguration.PullBeforeDeploy {
+		s.logPhaseStatus(phaseName, "started")
+		s.pullComponent(t, s.Config, componentName)
+		s.logPhaseStatus(phaseName, "completed")
+	}
+
+	if s.Config.SkipDeployComponent {
+		s.logPhaseStatus(phaseName, "skipped")
+		return nil, ""
+	}
+
+	s.logPhaseStatus(phaseName, "started")
+
+	mergedVars := s.getMergedVars(t, additionalVars)
+
+	atmosOptions := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, componentName, stackName, &mergedVars, nil)
+	atmosOptions.MergeOptions(options)
+	output, err := atmos.ApplyE(t, atmosOptions)
+	if err != nil {
+		s.logPhaseStatus(phaseName, "failed")
+		require.NoError(t, err)
+	}
+
+	s.logPhaseStatus(phaseName, "completed")
+
+	return atmosOptions, output
+}
 func (s *TestSuite) DeployAtmosComponent(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}) (*atmos.Options, string) {
 	phaseName := fmt.Sprintf("deploy/atmos component/%s/%s", stackName, componentName)
 	if s.SetupConfiguration.PullBeforeDeploy {
@@ -163,7 +201,7 @@ func (s *TestSuite) InitConfig() {
 		config := c.InitConfig(t)
 		s.Config = config
 	}
-
+	s.SetupConfiguration = NewSetupConfiguration()
 	s.SetupConfiguration.LocalStackConfiguration = NewLocalStackConfiguration()
 }
 
@@ -174,7 +212,6 @@ func (s *TestSuite) SetupSuite() {
 		panic("SetupSuite called with nil *testing.T, call s.SetT(t) first")
 	}
 
-	s.InitConfig()
 	config := s.Config
 
 	if s.Config.SkipSetupTestSuite {
@@ -184,8 +221,12 @@ func (s *TestSuite) SetupSuite() {
 	}
 
 	s.BootstrapTempDir(t, config)
-
 	s.CreateTempContents(t, config)
+	if _, err := os.Stat(config.FixturesDir); err == nil {
+		s.logPhaseStatus("fixtures", "started")
+		s.copyDirectoryRecursively(t, config.FixturesDir, filepath.Join(config.TempDir, s.SetupConfiguration.AtmosBaseDir))
+		s.logPhaseStatus("fixtures", "completed")
+	}
 	s.SetupLocalStackContainer(t, config)
 	if s.SetupConfiguration.VendorAllComponents {
 		s.VendorAllComponents(t, config)
@@ -198,17 +239,27 @@ func (s *TestSuite) SetupSuite() {
 }
 
 func (s *TestSuite) TearDownSuite() {
-	t := s.T()
-	if !s.Config.SkipDestroyDependencies {
-		s.DestroyDependencies(t, s.Config)
-	}
 
+	t := s.T()
+	if !s.Config.SkipTearDownLocalStack {
+		defer s.DestroyLocalStackContainer(t, s.Config)
+	}
 	if s.Config.SkipTeardownTestSuite {
 		s.logPhaseStatus("teardown", "skipped")
 		return
 	}
 
-	s.DestroyTempDir(t, s.Config)
-	s.DestroyConfigFile(t, s.Config)
-	s.DestroyLocalStackContainer(t, s.Config)
+	defer s.DestroyTempDir(t, s.Config)
+	defer s.DestroyConfigFile(t, s.Config)
+
+	if !s.Config.SkipDestroyDependencies {
+		s.DestroyDependencies(t, s.Config)
+	}
+}
+
+func (s *TestSuite) RunAtmosWorkflow(t *testing.T, WorkflowName string, WorkflowFile string) {
+
+	phaseName := fmt.Sprintf("run atmos workflow [%s] file: [%s]", WorkflowName, WorkflowFile)
+	s.logPhaseStatus(phaseName, "started")
+
 }
