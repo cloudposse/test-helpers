@@ -47,9 +47,13 @@ func (s *TestSuite) DestroyDependencies(t *testing.T, config *c.Config) {
 	}
 
 	for i := len(s.Dependencies) - 1; i >= 0; i-- {
+		if s.Dependencies[i].VendorOnly {
+			log.WithPrefix(t.Name()).Info("skipping vendor only dependency", "component", s.Dependencies[i].ComponentName)
+			continue
+		}
 		dependency := s.Dependencies[i]
 		log.Info("destroying dependency", "component", dependency.ComponentName, "stack", dependency.StackName)
-		atmosOptions := GetAtmosOptions(t, config, dependency.ComponentName, dependency.StackName, dependency.AdditionalVars)
+		atmosOptions := getAtmosOptions(t, config, s, dependency)
 		_, err := atmos.DestroyE(t, atmosOptions)
 		if err != nil {
 			s.logPhaseStatus(phaseName, "failed")

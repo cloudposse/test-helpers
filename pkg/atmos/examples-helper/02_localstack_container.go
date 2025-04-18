@@ -28,6 +28,8 @@ type LocalStackConfiguration struct {
 	LocalStackContainer testcontainers.Container
 
 	bUpdateAWSEndpointsToLocalStack bool // Set AWS StS endpoint to localstack when created
+
+	UseDockerComposeInstance bool // Set to true if using docker compose instance
 }
 
 func NewLocalStackConfiguration() *LocalStackConfiguration {
@@ -57,6 +59,12 @@ func streamContainerLogs(ctx context.Context, container testcontainers.Container
 }
 
 func (s *TestSuite) SetupLocalStackContainer(t *testing.T, config *c.Config) {
+	if s.SetupConfiguration.LocalStackConfiguration.UseDockerComposeInstance {
+		s.SetupConfiguration.LocalStackConfiguration.HostPort = "4566"
+		t.Setenv("LOCALSTACK_PORT", "4566")
+		s.UpdateAwsEnvVarsToLocalStack(t)
+		return
+	}
 	ctx := context.Background()
 
 	ports := createLocalStackPortArray()
@@ -65,8 +73,9 @@ func (s *TestSuite) SetupLocalStackContainer(t *testing.T, config *c.Config) {
 		t.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
 	}
 
-	logger := getLocalStackLogger(t)
+	//logger := getLocalStackLogger(t)
 	log.WithPrefix(t.Name()).Info("Starting localstack container", "image", s.SetupConfiguration.LocalStackConfiguration.Image)
+
 	LocalStackContainer, err := localstack.Run(ctx,
 		s.SetupConfiguration.LocalStackConfiguration.Image,
 		//testcontainers.WithLogger(logger),
@@ -82,7 +91,7 @@ func (s *TestSuite) SetupLocalStackContainer(t *testing.T, config *c.Config) {
 		testcontainers.WithHostPortAccess(ports...),
 	)
 	// Capture and log container logs
-	go streamContainerLogs(ctx, LocalStackContainer, logger)
+	//go streamContainerLogs(ctx, LocalStackContainer, logger)
 	s.SetupConfiguration.LocalStackConfiguration.LocalStackContainer = LocalStackContainer
 
 	portMap, err := LocalStackContainer.Ports(ctx)

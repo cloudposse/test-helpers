@@ -1,10 +1,18 @@
 package examples_helper
 
 import (
+	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/charmbracelet/log"
+	gwaws "github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/retry"
+	"github.com/gruntwork-io/terratest/modules/shell"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"fmt"
 
@@ -18,20 +26,22 @@ import (
 )
 
 type SetupConfiguration struct {
-	TempContentsCmd         *exec.Cmd
-	AtmosBaseDir            string // Base directory for atmos relative to the temp dir
-	LocalStackConfiguration *LocalStackConfiguration
-	VendorAllComponents     bool
-	PullBeforeDeploy        bool
+	TempContentsCmd           *exec.Cmd
+	AtmosBaseDir              string // Base directory for atmos relative to the temp dir
+	LocalStackConfiguration   *LocalStackConfiguration
+	VendorAllComponents       bool
+	PullBeforeDeploy          bool
+	DeployTfStateBackendStack string // Deploy the tfstate backend, stackName or empty string to skip
 }
 
 func NewSetupConfiguration() *SetupConfiguration {
 	return &SetupConfiguration{
-		TempContentsCmd:         nil,
-		AtmosBaseDir:            "",
-		LocalStackConfiguration: NewLocalStackConfiguration(),
-		VendorAllComponents:     false,
-		PullBeforeDeploy:        true,
+		TempContentsCmd:           nil,
+		AtmosBaseDir:              "",
+		LocalStackConfiguration:   NewLocalStackConfiguration(),
+		VendorAllComponents:       false,
+		PullBeforeDeploy:          true,
+		DeployTfStateBackendStack: "core-use1-root",
 	}
 }
 
@@ -40,6 +50,8 @@ type TestSuite struct {
 	Dependencies []*dependency.Dependency
 	suite.Suite
 	SetupConfiguration *SetupConfiguration
+	SuperUserAccessKey string
+	SuperUserSecretKey string
 }
 
 type TestingSuite interface {
@@ -233,6 +245,11 @@ func (s *TestSuite) SetupSuite() {
 	} else {
 		s.PullDependencies(t, config)
 	}
+
+	if s.SetupConfiguration.DeployTfStateBackendStack != "" {
+		s.InitTerraformState(t, s.SetupConfiguration.DeployTfStateBackendStack)
+	}
+
 	s.DeployDependencies(t, config)
 
 	s.logPhaseStatus("setup", "completed")
@@ -262,4 +279,96 @@ func (s *TestSuite) RunAtmosWorkflow(t *testing.T, WorkflowName string, Workflow
 	phaseName := fmt.Sprintf("run atmos workflow [%s] file: [%s]", WorkflowName, WorkflowFile)
 	s.logPhaseStatus(phaseName, "started")
 
+}
+
+func (s *TestSuite) InitTerraformState(t *testing.T, stack string) {
+	phaseName := "init tfstate-backend"
+	s.logPhaseStatus(phaseName, "started")
+
+	options := getAtmosOptionsFromSetupConfiguration(t, s.Config, s.SetupConfiguration, "tfstate-backend", stack, nil, nil)
+	// Vendor
+	s.pullComponent(t, s.Config, options.Component)
+
+	// Deploy the tfstate backend
+	_, err := atmos.RunAtmosCommandE(t, options, "terraform", "apply", options.Component, "-var=access_roles_enabled=false", "--stack", options.Stack, "--auto-generate-backend-file=false", "-input=false", "-auto-approve")
+	if err != nil {
+		s.logPhaseStatus(phaseName, "failed")
+		require.NoError(t, err)
+	}
+
+	retry.DoWithRetryableErrorsE(t, "Waiting for tfstate bucket", options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
+
+		out, err := shell.RunCommandAndGetOutputE(t, shell.Command{
+			Command: "aws",
+			Args:    []string{"s3", "ls"},
+		})
+
+		if err != nil {
+			return out, err
+		}
+		out, err = shell.RunCommandAndGetOutputE(t, shell.Command{
+			Command: "aws",
+			Args:    []string{"sts", "get-caller-identity"},
+		})
+
+		if err != nil {
+			return out, err
+		}
+		return out, nil
+	})
+	err = s.CreateSuperUser(t)
+
+	s.AssumeSuperUser()
+	shell.RunCommandAndGetOutputE(t, shell.Command{
+		Command: "aws",
+		Args:    []string{"sts", "get-caller-identity"},
+	})
+
+	time.Sleep(8 * time.Second)
+	shell.RunCommandAndGetOutputE(t, shell.Command{
+		Command: "aws",
+		Args:    []string{"s3", "ls"},
+	})
+	atmos.RunAtmosCommandE(t, options, "terraform", "init", options.Component, "-s", stack, "--", "-force-copy")
+
+	_, err = atmos.RunAtmosCommandE(t, options, "terraform", "apply", options.Component, "-var=access_roles_enabled=false", "--stack", options.Stack, "--skip-init", "-input=false", "-auto-approve")
+	if err != nil {
+		s.logPhaseStatus(phaseName, "failed")
+		require.NoError(t, err)
+	}
+
+	s.logPhaseStatus(phaseName, "completed")
+}
+
+func (s *TestSuite) CreateSuperUser(t *testing.T) error {
+	ctx := context.Background()
+	SuperAdminUsername := "SuperAdmin"
+	iamClient := gwaws.NewIamClient(t, "us-east-1")
+	iamClient.CreateUser(ctx, &iam.CreateUserInput{
+		UserName: aws.String(SuperAdminUsername),
+	})
+	_, err := iamClient.AttachUserPolicy(ctx, &iam.AttachUserPolicyInput{
+		UserName:  aws.String(SuperAdminUsername),
+		PolicyArn: aws.String("arn:aws:iam::aws:policy/AdministratorAccess"),
+	})
+	resp, err := iamClient.CreateAccessKey(ctx, &iam.CreateAccessKeyInput{
+		UserName: aws.String(SuperAdminUsername),
+	})
+	if err != nil {
+		log.WithPrefix(t.Name()).Fatalf("failed to create access key: %v", err)
+	}
+	log.WithPrefix(t.Name()).Print("Access key created")
+	s.SuperUserAccessKey = *resp.AccessKey.AccessKeyId
+	s.SuperUserSecretKey = *resp.AccessKey.SecretAccessKey
+	return err
+}
+
+func (s *TestSuite) AssumeSuperUser() {
+	s.T().Setenv("AWS_ACCESS_KEY_ID", s.SuperUserAccessKey)
+	s.T().Setenv("AWS_SECRET_ACCESS_KEY", s.SuperUserSecretKey)
+}
+
+func (s *TestSuite) AssumeRootAccount() {
+	s.T().Setenv("AWS_ACCESS_KEY_ID", "test")
+	s.T().Setenv("AWS_SECRET_ACCESS_KEY", "test")
 }

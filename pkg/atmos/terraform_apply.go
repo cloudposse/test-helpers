@@ -62,5 +62,5 @@ func ApplyAndIdempotentE(t testing.TestingT, options *Options) (string, error) {
 }
 
 func WorkflowE(t testing.TestingT, options *Options, WorkflowName string, WorkflowFile string) (string, error) {
-	return RunAtmosCommandE(t, options, FormatArgs(options, "workflow", WorkflowName, "-f", WorkflowFile, "-input=false", "-auto-approve")...)
+	return RunAtmosCommandE(t, options, "workflow", WorkflowName, "-f", WorkflowFile)
 }
