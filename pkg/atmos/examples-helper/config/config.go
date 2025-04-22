@@ -16,6 +16,7 @@ func init() {
 	flag.String("component-dest-dir", "", "The path to the component destination directory, relative to the temp directory")
 	flag.String("config", "test_suite.yaml", "The path to the config file")
 	flag.String("fixtures-dir", "fixtures", "The path to the fixtures directory")
+	flag.String("run-mode", "local", "Run mode for the test suite (local, gha)")
 	flag.Bool("only-deploy-dependencies", true, "Only run the deploy dependencies phase of tests")
 	flag.Bool("skip-deploy-component", true, "Disables running the deploy component phase of tests")
 	flag.Bool("skip-deploy-dependencies", true, "Disables running the deploy dependencies phase of tests")
@@ -34,6 +35,7 @@ func init() {
 }
 
 type Config struct {
+	RunMode                 string
 	ComponentDestDir        string
 	ConfigFilePath          string
 	FixturesDir             string
@@ -95,6 +97,8 @@ func InitConfig(t *testing.T) *Config {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 
+	viper.SetDefault("RunMode", "local")
+
 	viper.SetDefault("ConfigFilePath", "test_suite.yaml")
 	viper.SetDefault("FixturesDir", "fixtures")
 	viper.SetDefault("ComponentDestDir", "")
@@ -122,6 +126,9 @@ func InitConfig(t *testing.T) *Config {
 	pflag.Parse()
 
 	err := viper.BindPFlags(pflag.CommandLine)
+	require.NoError(t, err)
+
+	err = viper.BindPFlag("RunMode", pflag.Lookup("run-mode"))
 	require.NoError(t, err)
 
 	err = viper.BindPFlag("ComponentDestDir", pflag.Lookup("component-dest-dir"))
