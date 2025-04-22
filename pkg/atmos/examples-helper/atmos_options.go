@@ -57,10 +57,11 @@ func getAtmosOptionsFromSetupConfiguration(t *testing.T, config *c.Config, confi
 	}
 
 	atmosOptions := &atmos.Options{
-		AtmosBasePath: filepath.Join(config.TempDir, configuration.AtmosBaseDir),
-		Component:     componentName,
-		Stack:         stackName,
-		NoColor:       true,
+		AtmosBasePath:   filepath.Join(config.TempDir, configuration.AtmosBaseDir),
+		Component:       componentName,
+		Stack:           stackName,
+		NoColor:         true,
+		GenerateBackend: true,
 		BackendConfig: map[string]interface{}{
 			"workspace_key_prefix": strings.Join([]string{config.RandomIdentifier, stackName}, "-"),
 		},
@@ -105,6 +106,7 @@ func getAtmosOptions(t *testing.T, config *c.Config, s *TestSuite, d *dependency
 		},
 		Targets:            d.Targets,
 		InitRunReconfigure: true,
+		GenerateBackend:    true,
 	}
 	return atmosOptions
 }

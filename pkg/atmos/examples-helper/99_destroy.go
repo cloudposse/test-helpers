@@ -51,6 +51,17 @@ func (s *TestSuite) DestroyDependencies(t *testing.T, config *c.Config) {
 			log.WithPrefix(t.Name()).Info("skipping vendor only dependency", "component", s.Dependencies[i].ComponentName)
 			continue
 		}
+
+		if s.Dependencies[i].ComponentName == "tfstate-backend" {
+			log.WithPrefix(t.Name()).Info("skipping tfstate backend dependency", "component", s.Dependencies[i].ComponentName)
+			continue
+			//atmos.Output(t, s.GetAtmosOptions(), "tfstate_backend_s3_bucket_id")
+			//out, err = shell.RunCommandAndGetOutputE(t, shell.Command{
+			//	Command: "aws",
+			//	Args:    []string{"s3", "rm s3 rm s3://bucket-name --recursive"},
+			//})
+		}
+
 		dependency := s.Dependencies[i]
 		log.Info("destroying dependency", "component", dependency.ComponentName, "stack", dependency.StackName)
 		atmosOptions := getAtmosOptions(t, config, s, dependency)
@@ -98,7 +109,7 @@ func (s *TestSuite) DestroyLocalStackContainer(t *testing.T, config *c.Config) {
 
 	log.WithPrefix(t.Name()).Info("destroying localstack container", "path", config.StateDir)
 	if err := testcontainers.TerminateContainer(s.SetupConfiguration.LocalStackConfiguration.LocalStackContainer); err != nil {
-		log.WithPrefix(t.Name()).Fatalf("failed to terminate localstack container: %v", err)
+		log.WithPrefix(t.Name()).Errorf("failed to terminate localstack container: %v", err)
 	}
 
 	s.logPhaseStatus(phaseName, "completed")

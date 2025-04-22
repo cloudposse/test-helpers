@@ -48,7 +48,7 @@ func (s *TestSuite) DeployDependencies(t *testing.T, config *c.Config) {
 			output, err := atmos.WorkflowE(t, getAtmosOptions(t, config, s, dependency), dependency.WorkflowName, dependency.WorkflowFile)
 			if err != nil {
 				s.logPhaseStatus(phaseName, "failed")
-				log.WithPrefix(t.Name()).Fatal("failed to run workflow", "WorkflowName", dependency.WorkflowName, "WorkflowFile", dependency.WorkflowFile, "error", err)
+				log.WithPrefix(t.Name()).Error("failed to run workflow", "WorkflowName", dependency.WorkflowName, "WorkflowFile", dependency.WorkflowFile, "error", err)
 				s.T().FailNow()
 			}
 			log.WithPrefix(t.Name()).WithPrefix(fmt.Sprintf("Workflow [%s -f %s]", dependency.WorkflowName, dependency.WorkflowFile)).Info(output)

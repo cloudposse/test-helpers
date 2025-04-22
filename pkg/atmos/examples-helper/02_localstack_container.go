@@ -96,7 +96,7 @@ func (s *TestSuite) SetupLocalStackContainer(t *testing.T, config *c.Config) {
 
 	portMap, err := LocalStackContainer.Ports(ctx)
 	if err != nil {
-		log.WithPrefix(t.Name()).Fatal("Failed to get ports from container", "error", err)
+		log.WithPrefix(t.Name()).Error("Failed to get ports from container", "error", err)
 	}
 
 	hostPort := portMap[nat.Port("4566/tcp")][0].HostPort //  [{HostIP:0.0.0.0 HostPort:56614}]
@@ -413,7 +413,8 @@ func (s *TestSuite) NewLocalstackS3Client() *s3.Client {
 		config.WithBaseEndpoint(endpoint),
 	)
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		log.Errorf("failed to load config: %v", err)
+		return nil
 	}
 
 	return s3.NewFromConfig(cfg)
@@ -423,8 +424,9 @@ func (s *TestSuite) ShutDownExistingLocalStackContainer(t *testing.T) {
 	s.logPhaseStatus("teardown/localstack container", "started")
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		log.Fatalf("Unabel to create docker client, please make sure that docker is installed\n%s", err.Error())
-		os.Exit(1)
+		log.Errorf("Unabel to create docker client, please make sure that docker is installed\n%s", err.Error())
+		t.Fail()
+		return
 	}
 	list, err := cli.ContainerList(context.Background(), container.ListOptions{})
 	for _, c := range list {

@@ -2,6 +2,7 @@ package examples_helper
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/charmbracelet/log"
@@ -12,9 +13,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
-	"time"
-
-	"fmt"
 
 	"dario.cat/mergo"
 	"github.com/cloudposse/test-helpers/pkg/atmos"
@@ -84,7 +82,7 @@ func (s *TestSuite) AddWorkflowDependency(t *testing.T, workflowName string, wor
 	})
 }
 
-func (s *TestSuite) AddComponentDependency(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}, vendor bool, targets []string, addRandomAttribute bool, args ...string) {
+func (s *TestSuite) AddComponentDependencyTargets(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}, vendor bool, targets []string, addRandomAttribute bool, args ...string) {
 	s.Dependencies = append(s.Dependencies, &dependency.Dependency{
 		AdditionalVars:     additionalVars,
 		ComponentName:      componentName,
@@ -93,6 +91,16 @@ func (s *TestSuite) AddComponentDependency(t *testing.T, componentName string, s
 		Vendor:             vendor,
 		Targets:            targets,
 		AddRandomAttribute: addRandomAttribute,
+	})
+}
+func (s *TestSuite) AddComponentDependency(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}) {
+	s.Dependencies = append(s.Dependencies, &dependency.Dependency{
+		AdditionalVars:     additionalVars,
+		ComponentName:      componentName,
+		StackName:          stackName,
+		Vendor:             true,
+		Targets:            nil,
+		AddRandomAttribute: false,
 	})
 }
 
@@ -302,41 +310,19 @@ func (s *TestSuite) InitTerraformState(t *testing.T, stack string) {
 			Command: "aws",
 			Args:    []string{"s3", "ls"},
 		})
-
-		if err != nil {
-			return out, err
-		}
-		out, err = shell.RunCommandAndGetOutputE(t, shell.Command{
-			Command: "aws",
-			Args:    []string{"sts", "get-caller-identity"},
-		})
-
-		if err != nil {
-			return out, err
-		}
-		return out, nil
+		return out, err
 	})
+
 	err = s.CreateSuperUser(t)
-
 	s.AssumeSuperUser()
-	shell.RunCommandAndGetOutputE(t, shell.Command{
-		Command: "aws",
-		Args:    []string{"sts", "get-caller-identity"},
-	})
 
-	time.Sleep(8 * time.Second)
-	shell.RunCommandAndGetOutputE(t, shell.Command{
-		Command: "aws",
-		Args:    []string{"s3", "ls"},
-	})
 	atmos.RunAtmosCommandE(t, options, "terraform", "init", options.Component, "-s", stack, "--", "-force-copy")
-
 	_, err = atmos.RunAtmosCommandE(t, options, "terraform", "apply", options.Component, "-var=access_roles_enabled=false", "--stack", options.Stack, "--skip-init", "-input=false", "-auto-approve")
+
 	if err != nil {
 		s.logPhaseStatus(phaseName, "failed")
 		require.NoError(t, err)
 	}
-
 	s.logPhaseStatus(phaseName, "completed")
 }
 
@@ -355,7 +341,7 @@ func (s *TestSuite) CreateSuperUser(t *testing.T) error {
 		UserName: aws.String(SuperAdminUsername),
 	})
 	if err != nil {
-		log.WithPrefix(t.Name()).Fatalf("failed to create access key: %v", err)
+		log.WithPrefix(t.Name()).Errorf("failed to create access key: %v", err)
 	}
 	log.WithPrefix(t.Name()).Print("Access key created")
 	s.SuperUserAccessKey = *resp.AccessKey.AccessKeyId
