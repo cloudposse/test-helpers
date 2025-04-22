@@ -343,7 +343,7 @@ func (s *TestSuite) CreateSuperUser(t *testing.T) error {
 	if err != nil {
 		log.WithPrefix(t.Name()).Errorf("failed to create access key: %v", err)
 	}
-	log.WithPrefix(t.Name()).Print("Access key created")
+	log.WithPrefix(t.Name()).Info("Access key created")
 	s.SuperUserAccessKey = *resp.AccessKey.AccessKeyId
 	s.SuperUserSecretKey = *resp.AccessKey.SecretAccessKey
 	return err
