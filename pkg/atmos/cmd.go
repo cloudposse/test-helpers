@@ -96,7 +96,7 @@ func RunAtmosCommandAndGetStdoutE(t tt.TestingT, additionalOptions *Options, add
 	cmd := generateCommand(options, args...)
 	description := fmt.Sprintf("%s %v", options.AtmosBinary, args)
 	return retry.DoWithRetryableErrorsE(t, description, options.RetryableAtmosErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
-		s, err := shell.RunCommandAndGetOutputE(t, cmd)
+		s, err := shell.RunCommandAndGetStdOutE(t, cmd)
 		if err != nil {
 			return s, err
 		}
