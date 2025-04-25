@@ -287,6 +287,23 @@ func (s *TestSuite) RunAtmosWorkflow(t *testing.T, WorkflowName string, Workflow
 	phaseName := fmt.Sprintf("run atmos workflow [%s] file: [%s]", WorkflowName, WorkflowFile)
 	s.logPhaseStatus(phaseName, "started")
 
+	AtmosBasePath := filepath.Join(s.Config.TempDir, s.SetupConfiguration.AtmosBaseDir)
+	atmosOptions := &atmos.Options{
+		AtmosBasePath:   AtmosBasePath,
+		NoColor:         true,
+		GenerateBackend: true,
+		EnvVars: map[string]string{
+			"ATMOS_BASE_PATH":            AtmosBasePath,
+			"ATMOS_CLI_CONFIG_PATH":      AtmosBasePath,
+			"COMPONENT_HELPER_STATE_DIR": s.Config.StateDir,
+		},
+	}
+
+	_, err := atmos.WorkflowE(t, atmosOptions, WorkflowName, WorkflowFile)
+	if err != nil {
+		s.logPhaseStatus(phaseName, "failed")
+		require.NoError(t, err)
+	}
 }
 
 func (s *TestSuite) InitTerraformState(t *testing.T, stack string) {
