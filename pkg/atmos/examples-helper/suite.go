@@ -46,6 +46,7 @@ func NewSetupConfiguration() *SetupConfiguration {
 type TestSuite struct {
 	Config       *c.Config
 	Dependencies []*dependency.Dependency
+	Deployments  []*atmos.Options
 	suite.Suite
 	SetupConfiguration *SetupConfiguration
 	SuperUserAccessKey string
