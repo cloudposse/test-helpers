@@ -2,7 +2,7 @@ module github.com/cloudposse/test-helpers
 
 go 1.23.4
 
-toolchain go1.23.7
+toolchain go1.24.3
 
 require (
 	dario.cat/mergo v1.0.1
