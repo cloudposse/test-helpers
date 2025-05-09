@@ -81,10 +81,6 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 		terraformArgs = append(terraformArgs, fmt.Sprintf("--auto-generate-backend-file=%t", options.GenerateBackend))
 	}
 
-	//if options.MigrateState {
-	//	terraformArgs = append(terraformArgs, "-migrate-state")
-	//	terraformArgs = append(terraformArgs, "-force-copy")
-	//}
 	if options.Reconfigure {
 		terraformArgs = append(terraformArgs, "-reconfigure")
 	}
@@ -92,10 +88,6 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 	if !options.InitRunReconfigure {
 		terraformArgs = append(terraformArgs, "--init-run-reconfigure=false")
 	}
-	//
-	//if options.SkipInit {
-	//	terraformArgs = append(terraformArgs, "--skip-init")
-	//}
 
 	if lockSupported {
 		// If command supports locking, handle lock arguments
