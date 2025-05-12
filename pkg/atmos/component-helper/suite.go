@@ -72,15 +72,15 @@ func (s *TestSuite) getMergedVars(t *testing.T, additionalVars *map[string]inter
 func (s *TestSuite) DeployAtmosComponent(t *testing.T, componentName string, stackName string, additionalVars *map[string]interface{}) (*atmos.Options, string) {
 	phaseName := fmt.Sprintf("deploy/atmos component/%s/%s", stackName, componentName)
 
-	if s.Config.SkipDeployComponent {
-		s.logPhaseStatus(phaseName, "skipped")
-		return nil, ""
-	}
-
 	s.logPhaseStatus(phaseName, "started")
 
 	mergedVars := s.getMergedVars(t, additionalVars)
 	atmosOptions := getAtmosOptions(t, s.Config, componentName, stackName, &mergedVars)
+
+	if s.Config.SkipDeployComponent {
+		s.logPhaseStatus(phaseName, "skipped")
+		return atmosOptions, ""
+	}
 
 	output, err := atmos.ApplyE(t, atmosOptions)
 	if err != nil {
