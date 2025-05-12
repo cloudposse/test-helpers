@@ -10,6 +10,7 @@ import (
 
 const terraformCmd = "terraform"
 const vendorCmd = "vendor"
+const workflowCmd = "workflow"
 
 // TerraformCommandsWithPlanFileSupport is a list of all the Terraform commands that support interacting with plan
 // files.
@@ -43,6 +44,7 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 	lockSupported := collections.ListContains(tt.TerraformCommandsWithLockSupport, commandType)
 	planFileSupported := collections.ListContains(TerraformCommandsWithPlanFileSupport, commandType)
 	planFileSpecified := len(options.PlanFilePath) > 0
+	//skipInit := map[bool]string{true: "--skip-init", false: ""}[options.SkipInit]
 
 	terraformArgs = append(terraformArgs, "terraform", commandType, options.Component, "-s", options.Stack)
 
@@ -73,6 +75,18 @@ func FormatAtmosTerraformArgs(options *Options, args ...string) []string {
 
 	if options.RedirectStrErrDestination != "" {
 		terraformArgs = append(terraformArgs, fmt.Sprintf("--redirect-stderr=%s", options.RedirectStrErrDestination))
+	}
+
+	if !options.GenerateBackend {
+		terraformArgs = append(terraformArgs, fmt.Sprintf("--auto-generate-backend-file=%t", options.GenerateBackend))
+	}
+
+	if options.Reconfigure {
+		terraformArgs = append(terraformArgs, "-reconfigure")
+	}
+
+	if !options.InitRunReconfigure {
+		terraformArgs = append(terraformArgs, "--init-run-reconfigure=false")
 	}
 
 	if lockSupported {

@@ -112,14 +112,13 @@ func (s *TestSuite) DestroyAtmosComponent(t *testing.T, componentName string, st
 	s.logPhaseStatus(phaseName, "completed")
 }
 
-
 func (s *TestSuite) InitConfig() {
 	t := s.T()
 
 	if s.Config == nil {
 		config := c.InitConfig(t)
 		s.Config = config
-  }
+	}
 }
 
 func (s *TestSuite) BeforeTest(suiteName, testName string) {

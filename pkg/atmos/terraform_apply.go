@@ -2,7 +2,6 @@ package atmos
 
 import (
 	"errors"
-
 	"github.com/cloudposse/test-helpers/pkg/testing"
 	"github.com/stretchr/testify/require"
 )
@@ -60,4 +59,8 @@ func ApplyAndIdempotentE(t testing.TestingT, options *Options) (string, error) {
 	}
 
 	return out, nil
+}
+
+func WorkflowE(t testing.TestingT, options *Options, WorkflowName string, WorkflowFile string) (string, error) {
+	return RunAtmosCommandE(t, options, "workflow", WorkflowName, "-f", WorkflowFile)
 }
