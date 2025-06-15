@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.1 // indirect
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/charmbracelet/log v0.4.0
-	github.com/gruntwork-io/terratest v0.48.1
+	github.com/gruntwork-io/terratest v0.50.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
