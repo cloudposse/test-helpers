@@ -10,6 +10,7 @@
 
 **/.build-harness
 **/build-harness
+.atmos
 
 **/.terraform.lock.hcl
 
