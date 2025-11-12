@@ -1,7 +1,6 @@
 package component_helper
 
 import (
-	"strings"
 	"testing"
 
 	"dario.cat/mergo"
@@ -29,9 +28,9 @@ func getAtmosOptions(t *testing.T, config *c.Config, componentName string, stack
 		Component:     componentName,
 		Stack:         stackName,
 		NoColor:       true,
-		BackendConfig: map[string]interface{}{
-			"workspace_key_prefix": strings.Join([]string{config.RandomIdentifier, stackName}, "-"),
-		},
+		// BackendConfig: map[string]interface{}{
+		// 	"workspace_key_prefix": strings.Join([]string{config.RandomIdentifier, stackName}, "-"),
+		// },
 		Vars: mergedVars,
 		EnvVars: map[string]string{
 			"ATMOS_BASE_PATH":            config.TempDir,
