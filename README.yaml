@@ -125,6 +125,11 @@ introduction: |-
     [test/component-helper-integration](test/component-helper-integration) folder contains a terraform module and test
     that can be used to demonstrate the `component-helper` functionality.
 
+  ## Compatibility
+
+  - **Atmos 1.210.0+** is required for `terraform output` JSON support. The `-json` flag is passed directly to
+    Terraform via atmos. Older atmos versions used `--json` as an atmos-level flag, which is no longer recognized.
+
 contributors:
   - name: Matt Calhoun
     github: mcalhoun
