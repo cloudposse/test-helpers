@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/kafka"
-	"github.com/stretchr/testify/require"
 	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/stretchr/testify/require"
 )
 
 func NewMSKClient(t *testing.T, region string) *kafka.Client {

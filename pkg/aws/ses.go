@@ -8,8 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
-
 // NewElbV2Client creates en ELB client.
 func NewSESV2Client(t *testing.T, region string) *sesv2.Client {
 	client, err := NewSESV2ClientE(t, region)

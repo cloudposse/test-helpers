@@ -47,4 +47,3 @@ func StartDeploymentJob(t *testing.T, ctx context.Context, client *amplify.Clien
 	require.NoError(t, err)
 	return jobStart.JobSummary.JobId
 }
-

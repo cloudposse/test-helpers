@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 func NewElbV2Client(t *testing.T, region string) *elasticloadbalancingv2.Client {
 	client, err := NewElbV2ClientE(t, region)
 	require.NoError(t, err)

@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 func NewEFSClient(t *testing.T, region string) *efs.Client {
 	client, err := NewEFSClientE(t, region)
 	require.NoError(t, err)

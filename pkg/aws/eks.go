@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/eks/types"
+	terratestAWS "github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/gruntwork-io/terratest/modules/testing"
-	terratestAWS "github.com/gruntwork-io/terratest/modules/aws"	
 	"github.com/stretchr/testify/require"
 
 	"k8s.io/client-go/kubernetes"
@@ -53,7 +53,6 @@ func CreateEksClusterE(t testing.TestingT, ctx context.Context, region string, n
 		},
 		RoleArn: aws.String(roleArn),
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +97,6 @@ func NewEksClientE(t testing.TestingT, region string) (*eks.Client, error) {
 	return eks.NewFromConfig(*sess), nil
 }
 
-
 func NewK8SClientConfig(cluster *types.Cluster) (*rest.Config, error) {
 	gen, err := token.NewGenerator(true, false)
 	if err != nil {
@@ -124,7 +122,6 @@ func NewK8SClientConfig(cluster *types.Cluster) (*rest.Config, error) {
 		},
 	}, nil
 }
-
 
 func NewK8SClientset(cluster *types.Cluster) (*kubernetes.Clientset, error) {
 	config, err := NewK8SClientConfig(cluster)
