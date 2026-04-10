@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2 v1.41.5
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.46
 	github.com/aws/aws-sdk-go-v2/service/amplify v1.28.8
 	github.com/aws/aws-sdk-go-v2/service/backup v1.40.10
@@ -27,6 +27,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.202.4
 	github.com/aws/aws-sdk-go-v2/service/efs v1.34.11
 	github.com/aws/aws-sdk-go-v2/service/eks v1.64.0
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.52.0
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.43.12
 	github.com/aws/aws-sdk-go-v2/service/iam v1.38.1
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.38.16
@@ -54,8 +55,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.7 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.20 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.41 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.21 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.21 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.32 // indirect
 	github.com/aws/aws-sdk-go-v2/service/acm v1.30.6 // indirect
@@ -78,7 +79,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.5 // indirect
-	github.com/aws/smithy-go v1.22.3 // indirect
+	github.com/aws/smithy-go v1.24.2 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
