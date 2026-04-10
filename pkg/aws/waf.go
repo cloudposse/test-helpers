@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 func NewWAFClient(t *testing.T, region string) *wafv2.Client {
 	client, err := NewWAFClientE(t, region)
 	require.NoError(t, err)
@@ -83,4 +82,3 @@ func WafGetIPSetByARN(t *testing.T, client *wafv2.Client, arn string) *wafv2.Get
 	require.NotNil(t, ipSet.IPSet)
 	return ipSet
 }
-

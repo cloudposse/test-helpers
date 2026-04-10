@@ -1,10 +1,11 @@
 package aws
 
 import (
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/docdb"
 	"github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func NewDocDBClient(t *testing.T, region string) *docdb.Client {

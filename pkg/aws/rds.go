@@ -1,4 +1,3 @@
-
 package aws
 
 import (
@@ -8,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
-
 
 func AssertPotgresqlDatabaseExists(t *testing.T, dbUrl string, dbPort int32, dbUsername string, dbPassword string, databaseName string) bool {
 	output, err := AssertPotgresqlDatabaseExistsE(t, dbUrl, dbPort, dbUsername, dbPassword, databaseName)
@@ -43,9 +41,7 @@ func AssertPotgresqlSchemaExistsE(t *testing.T, dbUrl string, dbPort int32, dbUs
 		return false, connErr
 	}
 	defer db.Close()
-	var (
-		schemaName string
-	)
+	var schemaName string
 	sqlStatement := `SELECT "schema_name" FROM "information_schema"."schemata" where schema_name=$1`
 	row := db.QueryRow(sqlStatement, expectedSchemaName)
 	scanErr := row.Scan(&schemaName)
@@ -71,9 +67,7 @@ func AssertPotgresqlGrantsExistsE(t *testing.T, dbUrl string, dbPort int32, dbUs
 		return false, connErr
 	}
 	defer db.Close()
-	var (
-		schemaName string
-	)
+	var schemaName string
 	sqlStatement := `SELECT grantee AS user, CONCAT(table_schema, '.', table_name) AS table,
 			CASE
 				WHEN COUNT(privilege_type) = 7 THEN 'ALL'

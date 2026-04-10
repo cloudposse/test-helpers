@@ -12,8 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
-
-
 func GetDNSZoneByNameE(t *testing.T, ctx context.Context, hostName string, awsRegion string) (*types.HostedZone, error) {
 	if hostName == "" {
 		return nil, fmt.Errorf("hostName cannot be empty")
@@ -49,8 +47,8 @@ func CleanDNSZoneID(t *testing.T, ctx context.Context, zoneID string, awsRegion 
 	}
 
 	o, err := route53Client.ListResourceRecordSets(ctx, &route53.ListResourceRecordSetsInput{
-		HostedZoneId:    &zoneID,
-		MaxItems:        aws.Int32(100),
+		HostedZoneId: &zoneID,
+		MaxItems:     aws.Int32(100),
 	})
 	if err != nil {
 		return err

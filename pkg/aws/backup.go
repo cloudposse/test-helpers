@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/backup"
-	"github.com/stretchr/testify/require"
 	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/stretchr/testify/require"
 )
 
 func NewBackupClient(t *testing.T, region string) *backup.Client {
