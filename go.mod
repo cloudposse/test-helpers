@@ -5,7 +5,7 @@ go 1.24.2
 toolchain go1.26.5
 
 require (
-	dario.cat/mergo v1.0.1
+	dario.cat/mergo v1.0.2
 	github.com/aws/aws-sdk-go-v2/config v1.32.36
 	github.com/aws/aws-sdk-go-v2/service/sts v1.45.5 // indirect
 	github.com/charmbracelet/lipgloss v0.10.0
