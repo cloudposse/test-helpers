@@ -76,7 +76,7 @@ func PackageInstalled(t *testing.T, ssmClient *ssm.Client, instanceID string, pk
 	if err != nil {
 		t.Fatalf("Failed to check package installation: %v", err)
 	}
-_ = result // non-zero exit code means the package is not installed (already asserted by CheckSSMCommandWithClientE)
+	_ = result // non-zero exit code means the package is not installed (already asserted by CheckSSMCommandWithClientE)
 }
 
 // UserExists checks if a user exists.
@@ -92,7 +92,7 @@ func UserExists(t *testing.T, ssmClient *ssm.Client, instanceID string, username
 // GroupExists checks if a group exists.
 func GroupExists(t *testing.T, ssmClient *ssm.Client, instanceID string, groupname string) {
 	t.Helper()
-	result, err := aws.CheckSSMCommandWithClientE(t, ssmClient, instanceID, fmt.Sprintf("getent group %s | awk -F: '{print \$1}'", groupname), 1*time.Minute)
+	result, err := aws.CheckSSMCommandWithClientE(t, ssmClient, instanceID, fmt.Sprintf("getent group %s | awk -F: '{print $1}'", groupname), 1*time.Minute)
 	if err != nil {
 		t.Fatalf("Failed to check group existence: %v", err)
 	}
