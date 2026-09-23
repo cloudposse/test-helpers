@@ -33,6 +33,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.65.7
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.1
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.66.5
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.77.4
 	github.com/docker/docker v27.1.1+incompatible
 	github.com/docker/go-connections v0.5.0
@@ -56,7 +57,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.41 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.36 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.36 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.37 // indirect
 	github.com/aws/aws-sdk-go-v2/service/acm v1.30.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.51.0 // indirect
@@ -76,7 +76,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.5.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.37.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.33.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.38.5 // indirect
 	github.com/aws/smithy-go v1.27.7 // indirect
