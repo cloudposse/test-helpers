@@ -68,13 +68,15 @@ func PathIsMount(t *testing.T, ssmClient *ssm.Client, instanceID string, path st
 // PackageInstalled checks if a package is installed.
 func PackageInstalled(t *testing.T, ssmClient *ssm.Client, instanceID string, pkg string) {
 	t.Helper()
-	cmd := fmt.Sprintf("rpm -q %s || dpkg -l %s", pkg, pkg)
+	cmd := fmt.Sprintf(
+		`(rpm -q %s >/dev/null 2>&1 && exit 0) || (dpkg-query -W -f='${Status}' %s 2>/dev/null | grep -qx 'install ok installed' && exit 0) || exit 1`,
+		pkg, pkg,
+	)
 	result, err := aws.CheckSSMCommandWithClientE(t, ssmClient, instanceID, cmd, 1*time.Minute)
 	if err != nil {
 		t.Fatalf("Failed to check package installation: %v", err)
 	}
-	assert.False(t, strings.Contains(result.Stdout, "is not installed"), "Expected package to be installed: "+pkg)
-	assert.False(t, strings.Contains(result.Stdout, "no packages found"), "Expected package to be installed: "+pkg)
+_ = result // non-zero exit code means the package is not installed (already asserted by CheckSSMCommandWithClientE)
 }
 
 // UserExists checks if a user exists.
@@ -90,7 +92,7 @@ func UserExists(t *testing.T, ssmClient *ssm.Client, instanceID string, username
 // GroupExists checks if a group exists.
 func GroupExists(t *testing.T, ssmClient *ssm.Client, instanceID string, groupname string) {
 	t.Helper()
-	result, err := aws.CheckSSMCommandWithClientE(t, ssmClient, instanceID, fmt.Sprintf("id -ng %s", groupname), 1*time.Minute)
+	result, err := aws.CheckSSMCommandWithClientE(t, ssmClient, instanceID, fmt.Sprintf("getent group %s | awk -F: '{print \$1}'", groupname), 1*time.Minute)
 	if err != nil {
 		t.Fatalf("Failed to check group existence: %v", err)
 	}
