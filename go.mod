@@ -36,7 +36,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.77.4
 	github.com/docker/docker v27.1.1+incompatible
-	github.com/docker/go-connections v0.5.0
+	github.com/docker/go-connections v0.8.1
 	github.com/testcontainers/testcontainers-go v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.35.0
 	k8s.io/api v0.33.0
